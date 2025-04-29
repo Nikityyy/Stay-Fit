@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Track your weekly workouts and stay fit with this simple tracker app. Mark tasks, add details like distance and time, and view your progress.">
+    <meta name="theme-color" content="#007aff">
+    <title>Stay Fit!</title>
+    <!-- Favicon Links -->
+    <link rel="icon" href="media/icon.png" type="image/png">
+    <link rel="apple-touch-icon" href="media/apple-touch-icon.png">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        :root {
+            --background-color: #ffffff;
+            --text-color: #1d1d1f;
+            --secondary-text-color: #6e6e73;
+            --accent-color: #007aff;
+            --card-background: #f8f8f8;
+            --border-color: #d2d2d7;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --danger-color: #ff3b30;
+            --success-color: #34c759;
+            --done-background-color: #e8f5e9;
+            --border-radius: 12px;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100svh;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-size: 16px;
+            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+        }
+
+        main {
+            flex-grow: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* Improve scrolling on iOS */
+            padding: 20px 15px 80px 15px; /* Padding bottom accounts for nav bar */
+        }
+
+        /* Screen Management */
+        .screen {
+            display: none; /* Hidden by default */
+        }
+        .screen.active {
+            display: block;
+            animation: fadeIn var(--transition-speed) ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); } /* Subtle slide up */
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .screen.fade-out {
+             animation: fadeOut var(--transition-speed) ease-in forwards;
+        }
+        @keyframes fadeOut {
+             from { opacity: 1; transform: translateY(0); }
+             to { opacity: 0; transform: translateY(-5px); } /* Subtle slide up */
+        }
+
+
+        /* Header */
+        h1.screen-header {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 25px;
+            color: var(--text-color);
+            text-align: center;
+        }
+
+
+        /* Header */
+        img.screen-logo {
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto 20px auto;
+            display: block;
+        }
+
+        /* Forms & Inputs */
+        .add-workout-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .add-workout-form input[type="text"] {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 16px;
+            font-family: var(--font-family);
+            background-color: #f0f0f0; /* Slightly different background for input */
+        }
+        .add-workout-form input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            background-color: var(--background-color);
+        }
+
+        .add-workout-form button,
+        .minimal-button {
+            padding: 10px 15px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color var(--transition-speed) ease, transform 0.1s ease;
+            box-shadow: 0 1px 3px var(--shadow-color);
+        }
+         .add-workout-form button:hover,
+         .minimal-button:hover {
+             background-color: #0056b3;
+         }
+         .add-workout-form button:active,
+         .minimal-button:active {
+             transform: scale(0.98);
+         }
+
+        /* Danger Button variant */
+        .minimal-button.danger {
+            background-color: var(--danger-color);
+            padding: 10px; /* Smaller padding */
+            font-size: 14px; /* Smaller icon */
+            margin-left: 5px; /* Space between name and button */
+        }
+        .minimal-button.danger:hover {
+             background-color: #d9362e; /* Darker red */
+        }
+         .minimal-button.danger:active {
+             transform: scale(0.95); /* Slightly more pop */
+         }
+
+        /* Workout List Items */
+        .workout-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .workout-item {
+            background-color: var(--card-background);
+            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+            padding: 15px;
+            box-shadow: 0 2px 5px var(--shadow-color);
+            overflow: hidden;
+            transition: background-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease; /* Smooth background transition */
+            position: relative; /* Needed for potential absolute positioned elements if required */
+        }
+         .workout-item.done {
+             background-color: var(--done-background-color);
+             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Lighter shadow when done */
+         }
+         /* Deletion Animation */
+         .workout-item.deleting {
+             animation: fadeOutSlideUp var(--transition-speed) ease-in forwards;
+         }
+
+         @keyframes fadeOutSlideUp {
+             from {
+                 opacity: 1;
+                 transform: translateY(0);
+                 max-height: 150px; /* Estimate initial height generously */
+                 padding-top: 15px;
+                 padding-bottom: 15px;
+                 margin-bottom: 15px;
+                 overflow: hidden;
+             }
+             to {
+                 opacity: 0;
+                 transform: translateY(-15px); /* Slide up more */
+                 max-height: 0;
+                 padding-top: 0;
+                 padding-bottom: 0;
+                 margin-bottom: 0;
+                 border: none; /* Prevent border from lingering */
+                 box-shadow: none;
+                 overflow: hidden;
+             }
+         }
+
+
+        .workout-item-main {
+            display: flex;
+            align-items: center;
+            gap: 10px; /* Adjusted gap for button */
+             cursor: default;
+        }
+
+        /* Custom Checkbox */
+        .workout-item-main .checkbox {
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border: 2px solid var(--secondary-text-color);
+            border-radius: 50%;
+            cursor: pointer;
+            position: relative;
+            transition: background-color var(--transition-speed) ease, border-color var(--transition-speed) ease;
+            flex-shrink: 0;
+        }
+        .workout-item-main .checkbox:checked {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+        .workout-item-main .checkbox:checked::after {
+            content: '\f00c'; /* Font Awesome check */
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            font-size: 12px;
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .workout-name {
+            flex-grow: 1;
+            font-size: 17px;
+            font-weight: 500;
+            padding: 5px 0;
+            border: none;
+            background: transparent;
+            font-family: var(--font-family);
+            color: var(--text-color);
+            outline: none;
+            width: auto; /* Allow shrinking */
+            min-width: 50px; /* Prevent too much shrinking */
+        }
+         .workout-item:not(.done) .workout-name {
+             cursor: text;
+         }
+         .workout-item:not(.done) .workout-name:focus {
+             background-color: rgba(0, 122, 255, 0.05);
+             border-radius: 4px;
+             padding-left: 5px; /* Add slight padding on focus */
+             padding-right: 5px;
+             margin-left: -5px; /* Adjust margin to keep alignment */
+             margin-right: -5px;
+         }
+         .workout-item.done .workout-name {
+             color: var(--secondary-text-color); /* Dim text when done */
+             text-decoration: line-through; /* Strikethrough when done */
+         }
+
+        /* Delete Button Style */
+         .delete-workout-button {
+             flex-shrink: 0; /* Prevent shrinking */
+             margin-left: auto; /* Push to the right */
+             padding: 6px 10px; /* Slightly smaller */
+         }
+         .delete-workout-button i {
+             margin: 0; /* Remove default icon margin if any */
+             font-size: 1em; /* Match button font size */
+         }
+
+        /* Details Panel */
+        .workout-details-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height var(--transition-speed) ease-out, padding var(--transition-speed) ease-out, margin-top var(--transition-speed) ease-out, border-top-color var(--transition-speed) ease-out;
+            padding: 0 15px;
+            margin-top: 0;
+            border-top: 1px solid transparent; /* Placeholder for transition */
+        }
+
+        .workout-details-panel.open { /* Applied by JS when opened */
+            max-height: 300px; /* Adjust as needed */
+            padding: 15px 0 0 0; /* Padding top only */
+            margin-top: 15px;
+            border-top: 1px solid var(--border-color); /* Separator line */
+        }
+
+        .details-input-group {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        .details-input-group label {
+            font-size: 14px;
+            color: var(--secondary-text-color);
+            margin-bottom: 5px;
+        }
+        .details-input-group input[type="number"],
+        .details-input-group input[type="text"] {
+             padding: 10px 12px;
+             border: 1px solid var(--border-color);
+             border-radius: var(--border-radius);
+             font-size: 16px;
+             font-family: var(--font-family);
+             appearance: textfield;
+             -moz-appearance: textfield;
+             background-color: var(--background-color); /* Ensure input background is white */
+        }
+         .details-input-group input[type="number"]::-webkit-outer-spin-button,
+         .details-input-group input[type="number"]::-webkit-inner-spin-button {
+             -webkit-appearance: none;
+             margin: 0;
+         }
+
+        .details-input-group input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .save-details-button {
+            background-color: var(--success-color);
+            padding: 8px 12px;
+            font-size: 14px;
+            margin-top: 5px;
+            float: right;
+        }
+         .save-details-button:hover {
+             background-color: #2ca34a;
+         }
+
+
+        /* Compact Display */
+        .workout-compact-display {
+             /* display: none; /* Hidden by default, shown by JS */
+             opacity: 0;
+             max-height: 0;
+             overflow: hidden;
+             margin-top: 0;
+             padding-top: 0;
+             border-top: 1px solid transparent; /* Use transparent border for transition */
+             font-size: 15px;
+             color: var(--secondary-text-color);
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+             line-height: 1.3; /* Tighter line height */
+             transition: opacity var(--transition-speed) ease, max-height var(--transition-speed) ease, margin-top var(--transition-speed) ease, padding-top var(--transition-speed) ease, border-top-color var(--transition-speed) ease;
+        }
+        .workout-compact-display.visible {
+             /* display: flex; /* Use flex to make it visible */
+             opacity: 1;
+             max-height: 100px; /* Allow space */
+             margin-top: 10px;
+             padding-top: 10px;
+             border-top: 1px solid var(--border-color);
+        }
+        /* Don't hide compact view when edit panel is open - allow viewing while editing */
+        .compact-info {
+             flex-grow: 1;
+             margin-right: 10px;
+        }
+
+        .edit-details-button {
+             background: none;
+             border: none;
+             color: var(--accent-color);
+             cursor: pointer;
+             padding: 5px;
+             font-size: 18px;
+             flex-shrink: 0; /* Prevent shrinking */
+        }
+         .edit-details-button:hover {
+             opacity: 0.7;
+         }
+
+
+        /* Profile Screen */
+        .week-block {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+             border-bottom: 1px solid var(--border-color);
+        }
+         .week-block:last-child {
+             border-bottom: none;
+             margin-bottom: 0;
+             padding-bottom: 0;
+         }
+
+        .week-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+         .week-summary {
+             font-size: 14px;
+             font-weight: 400;
+             color: var(--secondary-text-color);
+         }
+
+         .profile-workout-list {
+             list-style: none;
+             padding: 0;
+         }
+         .profile-workout-item {
+             display: flex;
+             align-items: center;
+             padding: 12px 0; /* Increased vertical padding */
+             border-bottom: 1px solid var(--border-color);
+             font-size: 16px;
+         }
+         .profile-workout-item:last-child {
+             border-bottom: none;
+         }
+
+         .profile-workout-status {
+             margin-right: 15px;
+             font-size: 20px;
+             width: 25px;
+             text-align: center;
+             padding-top: 1px; /* Align icon slightly better with text */
+             flex-shrink: 0;
+         }
+         .profile-workout-content {
+             flex-grow: 1;
+             display: flex;
+             flex-direction: column; /* Stack name/details and timestamp */
+         }
+         .profile-workout-main-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 4px; /* Space between main info and timestamp */
+         }
+         .profile-workout-name {
+             font-weight: 500;
+         }
+         .profile-workout-details-info {
+             color: var(--secondary-text-color);
+             font-size: 14px;
+             text-align: right;
+             flex-shrink: 0; /* Prevent shrinking */
+         }
+         .profile-workout-timestamp {
+             font-size: 13px;
+             color: var(--secondary-text-color);
+             padding-top: 2px;
+         }
+         /* Removed profile edit button for now to simplify - edits are via Home screen */
+         /* .profile-edit-button { ... } */
+
+
+        /* Reset Button */
+        .reset-all-button {
+            display: block;
+            width: 100%; /* Full width */
+            margin: 30px 0 20px 0; /* Margin top/bottom */
+            padding: 15px;
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            text-align: center;
+            transition: background-color var(--transition-speed) ease, transform 0.1s ease;
+            box-shadow: 0 2px 5px var(--shadow-color);
+        }
+        .reset-all-button i {
+            margin-right: 8px;
+        }
+        .reset-all-button:hover {
+             background-color: #d9362e;
+         }
+         .reset-all-button:active {
+             transform: scale(0.99);
+         }
+
+        /* Bottom Navigation */
+        nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: calc(65px + env(safe-area-inset-bottom)); /* Adjust height + safe area */
+            padding-bottom: env(safe-area-inset-bottom); /* Add padding for safe area */
+            background-color: rgba(255, 255, 255, 0.9); /* Slightly transparent background */
+            backdrop-filter: blur(10px); /* iOS blur effect */
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start; /* Align items to top within nav */
+             padding-top: 5px; /* Padding at the top */
+        }
+
+        nav button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--secondary-text-color);
+            transition: color var(--transition-speed) ease;
+             padding-top: 5px; /* Push content down slightly */
+        }
+        nav button i {
+            font-size: 22px;
+            margin-bottom: 4px;
+             flex-shrink: 0; /* Prevent icon shrinking */
+             height: 24px; /* Give icon fixed height */
+             display: flex;
+             align-items: center;
+        }
+        nav button span {
+            font-size: 11px;
+            font-weight: 500;
+             white-space: nowrap; /* Prevent label wrapping */
+        }
+
+        nav button.active {
+            color: var(--accent-color);
+        }
+
+        /* Utility Classes */
+         .hidden { display: none !important; } /* Use important for JS toggling if needed */
+
+    </style>
+</head>
+<body>
+
+    <main>
+        <!-- Home Screen -->
+        <section id="home-screen" class="screen active">
+            <img class="screen-logo" src="media/text-logo.png" alt="Stay Fit!"></img>
+
+            <form class="add-workout-form" id="add-workout-form">
+                <input type="text" id="new-workout-name" placeholder="Add new workout..." autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" required>
+                <button type="submit" class="minimal-button" aria-label="Add Workout">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </form>
+
+            <ul class="workout-list" id="workout-list">
+                <!-- Workout items will be generated here by JS -->
+                 <li id="no-workouts-message" class="hidden" style="text-align: center; color: var(--secondary-text-color); padding: 20px;">No workouts added yet. Add one above!</li>
+            </ul>
+        </section>
+
+        <!-- Profile Screen -->
+        <section id="profile-screen" class="screen">
+            <h1 class="screen-header">Weekly Progress</h1>
+            <div id="weekly-progress-container">
+                <!-- Weekly blocks will be generated here by JS -->
+                 <p id="no-history-message" class="hidden" style="text-align: center; color: var(--secondary-text-color); padding: 20px;">No workout data recorded yet.</p>
+            </div>
+            <button id="reset-all-button" class="reset-all-button">
+                <i class="fa-solid fa-trash-can"></i> Reset All Data
+            </button>
+        </section>
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav>
+        <button data-target="home-screen" class="active" aria-label="Home">
+            <i class="fa-solid fa-house"></i>
+            <span>Home</span>
+        </button>
+        <button data-target="profile-screen" aria-label="Profile">
+            <i class="fa-solid fa-user"></i>
+            <span>Profile</span>
+        </button>
+    </nav>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const screens = document.querySelectorAll('.screen');
+            const navButtons = document.querySelectorAll('nav button');
+            const addWorkoutForm = document.getElementById('add-workout-form');
+            const newWorkoutInput = document.getElementById('new-workout-name');
+            const workoutListContainer = document.getElementById('workout-list');
+            const weeklyProgressContainer = document.getElementById('weekly-progress-container');
+            const resetAllButton = document.getElementById('reset-all-button');
+            const noWorkoutsMessage = document.getElementById('no-workouts-message');
+            const noHistoryMessage = document.getElementById('no-history-message');
+
+
+            const TEMPLATE_KEY = 'stayfit_template';
+            const WEEK_DATA_PREFIX = 'stayfit_week';
+            const LAST_ACTIVE_SCREEN_KEY = 'stayfit_last_screen';
+
+            let currentScreenId = localStorage.getItem(LAST_ACTIVE_SCREEN_KEY) || 'home-screen';
+            let currentIsoWeekInfo = getCurrentIsoWeek(); // Get { isoWeekString, weekRange }
+
+            // --- Data Management ---
+
+            function loadData(key, defaultValue = []) {
+                const data = localStorage.getItem(key);
+                try {
+                    // Basic check for empty or invalid JSON before parsing
+                    if (!data || data === 'null' || data === 'undefined') {
+                        return defaultValue;
+                    }
+                    return JSON.parse(data);
+                } catch (e) {
+                    console.error(`Error parsing localStorage key "${key}":`, e, "Raw data:", data);
+                    return defaultValue;
+                }
+            }
+
+
+            function saveData(key, data) {
+                try {
+                    localStorage.setItem(key, JSON.stringify(data));
+                } catch (e) {
+                    console.error(`Error saving data to localStorage key "${key}":`, e);
+                    alert('Error saving data. Your storage might be full.');
+                }
+            }
+
+            function getWorkoutTemplate() {
+                return loadData(TEMPLATE_KEY);
+            }
+
+            function saveWorkoutTemplate(template) {
+                saveData(TEMPLATE_KEY, template);
+            }
+
+            function getWeekData(isoWeek) {
+                return loadData(WEEK_DATA_PREFIX + isoWeek);
+            }
+
+            function saveWeekData(isoWeek, data) {
+                saveData(WEEK_DATA_PREFIX + isoWeek, data);
+            }
+
+            // --- Week Calculation ---
+
+            function getCurrentIsoWeek() {
+                const now = new Date();
+                const dayOfWeek = now.getDay(); // 0 = Sun, 6 = Sat
+                const isoDayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek; // 1 = Mon, 7 = Sun
+
+                const monday = new Date(now);
+                monday.setDate(now.getDate() - isoDayOfWeek + 1);
+                monday.setHours(0, 0, 0, 0);
+
+                const yearStart = new Date(monday.getFullYear(), 0, 1);
+                const dayNum = Math.floor((monday - yearStart) / 86400000) + 1;
+                let weekNo = Math.ceil((dayNum + yearStart.getDay() - 1) / 7);
+
+                // Handle edge case where Jan 1 is Fri, Sat, or Sun (belongs to the previous year's last week)
+                if (yearStart.getDay() > 4 || yearStart.getDay() === 0) {
+                     weekNo = Math.ceil((dayNum + yearStart.getDay() - 1 - 7) / 7);
+                 }
+                 // Handle week 0 (belongs to previous year)
+                 if (weekNo < 1) {
+                     const prevYear = new Date(monday.getFullYear() - 1, 11, 31);
+                     return getCurrentIsoWeek(prevYear); // Recurse for last week of prev year
+                 }
+
+                 // Handle week 53 edge cases
+                 const year = monday.getFullYear();
+                 if (weekNo > 52) {
+                     const thursday = new Date(monday);
+                     thursday.setDate(monday.getDate() + 3); // Thursday of the week determines the year
+                     if (thursday.getFullYear() > year) {
+                         // This week 53 actually belongs to the next year as week 1
+                         // This simple logic might not cover all ISO 8601 nuances but is often sufficient
+                     }
+                 }
+
+                const isoWeekString = `${year}-W${String(weekNo).padStart(2, '0')}`;
+
+                const sunday = new Date(monday);
+                sunday.setDate(monday.getDate() + 6);
+                const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                const weekRange = `${monthNames[monday.getMonth()]} ${monday.getDate()} – ${monthNames[sunday.getMonth()]} ${sunday.getDate()}`;
+
+                return { isoWeekString, weekRange };
+            }
+
+
+            // --- Initialization ---
+
+            function initializeApp() {
+                currentIsoWeekInfo = getCurrentIsoWeek(); // Update on init
+                const { isoWeekString } = currentIsoWeekInfo;
+
+                let currentWeekData = getWeekData(isoWeekString);
+                const template = getWorkoutTemplate();
+
+                let dataUpdated = false;
+
+                // Ensure current week data structure includes new fields if loaded from old version
+                 const migrateWorkout = (workout) => {
+                    let updated = false;
+                    if (typeof workout.completionTimestamp === 'undefined') {
+                        workout.completionTimestamp = workout.done ? new Date().toISOString() : null; // Best guess for migration
+                        updated = true;
+                    }
+                    return updated;
+                 };
+
+                if (!currentWeekData || currentWeekData.length === 0 && template.length > 0) {
+                    console.log(`Initializing week ${isoWeekString} from template.`);
+                    currentWeekData = template.map(workout => ({
+                        id: workout.id,
+                        name: workout.name,
+                        done: false,
+                        distance: null,
+                        time: null, // Store as HH:MM:SS
+                        completionTimestamp: null // Initialize new field
+                    }));
+                    dataUpdated = true;
+                } else if (currentWeekData.length > 0) {
+                    // Add new workouts from template if added mid-week
+                    const existingIds = new Set(currentWeekData.map(w => w.id));
+                    template.forEach(tWorkout => {
+                        if (!existingIds.has(tWorkout.id)) {
+                            currentWeekData.push({
+                                id: tWorkout.id,
+                                name: tWorkout.name,
+                                done: false,
+                                distance: null,
+                                time: null,
+                                completionTimestamp: null
+                            });
+                            dataUpdated = true;
+                        }
+                    });
+                     // Migrate existing entries in the current week
+                    currentWeekData.forEach(w => {
+                         if (migrateWorkout(w)) dataUpdated = true;
+                     });
+                } else {
+                    // Ensure currentWeekData is an array even if loaded empty or null
+                    currentWeekData = [];
+                }
+
+                if (dataUpdated) {
+                     saveWeekData(isoWeekString, currentWeekData);
+                }
+
+                 switchScreen(currentScreenId, true); // Instant switch on load
+                 renderHomeWorkouts();
+                 renderProfileScreen(); // Render profile data on load
+
+                 addWorkoutForm.addEventListener('submit', handleAddWorkout);
+                 navButtons.forEach(button => button.addEventListener('click', handleNavClick));
+                 resetAllButton.addEventListener('click', handleResetAll);
+                 workoutListContainer.addEventListener('click', handleListClick); // Use event delegation
+                 workoutListContainer.addEventListener('input', handleListInput); // Delegate input events (like name change)
+                 workoutListContainer.addEventListener('focusout', handleListFocusOut); // Delegate blur events more broadly
+
+                checkEmptyListState(); // Check initial state
+            }
+
+            // --- Navigation ---
+
+            function switchScreen(targetId, instant = false) {
+                const currentActiveScreen = document.querySelector('.screen.active');
+                const targetScreen = document.getElementById(targetId);
+                const currentActiveButton = document.querySelector('nav button.active');
+                const targetButton = document.querySelector(`nav button[data-target="${targetId}"]`);
+
+                if (!targetScreen) return; // Target screen doesn't exist
+                if (currentActiveScreen === targetScreen && !instant) return;
+
+                // Animation Handling
+                if (currentActiveScreen && !instant) {
+                    currentActiveScreen.classList.add('fade-out');
+                    // Use setTimeout for reliable removal after animation
+                    setTimeout(() => {
+                         if (currentActiveScreen) { // Check if it still exists
+                            currentActiveScreen.classList.remove('active', 'fade-out');
+                         }
+                         targetScreen.classList.add('active');
+                    }, parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--transition-speed') || '0.3') * 1000);
+                } else {
+                     if (currentActiveScreen) {
+                        currentActiveScreen.classList.remove('active', 'fade-out'); // Remove classes immediately
+                     }
+                    targetScreen.classList.add('active'); // Add active class immediately
+                }
+
+                if (currentActiveButton) currentActiveButton.classList.remove('active');
+                if (targetButton) targetButton.classList.add('active');
+
+                currentScreenId = targetId;
+                localStorage.setItem(LAST_ACTIVE_SCREEN_KEY, currentScreenId);
+
+                if (targetId === 'profile-screen') {
+                    renderProfileScreen(); // Refresh profile data when switching to it
+                } else if (targetId === 'home-screen') {
+                     renderHomeWorkouts(); // Refresh home data
+                     checkEmptyListState(); // Ensure message is correct on switch
+                }
+            }
+
+
+            function handleNavClick(event) {
+                const button = event.currentTarget;
+                const targetId = button.getAttribute('data-target');
+                switchScreen(targetId);
+            }
+
+            // --- Event Delegation for Workout List ---
+            function handleListClick(event) {
+                const target = event.target;
+                const listItem = target.closest('.workout-item');
+                if (!listItem || listItem.classList.contains('deleting')) return; // Clicked outside or on deleting item
+
+                const workoutId = parseInt(listItem.dataset.id);
+
+                // Checkbox click
+                if (target.classList.contains('checkbox')) {
+                    handleWorkoutCheck(workoutId, listItem, target);
+                }
+                // Save button click
+                else if (target.classList.contains('save-details-button') || target.closest('.save-details-button')) {
+                    handleSaveDetails(workoutId, listItem);
+                }
+                // Edit button click (pencil icon)
+                else if (target.classList.contains('edit-details-button') || target.closest('.edit-details-button')) {
+                    const detailsPanel = listItem.querySelector('.workout-details-panel');
+                    if (detailsPanel) {
+                         detailsPanel.classList.toggle('open'); // Toggle panel visibility
+                         // Optional: Focus first input if opening
+                         if (detailsPanel.classList.contains('open')) {
+                            const firstInput = detailsPanel.querySelector('input');
+                            if (firstInput) setTimeout(() => firstInput.focus(), 10);
+                         }
+                    }
+                }
+                // Delete button click
+                else if (target.classList.contains('delete-workout-button') || target.closest('.delete-workout-button')) {
+                    handleDeleteWorkout(workoutId, listItem);
+                }
+            }
+
+             function handleListInput(event) {
+                 const target = event.target;
+                 const listItem = target.closest('.workout-item');
+                 if (!listItem || listItem.classList.contains('deleting')) return;
+                 // Handle input changes if needed (e.g., real-time validation)
+                 // Currently saving name on blur/focusout
+             }
+
+             function handleListFocusOut(event) {
+                 const target = event.target;
+                 const listItem = target.closest('.workout-item');
+                 if (!listItem || listItem.classList.contains('deleting')) return;
+
+                 const workoutId = parseInt(listItem.dataset.id);
+
+                 // Workout name input blur
+                 if (target.classList.contains('workout-name')) {
+                     if (!listItem.classList.contains('done')) { // Only allow editing name if not done
+                        handleWorkoutNameEdit(workoutId, target.value);
+                     }
+                 }
+                 // Could handle blur on distance/time here too if auto-save on blur was desired
+             }
+
+
+            // --- Home Screen Logic ---
+
+            function renderHomeWorkouts() {
+                const { isoWeekString } = currentIsoWeekInfo;
+                const weekData = getWeekData(isoWeekString);
+                workoutListContainer.innerHTML = ''; // Clear list
+
+                if (!weekData || weekData.length === 0) {
+                    // Handled by checkEmptyListState
+                } else {
+                    weekData.forEach(workout => {
+                        const li = createWorkoutListItem(workout);
+                        workoutListContainer.appendChild(li);
+                    });
+                }
+                 checkEmptyListState(); // Ensure message state is correct after render
+            }
+
+            function createWorkoutListItem(workout) {
+                 const li = document.createElement('li');
+                 li.classList.add('workout-item');
+                 li.dataset.id = workout.id;
+                 if (workout.done) {
+                     li.classList.add('done');
+                 }
+
+                 const formattedTime = workout.time ? formatTimeForDisplay(workout.time) : '';
+                 const hasDetails = workout.distance !== null || formattedTime;
+                 const safeName = escapeHtml(workout.name);
+
+                 li.innerHTML = `
+                     <div class="workout-item-main">
+                         <input type="checkbox" class="checkbox" aria-label="Mark ${safeName} as done" ${workout.done ? 'checked' : ''}>
+                         <input type="text" class="workout-name" value="${safeName}" ${workout.done ? 'readonly' : ''} aria-label="Workout name for ${safeName}">
+                         <button class="delete-workout-button minimal-button danger ${workout.done ? 'hidden' : ''}" aria-label="Delete ${safeName}">
+                             <i class="fa-solid fa-trash-can"></i>
+                         </button>
+                     </div>
+                     <div class="workout-details-panel">
+                         <div class="details-input-group">
+                             <label for="distance-${workout.id}">Distance (km)</label>
+                             <input type="number" step="0.01" id="distance-${workout.id}" placeholder="e.g., 5.25" value="${workout.distance !== null ? workout.distance : ''}">
+                         </div>
+                         <div class="details-input-group">
+                             <label for="time-${workout.id}">Time (HH:MM:SS or MM:SS)</label>
+                             <input type="text" id="time-${workout.id}" placeholder="e.g., 45:30 or 01:15:00" value="${formattedTime}">
+                         </div>
+                        <button class="minimal-button danger delete-workout-button" aria-label="Delete Workout" style="float: left;">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                        <button class="minimal-button save-details-button" aria-label="Save Details">
+                            <i class="fa-solid fa-save"></i> Save
+                        </button>
+                     </div>
+                     <div class="workout-compact-display ${workout.done ? 'visible' : ''}">
+                         <span class="compact-info">
+                             ${workout.done ? '🏅 ' : ''}
+                             ${workout.distance !== null ? `${workout.distance} km` : ''}
+                             ${workout.distance !== null && formattedTime ? ' · ' : ''}
+                             ${formattedTime || (workout.done && !hasDetails ? 'Done (no details)' : '')}
+                         </span>
+                         ${workout.done ? `<button class="edit-details-button" aria-label="Edit Details"><i class="fa-solid fa-pencil"></i></button>` : ''}
+                     </div>
+                 `;
+
+                 // Add Enter key listener for name saving
+                 const nameInput = li.querySelector('.workout-name');
+                 nameInput.addEventListener('keypress', (e) => {
+                     if (e.key === 'Enter' && !li.classList.contains('done')) {
+                         nameInput.blur(); // Trigger focusout which triggers save
+                         e.preventDefault();
+                     }
+                 });
+
+                 return li;
+            }
+
+            function handleAddWorkout(event) {
+                event.preventDefault();
+                const name = newWorkoutInput.value.trim();
+                if (!name) return;
+
+                const newWorkout = {
+                    id: Date.now(), // Simple unique ID
+                    name: name,
+                    done: false,
+                    distance: null,
+                    time: null, // Stored as HH:MM:SS
+                    completionTimestamp: null
+                };
+
+                // Add to template
+                const template = getWorkoutTemplate();
+                template.push({ id: newWorkout.id, name: newWorkout.name }); // Only ID and name in template
+                saveWorkoutTemplate(template);
+
+                // Add to current week's data
+                const { isoWeekString } = currentIsoWeekInfo;
+                const weekData = getWeekData(isoWeekString);
+                weekData.push(newWorkout);
+                saveWeekData(isoWeekString, weekData);
+
+                newWorkoutInput.value = '';
+                // Add the new item visually
+                 const listItem = createWorkoutListItem(newWorkout);
+                 workoutListContainer.appendChild(listItem);
+                 checkEmptyListState(); // Ensure message is hidden
+            }
+
+             function handleWorkoutCheck(workoutId, listItemElement, checkboxElement) {
+                 const { isoWeekString } = currentIsoWeekInfo;
+                 const weekData = getWeekData(isoWeekString);
+                 const workoutIndex = weekData.findIndex(w => w.id === workoutId);
+                 if (workoutIndex === -1) return;
+
+                 const workout = weekData[workoutIndex];
+                 const isChecking = checkboxElement.checked; // The new state *after* the click
+
+                 const nameInput = listItemElement.querySelector('.workout-name');
+                 const detailsPanel = listItemElement.querySelector('.workout-details-panel');
+                 const compactDisplay = listItemElement.querySelector('.workout-compact-display');
+                 const editButtonContainer = compactDisplay; // Button is inside compact display
+                 const deleteButton = listItemElement.querySelector('.delete-workout-button');
+
+
+                 workout.done = isChecking; // Update data model
+
+                 if (isChecking) {
+                     // --- Mark as DONE ---
+                     workout.completionTimestamp = new Date().toISOString(); // Record completion time
+
+                     listItemElement.classList.add('done');
+                     nameInput.setAttribute('readonly', true);
+                     deleteButton?.classList.add('hidden'); // Hide delete button
+                     detailsPanel.classList.add('open'); // Auto-open details panel
+                      // Focus first input in panel for convenience
+                     const firstInput = detailsPanel.querySelector('input');
+                     if (firstInput) setTimeout(() => firstInput.focus(), 10); // Small delay
+
+                     // Ensure edit button exists in compact display
+                     if (compactDisplay && !editButtonContainer.querySelector('.edit-details-button')) {
+                          const editButton = document.createElement('button');
+                          editButton.className = 'edit-details-button';
+                          editButton.setAttribute('aria-label', 'Edit Details');
+                          editButton.innerHTML = '<i class="fa-solid fa-pencil"></i>';
+                          // Append edit button at the end of compact display
+                          compactDisplay.appendChild(editButton);
+                     }
+
+                     // Vibrate!
+                     if ('vibrate' in navigator) {
+                         navigator.vibrate(50); // Short feedback
+                     }
+                 } else {
+                     // --- Mark as NOT DONE ---
+                     workout.completionTimestamp = null; // Clear completion time
+
+                     listItemElement.classList.remove('done');
+                     nameInput.removeAttribute('readonly');
+                     deleteButton?.classList.remove('hidden'); // Show delete button
+                     detailsPanel.classList.remove('open'); // Close details panel
+
+                     // Remove edit button from compact display
+                     if (compactDisplay){
+                         const editButton = editButtonContainer.querySelector('.edit-details-button');
+                         if (editButton) editButton.remove();
+                     }
+
+                 }
+
+                 updateCompactDisplay(workout, listItemElement); // Update the compact display content/visibility
+
+                 saveWeekData(isoWeekString, weekData);
+             }
+
+
+            function handleWorkoutNameEdit(workoutId, newName) {
+                newName = newName.trim();
+                const { isoWeekString } = currentIsoWeekInfo;
+                let nameChanged = false;
+
+                // Retrieve current name from data to avoid saving if unchanged
+                const weekData = getWeekData(isoWeekString);
+                const workout = weekData.find(w => w.id === workoutId);
+                const originalName = workout ? workout.name : '';
+
+                const nameInput = document.querySelector(`.workout-item[data-id="${workoutId}"] .workout-name`);
+
+                if (!newName) {
+                    // Revert if name is empty
+                    if (nameInput) nameInput.value = originalName; // Restore value visually
+                    return;
+                }
+
+                if (originalName === newName) {
+                     // No actual change, ensure visual matches data just in case
+                     if (nameInput) nameInput.value = originalName;
+                     return;
+                }
+
+                // Proceed with update
+                let templateUpdated = false;
+                const template = getWorkoutTemplate();
+                const templateIndex = template.findIndex(w => w.id === workoutId);
+                if (templateIndex !== -1 && template[templateIndex].name !== newName) {
+                    template[templateIndex].name = newName;
+                    saveWorkoutTemplate(template);
+                    templateUpdated = true;
+                    nameChanged = true;
+                }
+
+                let weekDataUpdated = false;
+                // weekData already loaded above
+                const weekIndex = weekData.findIndex(w => w.id === workoutId);
+                if (weekIndex !== -1 && weekData[weekIndex].name !== newName) {
+                    weekData[weekIndex].name = newName;
+                    saveWeekData(isoWeekString, weekData);
+                    weekDataUpdated = true;
+                    nameChanged = true;
+                }
+
+                 if (nameChanged) {
+                    // Update aria-labels potentially referencing the name
+                    const listItem = document.querySelector(`.workout-item[data-id="${workoutId}"]`);
+                    if (listItem) {
+                        const safeNewName = escapeHtml(newName);
+                        const checkbox = listItem.querySelector('.checkbox');
+                        if (checkbox) checkbox.setAttribute('aria-label', `Mark ${safeNewName} as done`);
+                         // nameInput is already updated visually
+                         if (nameInput) nameInput.setAttribute('aria-label', `Workout name for ${safeNewName}`);
+                         const deleteButton = listItem.querySelector('.delete-workout-button');
+                         if (deleteButton) deleteButton.setAttribute('aria-label', `Delete ${safeNewName}`);
+                    }
+                    console.log(`Name updated for ${workoutId}. Template: ${templateUpdated}, WeekData: ${weekDataUpdated}`);
+                 }
+            }
+
+            function handleSaveDetails(workoutId, listItemElement) {
+                 const { isoWeekString } = currentIsoWeekInfo;
+                 const weekData = getWeekData(isoWeekString);
+                 const workoutIndex = weekData.findIndex(w => w.id === workoutId);
+                 if (workoutIndex === -1) return;
+
+                 const workout = weekData[workoutIndex];
+                 const distanceInput = listItemElement.querySelector(`#distance-${workout.id}`);
+                 const timeInput = listItemElement.querySelector(`#time-${workout.id}`);
+                 const detailsPanel = listItemElement.querySelector('.workout-details-panel');
+
+                 const distance = distanceInput.value ? parseFloat(distanceInput.value) : null;
+                 const timeInputValue = timeInput.value.trim();
+                 let parsedTime = null; // Will be stored as HH:MM:SS or null
+
+                 if (timeInputValue) {
+                     parsedTime = parseTimeInput(timeInputValue);
+                     if (parsedTime === null) { // Invalid format
+                         alert('Invalid time format. Please use HH:MM:SS or MM:SS (e.g., 01:15:30 or 45:00).');
+                         timeInput.focus();
+                         return; // Stop saving
+                     }
+                      // Update the input field to show the standardized format
+                      timeInput.value = formatTimeForDisplay(parsedTime);
+                 }
+
+                 // Update workout data
+                 workout.distance = (distance !== null && !isNaN(distance)) ? distance : null;
+                 workout.time = parsedTime; // Store HH:MM:SS or null
+
+                 saveWeekData(isoWeekString, weekData);
+
+                 detailsPanel.classList.remove('open'); // Close panel after saving
+                 updateCompactDisplay(workout, listItemElement); // Refresh compact display
+             }
+
+            function updateCompactDisplay(workout, listItemElement) {
+                const compactDisplay = listItemElement.querySelector('.workout-compact-display');
+                if (!compactDisplay) return;
+
+                const compactInfoSpan = compactDisplay.querySelector('.compact-info');
+                const formattedTime = workout.time ? formatTimeForDisplay(workout.time) : '';
+                const hasDetails = workout.distance !== null || formattedTime;
+
+                if (workout.done) {
+                    compactInfoSpan.innerHTML = `
+                        🏅 
+                        ${workout.distance !== null ? `${workout.distance} km` : ''}
+                        ${workout.distance !== null && formattedTime ? ' · ' : ''}
+                        ${formattedTime || (!hasDetails ? 'Done (no details)' : '')}
+                    `;
+                    compactDisplay.classList.add('visible');
+                } else {
+                    // If not done, the compact display should not be visible
+                    compactDisplay.classList.remove('visible');
+                    // Clear content when not visible for cleaner transition/state
+                    compactInfoSpan.innerHTML = '';
+                }
+            }
+
+            // --- Deletion Logic ---
+            function handleDeleteWorkout(workoutId, listItemElement) {
+                const workoutName = listItemElement.querySelector('.workout-name')?.value || 'this workout'; // Get name for confirmation
+                const safeName = escapeHtml(workoutName);
+
+                if (confirm(`Are you sure you want to delete "${safeName}"?\nThis will remove it permanently from the template and this week.`)) {
+
+                    // 1. Add deleting class to start animation
+                    listItemElement.classList.add('deleting');
+
+                    // 2. Remove data immediately
+                    try {
+                        // Remove from current week
+                        const { isoWeekString } = currentIsoWeekInfo;
+                        let weekData = getWeekData(isoWeekString);
+                        const weekDataOriginalLength = weekData.length;
+                        weekData = weekData.filter(w => w.id !== workoutId);
+                        if (weekData.length < weekDataOriginalLength) {
+                            saveWeekData(isoWeekString, weekData);
+                        } else {
+                            console.warn(`Workout ID ${workoutId} not found in week ${isoWeekString} during delete.`);
+                        }
+
+                        // Remove from template
+                        let template = getWorkoutTemplate();
+                        const templateOriginalLength = template.length;
+                        template = template.filter(w => w.id !== workoutId);
+                        if (template.length < templateOriginalLength) {
+                            saveWorkoutTemplate(template);
+                        } else {
+                            console.warn(`Workout ID ${workoutId} not found in template during delete.`);
+                        }
+
+                    } catch (error) {
+                        console.error("Error deleting workout data:", error);
+                        alert("Failed to delete workout data. Please try again.");
+                        // Remove animation class if data deletion fails to prevent removal
+                        listItemElement.classList.remove('deleting');
+                        return; // Stop process
+                    }
+
+                    // 3. Remove from DOM after animation completes
+                    listItemElement.addEventListener('animationend', () => {
+                        listItemElement.remove();
+                        checkEmptyListState(); // Check if list is now empty
+                    }, { once: true }); // Ensure listener is removed after firing
+                }
+            }
+
+            // --- Check Empty List State ---
+            function checkEmptyListState() {
+                // Query only items that are NOT currently being deleted
+                const remainingItems = workoutListContainer.querySelectorAll('.workout-item:not(.deleting)');
+                if (remainingItems.length === 0) {
+                    noWorkoutsMessage.classList.remove('hidden');
+                } else {
+                    noWorkoutsMessage.classList.add('hidden');
+                }
+            }
+
+
+            // --- Profile Screen Logic ---
+
+            function renderProfileScreen() {
+                 weeklyProgressContainer.innerHTML = ''; // Clear existing content
+                 const allKeys = Object.keys(localStorage);
+                 const weekKeys = allKeys
+                     .filter(key => key.startsWith(WEEK_DATA_PREFIX))
+                     .sort()
+                     .reverse(); // Newest first
+
+                 if (weekKeys.length === 0) {
+                     noHistoryMessage.classList.remove('hidden');
+                     resetAllButton.classList.add('hidden'); // Hide reset if no data
+                     return;
+                 }
+                 noHistoryMessage.classList.add('hidden');
+                 resetAllButton.classList.remove('hidden');
+
+                 weekKeys.forEach(key => {
+                     const isoWeek = key.substring(WEEK_DATA_PREFIX.length);
+                     const weekData = loadData(key);
+                     // Only render weeks with actual workout entries
+                     if (!weekData || weekData.length === 0) return;
+
+                     const weekBlock = document.createElement('div');
+                     weekBlock.classList.add('week-block');
+
+                     const weekRange = getWeekRangeFromIsoString(isoWeek) || isoWeek;
+                     const doneCount = weekData.filter(w => w.done).length;
+                     const totalCount = weekData.length;
+
+                     weekBlock.innerHTML = `
+                         <div class="week-header">
+                             <span>Week ${isoWeek.split('-W')[1]} (${weekRange})</span>
+                             <span class="week-summary">${doneCount} / ${totalCount} done</span>
+                         </div>
+                         <ul class="profile-workout-list">
+                             ${weekData.map(workout => {
+                                 const formattedTime = workout.time ? formatTimeForDisplay(workout.time) : '';
+                                 const hasDetails = workout.distance !== null || formattedTime;
+                                 const completionInfo = workout.done && workout.completionTimestamp
+                                    ? formatTimestamp(workout.completionTimestamp)
+                                    : (workout.done ? 'Completed (date unknown)' : '');
+                                 const safeName = escapeHtml(workout.name);
+
+                                 return `
+                                     <li class="profile-workout-item" data-id="${workout.id}" data-week="${isoWeek}">
+                                         <span class="profile-workout-status">
+                                             ${workout.done ? '✅' : '❌'}
+                                         </span>
+                                         <div class="profile-workout-content">
+                                             <div class="profile-workout-main-info">
+                                                 <span class="profile-workout-name">${safeName}</span>
+                                                 ${workout.done && hasDetails ? `
+                                                     <span class="profile-workout-details-info">
+                                                         ${workout.distance !== null ? `${workout.distance} km` : ''}
+                                                         ${workout.distance !== null && formattedTime ? ' · ' : ''}
+                                                         ${formattedTime || ''}
+                                                     </span>
+                                                 ` : (workout.done ? '<span class="profile-workout-details-info">(No details)</span>' : '')}
+                                             </div>
+                                             ${workout.done ? `
+                                                 <span class="profile-workout-timestamp">
+                                                     ${completionInfo}
+                                                 </span>
+                                             ` : ''}
+                                         </div>
+                                     </li>
+                                 `;
+                             }).join('')}
+                         </ul>
+                     `;
+                     weeklyProgressContainer.appendChild(weekBlock);
+                 });
+             }
+
+            function getWeekRangeFromIsoString(isoWeek) {
+                try {
+                    const [year, weekNum] = isoWeek.split('-W').map(Number);
+                    if (!year || !weekNum) return isoWeek;
+
+                    // Calculate date for Thursday of that week (determines ISO year)
+                    const firstDayOfYear = new Date(year, 0, 1);
+                    const firstDayOfWeek = firstDayOfYear.getDay(); // 0=Sun, 1=Mon...
+                    // Calculate days to add to Jan 4th (always in week 1)
+                    const daysToAdd = (weekNum - 1) * 7 + (4 - (firstDayOfWeek === 0 ? 7 : firstDayOfWeek));
+                    const thursdayDate = new Date(year, 0, 4 + daysToAdd);
+
+                    // Monday is 3 days before Thursday
+                    const monday = new Date(thursdayDate);
+                    monday.setDate(thursdayDate.getDate() - 3);
+                    monday.setHours(0, 0, 0, 0);
+
+                    // Sunday is 3 days after Thursday
+                    const sunday = new Date(thursdayDate);
+                    sunday.setDate(thursdayDate.getDate() + 3);
+                    sunday.setHours(23, 59, 59, 999);
+
+                    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                     const monStr = `${monthNames[monday.getMonth()]} ${monday.getDate()}`;
+                     const sunStr = `${monthNames[sunday.getMonth()]} ${sunday.getDate()}${sunday.getFullYear() !== monday.getFullYear() ? `, ${sunday.getFullYear()}` : ''}`;
+
+                     return `${monStr} – ${sunStr}`;
+                } catch (e) {
+                    console.error("Error calculating week range for", isoWeek, ":", e);
+                    return isoWeek; // Fallback
+                }
+            }
+
+            // --- Reset Logic ---
+
+            function handleResetAll() {
+                if (confirm("⚠️ Are you sure you want to permanently delete ALL your Stay Fit! workout data? This cannot be undone.")) {
+                    if (confirm("⚠️ FINAL WARNING: Delete all data?")) { // Double confirmation
+                         const allKeys = Object.keys(localStorage);
+                         let clearedCount = 0;
+                         allKeys.forEach(key => {
+                             if (key.startsWith('stayfit_')) { // Target all keys for this app
+                                 localStorage.removeItem(key);
+                                 clearedCount++;
+                             }
+                         });
+
+                         // Clear current state and re-render
+                         currentIsoWeekInfo = getCurrentIsoWeek(); // Reset current week info
+                         // Force empty template and current week data
+                         saveWorkoutTemplate([]);
+                         saveWeekData(currentIsoWeekInfo.isoWeekString, []);
+
+                         initializeApp(); // Re-initialize (will find no data)
+                         alert(`All ${clearedCount} Stay Fit! data entries have been cleared.`);
+                         switchScreen('home-screen', true); // Go back to home
+                    }
+                }
+            }
+
+            // --- Utilities ---
+            function escapeHtml(unsafe) {
+                if (typeof unsafe !== 'string') return unsafe;
+                return unsafe
+                     .replace(/&/g, "&") // Must be first
+                     .replace(/</g, "<")
+                     .replace(/>/g, ">")
+                     .replace(/"/g, '"')
+                     .replace(/'/g, "'"); // Use HTML entity for single quote
+            }
+
+            // Parses MM:SS or HH:MM:SS input into HH:MM:SS format or null if invalid
+             function parseTimeInput(timeString) {
+                 timeString = timeString.trim();
+                 timeString = timeString.replace(/[.,]/g, ":"); // Replace dots/commas with colons
+                 const parts = timeString.split(':').map(part => part.trim()).filter(part => part !== ''); // Filter empty parts
+
+                 let hours = 0, minutes = 0, seconds = 0;
+
+                 if (parts.length === 2) { // MM:SS format
+                     minutes = parseInt(parts[0], 10);
+                     seconds = parseInt(parts[1], 10);
+                 } else if (parts.length === 3) { // HH:MM:SS format
+                     hours = parseInt(parts[0], 10);
+                     minutes = parseInt(parts[1], 10);
+                     seconds = parseInt(parts[2], 10);
+                 } else if (parts.length === 1 && !isNaN(parseInt(parts[0], 10))) { // Treat single number as minutes
+                     minutes = parseInt(parts[0], 10);
+                     seconds = 0;
+                 } else {
+                     return null; // Invalid number of parts
+                 }
+
+                 // Validate parts are numbers and within reasonable range
+                 if (isNaN(hours) || isNaN(minutes) || isNaN(seconds) ||
+                     hours < 0 || minutes < 0 || seconds < 0 ||
+                     minutes > 59 || seconds > 59) { // Allow more than 59 minutes if entered directly in MM:SS
+                      if(parts.length === 2 && minutes >= 60) {
+                         // Allow MM:SS like 75:30, convert to HH:MM:SS
+                         hours = Math.floor(minutes / 60);
+                         minutes = minutes % 60;
+                      } else if (minutes > 59 || seconds > 59) {
+                         return null; // Invalid values otherwise
+                      }
+                 }
+
+                 // Format to HH:MM:SS with leading zeros
+                 const hh = String(hours).padStart(2, '0');
+                 const mm = String(minutes).padStart(2, '0');
+                 const ss = String(seconds).padStart(2, '0');
+
+                 return `${hh}:${mm}:${ss}`;
+             }
+
+             // Formats stored HH:MM:SS for display (e.g., omits 00: if hours are 0)
+             function formatTimeForDisplay(timeString) {
+                 if (!timeString || !/^\d{2}:\d{2}:\d{2}$/.test(timeString)) {
+                     return timeString || ''; // Return original or empty if invalid/null
+                 }
+                 if (timeString.startsWith('00:')) {
+                     return timeString.substring(3); // Return MM:SS
+                 }
+                 return timeString; // Return HH:MM:SS
+             }
+
+             // Formats ISO timestamp for display in Profile
+             function formatTimestamp(isoString) {
+                 if (!isoString) return '';
+                 try {
+                     const date = new Date(isoString);
+                     // Example format: "Completed: Jan 15, 10:30 AM"
+                     return `Completed: ${date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}, ${date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}`;
+                 } catch (e) {
+                     console.error("Error formatting timestamp:", e);
+                     return 'Completed: (invalid date)';
+                 }
+             }
+
+
+            // --- Start the app ---
+            initializeApp();
+        });
+    </script>
+
+</body>
+</html>
