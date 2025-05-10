@@ -878,7 +878,21 @@
 
             function saveData(key, data) {
                 try {
-                    localStorage.setItem(key, JSON.stringify(data));
+                    if (key === TEMPLATE_KEY) {
+                        const uniqueData = [];
+                        const seenNames = new Set();
+
+                        data.forEach(item => {
+                            if (!seenNames.has(item.name)) {
+                                uniqueData.push(item);
+                                seenNames.add(item.name);
+                            }
+                        });
+
+                        localStorage.setItem(key, JSON.stringify(uniqueData));
+                    } else {
+                        localStorage.setItem(key, JSON.stringify(data));
+                    }
                 } catch (e) {
                     console.error(`Error saving data to localStorage key "${key}":`, e);
                     alert('Error saving data. Your storage might be full.');
