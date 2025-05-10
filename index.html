@@ -1,31 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="Track your weekly workouts and stay fit with this simple tracker app. Mark tasks, add details like distance and time, and view your progress.">
-    <meta name="theme-color" content="#007aff">
-    <title>Stay Fit!</title>
-    <!-- Favicon Links -->
-    <link rel="icon" href="media/icon.png" type="image/png">
+    <meta name="description"
+        content="Track your weekly run sessions and stay fit with this simple tracker app. Mark tasks, add details like distance and time, and view your progress.">
+    <meta name="theme-color" content="#0A84FF">
+    <title>Stay Fit! - Run Tracker</title>
+    <link rel="icon" href="media/icon.avif" type="image/png">
     <link rel="apple-touch-icon" href="media/apple-touch-icon.png">
+    <link rel="preload" href="media/text-logo.avif" as="image">
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
+
     <style>
         :root {
-            --background-color: #ffffff;
-            --text-color: #1d1d1f;
-            --secondary-text-color: #6e6e73;
-            --accent-color: #007aff;
-            --card-background: #f8f8f8;
-            --border-color: #d2d2d7;
-            --shadow-color: rgba(0, 0, 0, 0.1);
-            --danger-color: #ff3b30;
-            --success-color: #34c759;
-            --done-background-color: #e8f5e9;
+            --background-color: #000000;
+            --text-color: #FFFFFF;
+            --secondary-text-color: #D3D3D3;
+            --accent-color: #0A84FF;
+            /* Apple's brighter blue for dark mode */
+            --card-background: #1C1C1E;
+            /* iOS dark mode card color */
+            --border-color: #38383A;
+            /* iOS dark mode separator color */
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            /* Darker shadow for dark mode */
+            --danger-color: #FF453A;
+            /* iOS dark mode red */
+            --success-color: #30D158;
+            /* iOS dark mode green */
+            --done-background-color: rgba(48, 209, 88, 0.1);
+            /* Subtle green tint on dark */
+            --input-background-color: #2C2C2E;
+            --input-focus-background-color: #3A3A3C;
+            --nav-background-color: rgba(28, 28, 30, 0.85);
+            /* Darker, slightly transparent nav */
+
             --border-radius: 12px;
             --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
             --transition-speed: 0.3s;
+            --long-transition-speed: 0.4s;
+            /* For panel animations */
         }
 
         * {
@@ -34,8 +57,12 @@
             padding: 0;
         }
 
-        html, body {
+        html,
+        body {
             height: 100svh;
+            /* Fallback for older browsers */
+            height: 100dvh;
+            /* Dynamic viewport height */
         }
 
         body {
@@ -46,37 +73,55 @@
             line-height: 1.5;
             display: flex;
             flex-direction: column;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         main {
             flex-grow: 1;
             overflow-y: auto;
-            -webkit-overflow-scrolling: touch; /* Improve scrolling on iOS */
-            padding: 20px 15px 80px 15px; /* Padding bottom accounts for nav bar */
+            -webkit-overflow-scrolling: touch;
+            padding: 20px 15px 80px 15px;
         }
 
         /* Screen Management */
         .screen {
-            display: none; /* Hidden by default */
+            display: none;
         }
+
         .screen.active {
             display: block;
             animation: fadeIn var(--transition-speed) ease-out;
         }
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); } /* Subtle slide up */
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
+
         .screen.fade-out {
-             animation: fadeOut var(--transition-speed) ease-in forwards;
+            animation: fadeOut var(--transition-speed) ease-in forwards;
         }
+
         @keyframes fadeOut {
-             from { opacity: 1; transform: translateY(0); }
-             to { opacity: 0; transform: translateY(-5px); } /* Subtle slide up */
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
         }
 
-
-        /* Header */
         h1.screen-header {
             font-size: 28px;
             font-weight: bold;
@@ -85,8 +130,6 @@
             text-align: center;
         }
 
-
-        /* Header */
         img.screen-logo {
             width: 100%;
             max-width: 300px;
@@ -95,127 +138,178 @@
         }
 
         /* Forms & Inputs */
-        .add-workout-form {
+        .add-run-session-form {
             display: flex;
             gap: 10px;
             margin-bottom: 25px;
         }
 
-        .add-workout-form input[type="text"] {
+        .add-run-session-form input[type="text"],
+        .details-input-group input[type="number"],
+        .details-input-group input[type="text"],
+        .details-input-group input[type="date"],
+        .details-input-group input[type="time"],
+        select#stats-period-filter,
+        .profile-editor-form input[type="text"],
+        .profile-editor-form input[type="number"],
+        .profile-editor-form input[type="date"],
+        .profile-editor-form input[type="time"] {
             flex-grow: 1;
             padding: 12px 15px;
             border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
             font-size: 16px;
             font-family: var(--font-family);
-            background-color: #f0f0f0; /* Slightly different background for input */
-        }
-        .add-workout-form input[type="text"]:focus {
-            outline: none;
-            border-color: var(--accent-color);
-            background-color: var(--background-color);
+            background-color: var(--input-background-color);
+            color: var(--text-color);
         }
 
-        .add-workout-form button,
+        select#stats-period-filter {
+            flex-grow: 0;
+            /* Don't let select grow too much */
+            min-width: 150px;
+        }
+
+        .add-run-session-form input[type="text"]::placeholder,
+        .details-input-group input::placeholder,
+        .profile-editor-form input::placeholder {
+            color: var(--secondary-text-color);
+            opacity: 0.7;
+        }
+
+        .add-run-session-form input[type="text"]:focus,
+        .details-input-group input:focus,
+        select#stats-period-filter:focus,
+        .profile-editor-form input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            background-color: var(--input-focus-background-color);
+        }
+
+        /* Style for date/time input indicators */
+        .details-input-group input[type="date"]::-webkit-calendar-picker-indicator,
+        .details-input-group input[type="time"]::-webkit-calendar-picker-indicator,
+        .profile-editor-form input[type="date"]::-webkit-calendar-picker-indicator,
+        .profile-editor-form input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(1) brightness(0.7);
+            /* Adjust for dark mode */
+        }
+
+
+        .add-run-session-form button,
         .minimal-button {
             padding: 10px 15px;
             background-color: var(--accent-color);
-            color: white;
+            color: var(--background-color);
+            /* Text color on accent button for contrast */
             border: none;
             border-radius: var(--border-radius);
             cursor: pointer;
             font-size: 16px;
-            font-weight: 500;
+            font-weight: 600;
+            /* Bolder text on buttons */
             display: inline-flex;
             align-items: center;
             justify-content: center;
             transition: background-color var(--transition-speed) ease, transform 0.1s ease;
             box-shadow: 0 1px 3px var(--shadow-color);
+            gap: 5px;
         }
-         .add-workout-form button:hover,
-         .minimal-button:hover {
-             background-color: #0056b3;
-         }
-         .add-workout-form button:active,
-         .minimal-button:active {
-             transform: scale(0.98);
-         }
 
-        /* Danger Button variant */
+        .add-run-session-form button:hover,
+        .minimal-button:hover {
+            background-color: #0056b3;
+            /* Slightly darker accent */
+        }
+
+        .add-run-session-form button:active,
+        .minimal-button:active {
+            transform: scale(0.98);
+        }
+
         .minimal-button.danger {
             background-color: var(--danger-color);
-            padding: 10px; /* Smaller padding */
-            font-size: 14px; /* Smaller icon */
-            margin-left: 5px; /* Space between name and button */
+            color: var(--text-color);
         }
-        .minimal-button.danger:hover {
-             background-color: #d9362e; /* Darker red */
-        }
-         .minimal-button.danger:active {
-             transform: scale(0.95); /* Slightly more pop */
-         }
 
-        /* Workout List Items */
-        .workout-list {
+        .minimal-button.danger:hover {
+            background-color: #d9362e;
+        }
+
+        .minimal-button.save-details-button,
+        .minimal-button.profile-save-button {
+            /* Ensure save button uses success color */
+            background-color: var(--success-color);
+            color: var(--background-color);
+        }
+
+        .minimal-button.save-details-button:hover,
+        .minimal-button.profile-save-button:hover {
+            background-color: #2ca34a;
+        }
+
+        .minimal-button.delete-run-session-button-panel i {
+            margin: 0;
+            /* Remove gap if only icon */
+        }
+
+
+        /* Run Session List Items */
+        .run-session-list {
             list-style: none;
             padding: 0;
         }
 
-        .workout-item {
+        .run-session-item {
             background-color: var(--card-background);
             border-radius: var(--border-radius);
             margin-bottom: 15px;
             padding: 15px;
             box-shadow: 0 2px 5px var(--shadow-color);
             overflow: hidden;
-            transition: background-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease; /* Smooth background transition */
-            position: relative; /* Needed for potential absolute positioned elements if required */
+            transition: background-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+            position: relative;
         }
-         .workout-item.done {
-             background-color: var(--done-background-color);
-             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* Lighter shadow when done */
-         }
-         /* Deletion Animation */
-         .workout-item.deleting {
-             animation: fadeOutSlideUp var(--transition-speed) ease-in forwards;
-         }
 
-         @keyframes fadeOutSlideUp {
-             from {
-                 opacity: 1;
-                 transform: translateY(0);
-                 max-height: 150px; /* Estimate initial height generously */
-                 padding-top: 15px;
-                 padding-bottom: 15px;
-                 margin-bottom: 15px;
-                 overflow: hidden;
-             }
-             to {
-                 opacity: 0;
-                 transform: translateY(-15px); /* Slide up more */
-                 max-height: 0;
-                 padding-top: 0;
-                 padding-bottom: 0;
-                 margin-bottom: 0;
-                 border: none; /* Prevent border from lingering */
-                 box-shadow: none;
-                 overflow: hidden;
-             }
-         }
+        .run-session-item.done {
+            background-color: var(--done-background-color);
+        }
 
+        .run-session-item.deleting {
+            animation: fadeOutSlideUp var(--transition-speed) ease-in forwards;
+        }
 
-        .workout-item-main {
+        @keyframes fadeOutSlideUp {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+                max-height: 250px;
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            to {
+                opacity: 0;
+                transform: translateY(-20px);
+                max-height: 0;
+                padding: 0 15px;
+                margin-bottom: 0;
+                border: none;
+                box-shadow: none;
+            }
+        }
+
+        .run-session-item-main {
             display: flex;
             align-items: center;
-            gap: 10px; /* Adjusted gap for button */
-             cursor: default;
+            gap: 12px;
+            cursor: default;
         }
 
-        /* Custom Checkbox */
-        .workout-item-main .checkbox {
+        .run-session-item-main .checkbox {
             appearance: none;
-            width: 22px;
-            height: 22px;
+            width: 24px;
+            height: 24px;
             border: 2px solid var(--secondary-text-color);
             border-radius: 50%;
             cursor: pointer;
@@ -223,23 +317,30 @@
             transition: background-color var(--transition-speed) ease, border-color var(--transition-speed) ease;
             flex-shrink: 0;
         }
-        .workout-item-main .checkbox:checked {
+
+        .run-session-item-main .checkbox:hover {
+            border-color: var(--accent-color);
+        }
+
+        .run-session-item-main .checkbox:checked {
             background-color: var(--accent-color);
             border-color: var(--accent-color);
         }
-        .workout-item-main .checkbox:checked::after {
-            content: '\f00c'; /* Font Awesome check */
+
+        .run-session-item-main .checkbox:checked::after {
+            content: '\f00c';
             font-family: "Font Awesome 6 Free";
             font-weight: 900;
             font-size: 12px;
-            color: white;
+            color: var(--background-color);
+            /* Check mark color for contrast */
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
         }
 
-        .workout-name {
+        .run-session-name {
             flex-grow: 1;
             font-size: 17px;
             font-weight: 500;
@@ -249,51 +350,60 @@
             font-family: var(--font-family);
             color: var(--text-color);
             outline: none;
-            width: auto; /* Allow shrinking */
-            min-width: 50px; /* Prevent too much shrinking */
+            width: auto;
+            min-width: 50px;
         }
-         .workout-item:not(.done) .workout-name {
-             cursor: text;
-         }
-         .workout-item:not(.done) .workout-name:focus {
-             background-color: rgba(0, 122, 255, 0.05);
-             border-radius: 4px;
-             padding-left: 5px; /* Add slight padding on focus */
-             padding-right: 5px;
-             margin-left: -5px; /* Adjust margin to keep alignment */
-             margin-right: -5px;
-         }
-         .workout-item.done .workout-name {
-             color: var(--secondary-text-color); /* Dim text when done */
-             text-decoration: line-through; /* Strikethrough when done */
-         }
 
-        /* Delete Button Style */
-         .delete-workout-button {
-             flex-shrink: 0; /* Prevent shrinking */
-             margin-left: auto; /* Push to the right */
-             padding: 6px 10px; /* Slightly smaller */
-         }
-         .delete-workout-button i {
-             margin: 0; /* Remove default icon margin if any */
-             font-size: 1em; /* Match button font size */
-         }
+        .run-session-item:not(.done) .run-session-name {
+            cursor: text;
+        }
+
+        .run-session-item:not(.done) .run-session-name:focus {
+            background-color: rgba(10, 132, 255, 0.1);
+            /* Subtle accent focus */
+            border-radius: 4px;
+            padding-left: 5px;
+            padding-right: 5px;
+            margin-left: -5px;
+            margin-right: -5px;
+        }
+
+        .run-session-item.done .run-session-name {
+            color: var(--secondary-text-color);
+            text-decoration: line-through;
+            text-decoration-color: var(--secondary-text-color);
+        }
+
+        .delete-run-session-button {
+            flex-shrink: 0;
+            margin-left: auto;
+            padding: 6px 10px;
+        }
+
+        .delete-run-session-button i {
+            margin: 0;
+            font-size: 1em;
+        }
 
         /* Details Panel */
-        .workout-details-panel {
+        .run-session-details-panel {
             max-height: 0;
             overflow: hidden;
-            transition: max-height var(--transition-speed) ease-out, padding var(--transition-speed) ease-out, margin-top var(--transition-speed) ease-out, border-top-color var(--transition-speed) ease-out;
+            transition: max-height var(--long-transition-speed) ease-out, padding var(--long-transition-speed) ease-out, margin-top var(--long-transition-speed) ease-out, border-top-color var(--long-transition-speed) ease-out;
             padding: 0 15px;
+            /* Horizontal padding maintained during animation */
             margin-top: 0;
-            border-top: 1px solid transparent; /* Placeholder for transition */
+            border-top: 1px solid transparent;
         }
 
-        .workout-details-panel.open { /* Applied by JS when opened */
-            max-height: 300px; /* Adjust as needed */
-            padding: 15px 0 0 0; /* Padding top only */
+        .run-session-details-panel.open {
+            max-height: 500px;
+            /* Increased for new date/time fields */
+            padding-top: 15px;
+            /* Vertical padding animates in */
+            padding-bottom: 15px;
             margin-top: 15px;
-            border-top: 1px solid var(--border-color); /* Separator line */
+            border-top: 1px solid var(--border-color);
         }
 
         .details-input-group {
@@ -301,101 +411,92 @@
             display: flex;
             flex-direction: column;
         }
+
         .details-input-group label {
             font-size: 14px;
             color: var(--secondary-text-color);
             margin-bottom: 5px;
         }
+
         .details-input-group input[type="number"],
-        .details-input-group input[type="text"] {
-             padding: 10px 12px;
-             border: 1px solid var(--border-color);
-             border-radius: var(--border-radius);
-             font-size: 16px;
-             font-family: var(--font-family);
-             appearance: textfield;
-             -moz-appearance: textfield;
-             background-color: var(--background-color); /* Ensure input background is white */
-        }
-         .details-input-group input[type="number"]::-webkit-outer-spin-button,
-         .details-input-group input[type="number"]::-webkit-inner-spin-button {
-             -webkit-appearance: none;
-             margin: 0;
-         }
-
-        .details-input-group input:focus {
-            outline: none;
-            border-color: var(--accent-color);
+        .details-input-group input[type="text"],
+        .details-input-group input[type="date"],
+        .details-input-group input[type="time"] {
+            margin-bottom: 0;
         }
 
-        .save-details-button {
-            background-color: var(--success-color);
-            padding: 8px 12px;
-            font-size: 14px;
-            margin-top: 5px;
-            float: right;
+        .details-input-group input[type="number"]::-webkit-outer-spin-button,
+        .details-input-group input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
-         .save-details-button:hover {
-             background-color: #2ca34a;
-         }
 
+        .details-buttons-container {
+            display: flex;
+            justify-content: space-between;
+            /* Pushes delete to left, save to right */
+            align-items: center;
+            margin-top: 10px;
+        }
 
         /* Compact Display */
-        .workout-compact-display {
-             /* display: none; /* Hidden by default, shown by JS */
-             opacity: 0;
-             max-height: 0;
-             overflow: hidden;
-             margin-top: 0;
-             padding-top: 0;
-             border-top: 1px solid transparent; /* Use transparent border for transition */
-             font-size: 15px;
-             color: var(--secondary-text-color);
-             display: flex;
-             justify-content: space-between;
-             align-items: center;
-             line-height: 1.3; /* Tighter line height */
-             transition: opacity var(--transition-speed) ease, max-height var(--transition-speed) ease, margin-top var(--transition-speed) ease, padding-top var(--transition-speed) ease, border-top-color var(--transition-speed) ease;
+        .run-session-compact-display {
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            margin-top: 0;
+            padding-top: 0;
+            border-top: 1px solid transparent;
+            font-size: 15px;
+            color: var(--secondary-text-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            line-height: 1.3;
+            transition: opacity var(--transition-speed) ease, max-height var(--transition-speed) ease, margin-top var(--transition-speed) ease, padding-top var(--transition-speed) ease, border-top-color var(--transition-speed) ease;
         }
-        .workout-compact-display.visible {
-             /* display: flex; /* Use flex to make it visible */
-             opacity: 1;
-             max-height: 100px; /* Allow space */
-             margin-top: 10px;
-             padding-top: 10px;
-             border-top: 1px solid var(--border-color);
+
+        .run-session-compact-display.visible {
+            opacity: 1;
+            max-height: 100px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
         }
-        /* Don't hide compact view when edit panel is open - allow viewing while editing */
+
         .compact-info {
-             flex-grow: 1;
-             margin-right: 10px;
+            flex-grow: 1;
+            margin-right: 10px;
         }
 
         .edit-details-button {
-             background: none;
-             border: none;
-             color: var(--accent-color);
-             cursor: pointer;
-             padding: 5px;
-             font-size: 18px;
-             flex-shrink: 0; /* Prevent shrinking */
+            background: none;
+            border: none;
+            color: var(--accent-color);
+            cursor: pointer;
+            padding: 5px;
+            font-size: 18px;
+            flex-shrink: 0;
         }
-         .edit-details-button:hover {
-             opacity: 0.7;
-         }
 
+        .edit-details-button:hover {
+            opacity: 0.7;
+        }
 
-        /* Profile Screen */
-        .week-block {
+        /* Profile Screen & Stats Screen common*/
+        .week-block,
+        .stats-block {
             margin-bottom: 30px;
             padding-bottom: 20px;
-             border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
         }
-         .week-block:last-child {
-             border-bottom: none;
-             margin-bottom: 0;
-             padding-bottom: 0;
-         }
+
+        .week-block:last-child,
+        .stats-block:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
 
         .week-header {
             font-size: 20px;
@@ -405,70 +506,184 @@
             justify-content: space-between;
             align-items: center;
         }
-         .week-summary {
-             font-size: 14px;
-             font-weight: 400;
-             color: var(--secondary-text-color);
-         }
 
-         .profile-workout-list {
-             list-style: none;
-             padding: 0;
-         }
-         .profile-workout-item {
-             display: flex;
-             align-items: center;
-             padding: 12px 0; /* Increased vertical padding */
-             border-bottom: 1px solid var(--border-color);
-             font-size: 16px;
-         }
-         .profile-workout-item:last-child {
-             border-bottom: none;
-         }
+        .week-summary {
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--secondary-text-color);
+        }
 
-         .profile-workout-status {
-             margin-right: 15px;
-             font-size: 20px;
-             width: 25px;
-             text-align: center;
-             padding-top: 1px; /* Align icon slightly better with text */
-             flex-shrink: 0;
-         }
-         .profile-workout-content {
-             flex-grow: 1;
-             display: flex;
-             flex-direction: column; /* Stack name/details and timestamp */
-         }
-         .profile-workout-main-info {
+        .profile-run-session-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .profile-run-session-item {
+            display: flex;
+            flex-direction: column;
+            /* Changed to column for editor */
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 16px;
+            cursor: pointer;
+            /* To indicate clickable for editing */
+            transition: opacity var(--transition-speed) ease-out, max-height var(--transition-speed) ease-out, padding var(--transition-speed) ease-out, margin-bottom var(--transition-speed) ease-out;
+            /* For item deletion animation */
+            overflow: hidden;
+            /* For item deletion animation */
+        }
+
+        .profile-run-session-item:last-child {
+            border-bottom: none;
+        }
+
+        .profile-run-session-item-content-wrapper {
+            /* New wrapper for existing content */
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .profile-run-session-status {
+            margin-right: 15px;
+            font-size: 20px;
+            width: 25px;
+            text-align: center;
+            padding-top: 1px;
+            flex-shrink: 0;
+        }
+
+        .profile-run-session-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .profile-run-session-main-info {
             display: flex;
             justify-content: space-between;
             align-items: center;
             gap: 10px;
-            margin-bottom: 4px; /* Space between main info and timestamp */
-         }
-         .profile-workout-name {
-             font-weight: 500;
-         }
-         .profile-workout-details-info {
-             color: var(--secondary-text-color);
-             font-size: 14px;
-             text-align: right;
-             flex-shrink: 0; /* Prevent shrinking */
-         }
-         .profile-workout-timestamp {
-             font-size: 13px;
-             color: var(--secondary-text-color);
-             padding-top: 2px;
-         }
-         /* Removed profile edit button for now to simplify - edits are via Home screen */
-         /* .profile-edit-button { ... } */
+            margin-bottom: 4px;
+        }
+
+        .profile-run-session-name {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .profile-run-session-details-info {
+            color: var(--secondary-text-color);
+            font-size: 14px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .profile-run-session-timestamp {
+            font-size: 13px;
+            color: var(--secondary-text-color);
+            padding-top: 2px;
+        }
+
+        /* Profile Item Editor */
+        .profile-editor-form {
+            background-color: var(--card-background);
+            padding-left: 15px;
+            /* Static horizontal padding */
+            padding-right: 15px;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            /* Animated properties: padding-top, padding-bottom, margin-top, max-height, opacity */
+            transition: max-height var(--long-transition-speed) ease-out,
+                opacity var(--long-transition-speed) ease-out,
+                padding-top var(--long-transition-speed) ease-out,
+                padding-bottom var(--long-transition-speed) ease-out,
+                margin-top var(--long-transition-speed) ease-out;
+        }
+
+        /* .profile-editor-form.open is not strictly needed for animated properties if JS sets them directly */
+        /* It could be used for :focus-within type things if needed, or just as a marker class */
+
+        .profile-editor-form .details-input-group {
+            /* Reuse existing styles */
+            margin-bottom: 12px;
+        }
+
+        .profile-editor-form .details-input-group label {
+            font-size: 13px;
+            /* Slightly smaller for editor */
+        }
+
+        .profile-editor-form .details-buttons-container {
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .profile-editor-form .details-buttons-container>div {
+            /* Wrapper for right-aligned buttons */
+            display: flex;
+            gap: 10px;
+        }
+
+        .profile-editor-checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .profile-editor-checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--accent-color);
+        }
+
+
+        /* Stats Screen Specifics */
+        .stats-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            /* Allow wrapping on small screens */
+        }
+
+        .stats-controls label {
+            font-size: 15px;
+            color: var(--secondary-text-color);
+        }
+
+        #stats-chart-container {
+            width: 100%;
+            max-width: 700px;
+            /* Max width for larger screens */
+            margin: 20px auto;
+            padding: 10px;
+            background-color: var(--card-background);
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 5px var(--shadow-color);
+            height: 300px;
+            /* Give chart a fixed height or responsive aspect ratio */
+        }
+
+        #stats-summary {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 16px;
+            color: var(--secondary-text-color);
+        }
 
 
         /* Reset Button */
         .reset-all-button {
             display: block;
-            width: 100%; /* Full width */
-            margin: 30px 0 20px 0; /* Margin top/bottom */
+            width: 100%;
+            margin: 30px 0 20px 0;
             padding: 15px;
             background-color: var(--danger-color);
             color: white;
@@ -481,32 +696,34 @@
             transition: background-color var(--transition-speed) ease, transform 0.1s ease;
             box-shadow: 0 2px 5px var(--shadow-color);
         }
+
         .reset-all-button i {
             margin-right: 8px;
         }
-        .reset-all-button:hover {
-             background-color: #d9362e;
-         }
-         .reset-all-button:active {
-             transform: scale(0.99);
-         }
 
-        /* Bottom Navigation */
+        .reset-all-button:hover {
+            background-color: #d9362e;
+        }
+
+        .reset-all-button:active {
+            transform: scale(0.99);
+        }
+
         nav {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            height: calc(65px + env(safe-area-inset-bottom)); /* Adjust height + safe area */
-            padding-bottom: env(safe-area-inset-bottom); /* Add padding for safe area */
-            background-color: rgba(255, 255, 255, 0.9); /* Slightly transparent background */
-            backdrop-filter: blur(10px); /* iOS blur effect */
-            -webkit-backdrop-filter: blur(10px);
+            height: calc(65px + env(safe-area-inset-bottom));
+            padding-bottom: env(safe-area-inset-bottom);
+            background-color: var(--nav-background-color);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border-top: 1px solid var(--border-color);
             display: flex;
             justify-content: space-around;
-            align-items: flex-start; /* Align items to top within nav */
-             padding-top: 5px; /* Padding at the top */
+            align-items: flex-start;
+            padding: 5px 0;
         }
 
         nav button {
@@ -521,49 +738,72 @@
             height: 100%;
             color: var(--secondary-text-color);
             transition: color var(--transition-speed) ease;
-             padding-top: 5px; /* Push content down slightly */
         }
+
         nav button i {
             font-size: 22px;
             margin-bottom: 4px;
-             flex-shrink: 0; /* Prevent icon shrinking */
-             height: 24px; /* Give icon fixed height */
-             display: flex;
-             align-items: center;
+            flex-shrink: 0;
+            height: 24px;
+            display: flex;
+            align-items: center;
         }
+
         nav button span {
             font-size: 11px;
             font-weight: 500;
-             white-space: nowrap; /* Prevent label wrapping */
+            white-space: nowrap;
         }
 
         nav button.active {
             color: var(--accent-color);
         }
 
-        /* Utility Classes */
-         .hidden { display: none !important; } /* Use important for JS toggling if needed */
-
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
+
 <body>
 
     <main>
         <!-- Home Screen -->
         <section id="home-screen" class="screen active">
-            <img class="screen-logo" src="media/text-logo.png" alt="Stay Fit!"></img>
+            <img class="screen-logo" src="media/text-logo.avif" alt="Stay Fit! Logo">
 
-            <form class="add-workout-form" id="add-workout-form">
-                <input type="text" id="new-workout-name" placeholder="Add new workout..." autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" required>
-                <button type="submit" class="minimal-button" aria-label="Add Workout">
+            <form class="add-run-session-form" id="add-run-session-form">
+                <input type="text" id="new-run-session-name" placeholder="Add new run session..." autocomplete="off"
+                    autocorrect="off" autocapitalize="none" spellcheck="false" required>
+                <button type="submit" class="minimal-button" aria-label="Add Run Session">
                     <i class="fa-solid fa-plus"></i>
                 </button>
             </form>
 
-            <ul class="workout-list" id="workout-list">
-                <!-- Workout items will be generated here by JS -->
-                 <li id="no-workouts-message" class="hidden" style="text-align: center; color: var(--secondary-text-color); padding: 20px;">No workouts added yet. Add one above!</li>
+            <ul class="run-session-list" id="run-session-list">
+                <!-- Run session items will be generated here by JS -->
+                <li id="no-run-sessions-message" class="hidden"
+                    style="text-align: center; color: var(--secondary-text-color); padding: 20px;">No run sessions added
+                    yet. Add one above!</li>
             </ul>
+        </section>
+
+        <!-- Stats Screen -->
+        <section id="stats-screen" class="screen">
+            <h1 class="screen-header">Statistics</h1>
+            <div class="stats-controls">
+                <label for="stats-period-filter">Show data for:</label>
+                <select id="stats-period-filter">
+                    <option value="week">This Week</option>
+                    <option value="year">This Year</option>
+                </select>
+            </div>
+            <div id="stats-chart-container">
+                <canvas id="totalKilometersChart"></canvas>
+            </div>
+            <div id="stats-summary" style="text-align: center; margin-top: 20px;">
+                <!-- Summary text like "Total KM this week: X" will be populated by JS -->
+            </div>
         </section>
 
         <!-- Profile Screen -->
@@ -571,7 +811,9 @@
             <h1 class="screen-header">Weekly Progress</h1>
             <div id="weekly-progress-container">
                 <!-- Weekly blocks will be generated here by JS -->
-                 <p id="no-history-message" class="hidden" style="text-align: center; color: var(--secondary-text-color); padding: 20px;">No workout data recorded yet.</p>
+                <p id="no-history-message" class="hidden"
+                    style="text-align: center; color: var(--secondary-text-color); padding: 20px;">No run session data
+                    recorded yet.</p>
             </div>
             <button id="reset-all-button" class="reset-all-button">
                 <i class="fa-solid fa-trash-can"></i> Reset All Data
@@ -585,6 +827,10 @@
             <i class="fa-solid fa-house"></i>
             <span>Home</span>
         </button>
+        <button data-target="stats-screen" aria-label="Stats">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Stats</span>
+        </button>
         <button data-target="profile-screen" aria-label="Profile">
             <i class="fa-solid fa-user"></i>
             <span>Profile</span>
@@ -595,13 +841,19 @@
         document.addEventListener('DOMContentLoaded', () => {
             const screens = document.querySelectorAll('.screen');
             const navButtons = document.querySelectorAll('nav button');
-            const addWorkoutForm = document.getElementById('add-workout-form');
-            const newWorkoutInput = document.getElementById('new-workout-name');
-            const workoutListContainer = document.getElementById('workout-list');
+            const addRunSessionForm = document.getElementById('add-run-session-form');
+            const newRunSessionInput = document.getElementById('new-run-session-name');
+            const runSessionListContainer = document.getElementById('run-session-list');
             const weeklyProgressContainer = document.getElementById('weekly-progress-container');
             const resetAllButton = document.getElementById('reset-all-button');
-            const noWorkoutsMessage = document.getElementById('no-workouts-message');
+            const noRunSessionsMessage = document.getElementById('no-run-sessions-message');
             const noHistoryMessage = document.getElementById('no-history-message');
+
+            // Stats Screen Elements
+            const statsPeriodFilter = document.getElementById('stats-period-filter');
+            const statsChartCanvas = document.getElementById('totalKilometersChart');
+            const statsSummaryElement = document.getElementById('stats-summary');
+            let totalKilometersChart = null;
 
 
             const TEMPLATE_KEY = 'stayfit_template';
@@ -609,24 +861,20 @@
             const LAST_ACTIVE_SCREEN_KEY = 'stayfit_last_screen';
 
             let currentScreenId = localStorage.getItem(LAST_ACTIVE_SCREEN_KEY) || 'home-screen';
-            let currentIsoWeekInfo = getCurrentIsoWeek(); // Get { isoWeekString, weekRange }
+            let currentIsoWeekInfo = null; // Will be set by initializeApp calling getCurrentIsoWeek
+            let openProfileEditor = null; // To manage the currently open editor in profile: {form, id, itemElement, isoWeek}
 
             // --- Data Management ---
-
             function loadData(key, defaultValue = []) {
                 const data = localStorage.getItem(key);
                 try {
-                    // Basic check for empty or invalid JSON before parsing
-                    if (!data || data === 'null' || data === 'undefined') {
-                        return defaultValue;
-                    }
+                    if (!data || data === 'null' || data === 'undefined') return defaultValue;
                     return JSON.parse(data);
                 } catch (e) {
                     console.error(`Error parsing localStorage key "${key}":`, e, "Raw data:", data);
                     return defaultValue;
                 }
             }
-
 
             function saveData(key, data) {
                 try {
@@ -637,170 +885,164 @@
                 }
             }
 
-            function getWorkoutTemplate() {
-                return loadData(TEMPLATE_KEY);
+            function getRunSessionTemplate() { return loadData(TEMPLATE_KEY); }
+            function saveRunSessionTemplate(template) { saveData(TEMPLATE_KEY, template); }
+            function getWeekData(isoWeek) { return loadData(WEEK_DATA_PREFIX + isoWeek); }
+            function saveWeekData(isoWeek, data) { saveData(WEEK_DATA_PREFIX + isoWeek, data); }
+
+            // --- Week Calculation (Corrected) ---
+            /**
+             * Helper function to get the ISO 8601 week number and year for a given date.
+             * @param {Date} dateInput - The local date for which to find the ISO week data.
+             * @returns {{year: number, week: number}} - The ISO year and week number.
+             */
+            function getIsoWeekAndYear(dateInput) {
+                const date = new Date(Date.UTC(dateInput.getFullYear(), dateInput.getMonth(), dateInput.getDate()));
+                // Move to Thursday of the week (ISO week day 4)
+                // getUTCDay() is 0 for Sunday, 1 for Monday, ..., 6 for Saturday
+                // (date.getUTCDay() || 7) makes Sunday 7, Monday 1, etc.
+                date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
+
+                const year = date.getUTCFullYear();
+                const yearStart = new Date(Date.UTC(year, 0, 1));
+                // Calculate week number
+                const weekNumber = Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+
+                return { year: year, week: weekNumber };
             }
 
-            function saveWorkoutTemplate(template) {
-                saveData(TEMPLATE_KEY, template);
-            }
+            /**
+             * Gets comprehensive information about the ISO 8601 week for a given date.
+             * @param {Date} dateInput - The local date (defaults to current date).
+             * @returns {{isoWeekString: string, weekRange: string, startDate: Date, endDate: Date, weekNumber: number, year: number}}
+             */
+            function getCurrentIsoWeek(dateInput = new Date()) {
+                const localDate = new Date(dateInput.getTime()); // Work with a copy
 
-            function getWeekData(isoWeek) {
-                return loadData(WEEK_DATA_PREFIX + isoWeek);
-            }
+                const { year: isoYear, week: isoWeekNumber } = getIsoWeekAndYear(localDate);
 
-            function saveWeekData(isoWeek, data) {
-                saveData(WEEK_DATA_PREFIX + isoWeek, data);
-            }
+                // Calculate Monday of the week localDate is in.
+                const dayOfWeekLocal = localDate.getDay(); // 0 for Sunday, 1 for Mon ...
+                // Offset to get to Monday:
+                // If localDate is Sunday (0), offset is -6.
+                // If localDate is Monday (1), offset is 0.
+                // If localDate is Saturday (6), offset is -5.
+                const offsetToMonday = (dayOfWeekLocal === 0) ? -6 : (1 - dayOfWeekLocal);
 
-            // --- Week Calculation ---
-
-            function getCurrentIsoWeek() {
-                const now = new Date();
-                const dayOfWeek = now.getDay(); // 0 = Sun, 6 = Sat
-                const isoDayOfWeek = dayOfWeek === 0 ? 7 : dayOfWeek; // 1 = Mon, 7 = Sun
-
-                const monday = new Date(now);
-                monday.setDate(now.getDate() - isoDayOfWeek + 1);
+                const monday = new Date(localDate.getTime());
+                monday.setDate(localDate.getDate() + offsetToMonday);
                 monday.setHours(0, 0, 0, 0);
 
-                const yearStart = new Date(monday.getFullYear(), 0, 1);
-                const dayNum = Math.floor((monday - yearStart) / 86400000) + 1;
-                let weekNo = Math.ceil((dayNum + yearStart.getDay() - 1) / 7);
-
-                // Handle edge case where Jan 1 is Fri, Sat, or Sun (belongs to the previous year's last week)
-                if (yearStart.getDay() > 4 || yearStart.getDay() === 0) {
-                     weekNo = Math.ceil((dayNum + yearStart.getDay() - 1 - 7) / 7);
-                 }
-                 // Handle week 0 (belongs to previous year)
-                 if (weekNo < 1) {
-                     const prevYear = new Date(monday.getFullYear() - 1, 11, 31);
-                     return getCurrentIsoWeek(prevYear); // Recurse for last week of prev year
-                 }
-
-                 // Handle week 53 edge cases
-                 const year = monday.getFullYear();
-                 if (weekNo > 52) {
-                     const thursday = new Date(monday);
-                     thursday.setDate(monday.getDate() + 3); // Thursday of the week determines the year
-                     if (thursday.getFullYear() > year) {
-                         // This week 53 actually belongs to the next year as week 1
-                         // This simple logic might not cover all ISO 8601 nuances but is often sufficient
-                     }
-                 }
-
-                const isoWeekString = `${year}-W${String(weekNo).padStart(2, '0')}`;
-
-                const sunday = new Date(monday);
+                const sunday = new Date(monday.getTime());
                 sunday.setDate(monday.getDate() + 6);
+                sunday.setHours(23, 59, 59, 999);
+
+                const isoWeekString = `${isoYear}-W${String(isoWeekNumber).padStart(2, '0')}`;
                 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
                 const weekRange = `${monthNames[monday.getMonth()]} ${monday.getDate()} – ${monthNames[sunday.getMonth()]} ${sunday.getDate()}`;
 
-                return { isoWeekString, weekRange };
+                return {
+                    isoWeekString,
+                    weekRange,
+                    startDate: monday,
+                    endDate: sunday,
+                    weekNumber: isoWeekNumber,
+                    year: isoYear
+                };
             }
 
 
             // --- Initialization ---
-
             function initializeApp() {
-                currentIsoWeekInfo = getCurrentIsoWeek(); // Update on init
+                currentIsoWeekInfo = getCurrentIsoWeek(); // Set initial currentIsoWeekInfo
                 const { isoWeekString } = currentIsoWeekInfo;
-
                 let currentWeekData = getWeekData(isoWeekString);
-                const template = getWorkoutTemplate();
-
+                const template = getRunSessionTemplate();
                 let dataUpdated = false;
 
-                // Ensure current week data structure includes new fields if loaded from old version
-                 const migrateWorkout = (workout) => {
+                const migrateRunSession = (runSession) => {
                     let updated = false;
-                    if (typeof workout.completionTimestamp === 'undefined') {
-                        workout.completionTimestamp = workout.done ? new Date().toISOString() : null; // Best guess for migration
+                    if (typeof runSession.completionTimestamp === 'undefined') {
+                        runSession.completionTimestamp = runSession.done ? new Date().toISOString() : null;
+                        updated = true;
+                    }
+                    if (typeof runSession.runDate === 'undefined') {
+                        if (runSession.completionTimestamp) {
+                            const d = new Date(runSession.completionTimestamp);
+                            runSession.runDate = d.toISOString().split('T')[0];
+                            runSession.runTime = d.toTimeString().split(' ')[0].substring(0, 5);
+                        } else {
+                            runSession.runDate = null;
+                            runSession.runTime = null;
+                        }
                         updated = true;
                     }
                     return updated;
-                 };
+                };
 
                 if (!currentWeekData || currentWeekData.length === 0 && template.length > 0) {
-                    console.log(`Initializing week ${isoWeekString} from template.`);
-                    currentWeekData = template.map(workout => ({
-                        id: workout.id,
-                        name: workout.name,
-                        done: false,
-                        distance: null,
-                        time: null, // Store as HH:MM:SS
-                        completionTimestamp: null // Initialize new field
+                    currentWeekData = template.map(rs => ({
+                        id: rs.id, name: rs.name, done: false, distance: null, time: null,
+                        completionTimestamp: null, runDate: null, runTime: null
                     }));
                     dataUpdated = true;
                 } else if (currentWeekData.length > 0) {
-                    // Add new workouts from template if added mid-week
                     const existingIds = new Set(currentWeekData.map(w => w.id));
-                    template.forEach(tWorkout => {
-                        if (!existingIds.has(tWorkout.id)) {
+                    template.forEach(tRunSession => {
+                        if (!existingIds.has(tRunSession.id)) {
                             currentWeekData.push({
-                                id: tWorkout.id,
-                                name: tWorkout.name,
-                                done: false,
-                                distance: null,
-                                time: null,
-                                completionTimestamp: null
+                                id: tRunSession.id, name: tRunSession.name, done: false, distance: null, time: null,
+                                completionTimestamp: null, runDate: null, runTime: null
                             });
                             dataUpdated = true;
                         }
                     });
-                     // Migrate existing entries in the current week
-                    currentWeekData.forEach(w => {
-                         if (migrateWorkout(w)) dataUpdated = true;
-                     });
+                    currentWeekData.forEach(rs => { if (migrateRunSession(rs)) dataUpdated = true; });
                 } else {
-                    // Ensure currentWeekData is an array even if loaded empty or null
                     currentWeekData = [];
                 }
 
-                if (dataUpdated) {
-                     saveWeekData(isoWeekString, currentWeekData);
-                }
+                if (dataUpdated) saveWeekData(isoWeekString, currentWeekData);
 
-                 switchScreen(currentScreenId, true); // Instant switch on load
-                 renderHomeWorkouts();
-                 renderProfileScreen(); // Render profile data on load
+                switchScreen(currentScreenId, true);
+                renderHomeRunSessions();
 
-                 addWorkoutForm.addEventListener('submit', handleAddWorkout);
-                 navButtons.forEach(button => button.addEventListener('click', handleNavClick));
-                 resetAllButton.addEventListener('click', handleResetAll);
-                 workoutListContainer.addEventListener('click', handleListClick); // Use event delegation
-                 workoutListContainer.addEventListener('input', handleListInput); // Delegate input events (like name change)
-                 workoutListContainer.addEventListener('focusout', handleListFocusOut); // Delegate blur events more broadly
+                addRunSessionForm.addEventListener('submit', handleAddRunSession);
+                navButtons.forEach(button => button.addEventListener('click', handleNavClick));
+                resetAllButton.addEventListener('click', handleResetAll);
+                runSessionListContainer.addEventListener('click', handleListClick);
+                runSessionListContainer.addEventListener('input', handleListInput);
+                runSessionListContainer.addEventListener('focusout', handleListFocusOut);
+                statsPeriodFilter.addEventListener('change', renderStatsScreen);
+                weeklyProgressContainer.addEventListener('click', handleProfileListClick);
 
-                checkEmptyListState(); // Check initial state
+
+                checkEmptyListState();
             }
 
             // --- Navigation ---
-
             function switchScreen(targetId, instant = false) {
                 const currentActiveScreen = document.querySelector('.screen.active');
                 const targetScreen = document.getElementById(targetId);
                 const currentActiveButton = document.querySelector('nav button.active');
                 const targetButton = document.querySelector(`nav button[data-target="${targetId}"]`);
 
-                if (!targetScreen) return; // Target screen doesn't exist
+                if (openProfileEditor) {
+                    closeOpenProfileEditor(); // Close profile editor if switching screens
+                }
+
+                if (!targetScreen) return;
                 if (currentActiveScreen === targetScreen && !instant) return;
 
-                // Animation Handling
                 if (currentActiveScreen && !instant) {
                     currentActiveScreen.classList.add('fade-out');
-                    // Use setTimeout for reliable removal after animation
                     setTimeout(() => {
-                         if (currentActiveScreen) { // Check if it still exists
-                            currentActiveScreen.classList.remove('active', 'fade-out');
-                         }
-                         targetScreen.classList.add('active');
+                        if (currentActiveScreen) currentActiveScreen.classList.remove('active', 'fade-out');
+                        targetScreen.classList.add('active');
                     }, parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--transition-speed') || '0.3') * 1000);
                 } else {
-                     if (currentActiveScreen) {
-                        currentActiveScreen.classList.remove('active', 'fade-out'); // Remove classes immediately
-                     }
-                    targetScreen.classList.add('active'); // Add active class immediately
+                    if (currentActiveScreen) currentActiveScreen.classList.remove('active', 'fade-out');
+                    targetScreen.classList.add('active');
                 }
 
                 if (currentActiveButton) currentActiveButton.classList.remove('active');
@@ -809,14 +1051,13 @@
                 currentScreenId = targetId;
                 localStorage.setItem(LAST_ACTIVE_SCREEN_KEY, currentScreenId);
 
-                if (targetId === 'profile-screen') {
-                    renderProfileScreen(); // Refresh profile data when switching to it
-                } else if (targetId === 'home-screen') {
-                     renderHomeWorkouts(); // Refresh home data
-                     checkEmptyListState(); // Ensure message is correct on switch
+                if (targetId === 'profile-screen') renderProfileScreen();
+                else if (targetId === 'stats-screen') renderStatsScreen();
+                else if (targetId === 'home-screen') {
+                    renderHomeRunSessions();
+                    checkEmptyListState();
                 }
             }
-
 
             function handleNavClick(event) {
                 const button = event.currentTarget;
@@ -824,637 +1065,1103 @@
                 switchScreen(targetId);
             }
 
-            // --- Event Delegation for Workout List ---
+            // --- Event Delegation for Run Session List (Home Screen) ---
             function handleListClick(event) {
                 const target = event.target;
-                const listItem = target.closest('.workout-item');
-                if (!listItem || listItem.classList.contains('deleting')) return; // Clicked outside or on deleting item
+                const listItem = target.closest('.run-session-item');
+                if (!listItem || listItem.classList.contains('deleting')) return;
+                const runSessionId = parseInt(listItem.dataset.id);
 
-                const workoutId = parseInt(listItem.dataset.id);
-
-                // Checkbox click
-                if (target.classList.contains('checkbox')) {
-                    handleWorkoutCheck(workoutId, listItem, target);
-                }
-                // Save button click
-                else if (target.classList.contains('save-details-button') || target.closest('.save-details-button')) {
-                    handleSaveDetails(workoutId, listItem);
-                }
-                // Edit button click (pencil icon)
+                if (target.classList.contains('checkbox')) handleRunSessionCheck(runSessionId, listItem, target);
+                else if (target.classList.contains('save-details-button') || target.closest('.save-details-button')) handleSaveDetails(runSessionId, listItem);
                 else if (target.classList.contains('edit-details-button') || target.closest('.edit-details-button')) {
-                    const detailsPanel = listItem.querySelector('.workout-details-panel');
+                    const detailsPanel = listItem.querySelector('.run-session-details-panel');
                     if (detailsPanel) {
-                         detailsPanel.classList.toggle('open'); // Toggle panel visibility
-                         // Optional: Focus first input if opening
-                         if (detailsPanel.classList.contains('open')) {
-                            const firstInput = detailsPanel.querySelector('input');
+                        detailsPanel.classList.toggle('open');
+                        if (detailsPanel.classList.contains('open')) {
+                            const firstInput = detailsPanel.querySelector('input:not([type="hidden"])');
                             if (firstInput) setTimeout(() => firstInput.focus(), 10);
-                         }
+                        }
                     }
                 }
-                // Delete button click
-                else if (target.classList.contains('delete-workout-button') || target.closest('.delete-workout-button')) {
-                    handleDeleteWorkout(workoutId, listItem);
+                else if (target.classList.contains('delete-run-session-button-main') || target.closest('.delete-run-session-button-main') || target.classList.contains('delete-run-session-button-panel') || target.closest('.delete-run-session-button-panel')) {
+                    handleDeleteRunSession(runSessionId, listItem);
                 }
             }
-
-             function handleListInput(event) {
-                 const target = event.target;
-                 const listItem = target.closest('.workout-item');
-                 if (!listItem || listItem.classList.contains('deleting')) return;
-                 // Handle input changes if needed (e.g., real-time validation)
-                 // Currently saving name on blur/focusout
-             }
-
-             function handleListFocusOut(event) {
-                 const target = event.target;
-                 const listItem = target.closest('.workout-item');
-                 if (!listItem || listItem.classList.contains('deleting')) return;
-
-                 const workoutId = parseInt(listItem.dataset.id);
-
-                 // Workout name input blur
-                 if (target.classList.contains('workout-name')) {
-                     if (!listItem.classList.contains('done')) { // Only allow editing name if not done
-                        handleWorkoutNameEdit(workoutId, target.value);
-                     }
-                 }
-                 // Could handle blur on distance/time here too if auto-save on blur was desired
-             }
-
+            function handleListInput(event) { /* Currently saving name on focusout */ }
+            function handleListFocusOut(event) {
+                const target = event.target;
+                const listItem = target.closest('.run-session-item');
+                if (!listItem || listItem.classList.contains('deleting') || listItem.dataset.temporarilyChecked === "true") return;
+                const runSessionId = parseInt(listItem.dataset.id);
+                if (target.classList.contains('run-session-name') && !listItem.classList.contains('done')) {
+                    handleRunSessionNameEdit(runSessionId, target.value);
+                }
+            }
 
             // --- Home Screen Logic ---
-
-            function renderHomeWorkouts() {
+            function renderHomeRunSessions() {
                 const { isoWeekString } = currentIsoWeekInfo;
                 const weekData = getWeekData(isoWeekString);
-                workoutListContainer.innerHTML = ''; // Clear list
-
-                if (!weekData || weekData.length === 0) {
-                    // Handled by checkEmptyListState
-                } else {
-                    weekData.forEach(workout => {
-                        const li = createWorkoutListItem(workout);
-                        workoutListContainer.appendChild(li);
-                    });
+                runSessionListContainer.innerHTML = '';
+                if (weekData && weekData.length > 0) {
+                    weekData.forEach(rs => runSessionListContainer.appendChild(createRunSessionListItem(rs)));
                 }
-                 checkEmptyListState(); // Ensure message state is correct after render
+                checkEmptyListState();
             }
 
-            function createWorkoutListItem(workout) {
-                 const li = document.createElement('li');
-                 li.classList.add('workout-item');
-                 li.dataset.id = workout.id;
-                 if (workout.done) {
-                     li.classList.add('done');
-                 }
+            function createRunSessionListItem(runSession) {
+                const li = document.createElement('li');
+                li.classList.add('run-session-item');
+                li.dataset.id = runSession.id;
+                if (runSession.done) li.classList.add('done');
 
-                 const formattedTime = workout.time ? formatTimeForDisplay(workout.time) : '';
-                 const hasDetails = workout.distance !== null || formattedTime;
-                 const safeName = escapeHtml(workout.name);
+                const formattedTime = runSession.time ? formatTimeForDisplay(runSession.time) : '';
+                const hasDetails = runSession.distance !== null || formattedTime || runSession.runDate;
+                const safeName = escapeHtml(runSession.name);
+                const today = new Date().toISOString().split('T')[0];
+                const currentTime = new Date().toTimeString().split(' ')[0].substring(0, 5);
 
-                 li.innerHTML = `
-                     <div class="workout-item-main">
-                         <input type="checkbox" class="checkbox" aria-label="Mark ${safeName} as done" ${workout.done ? 'checked' : ''}>
-                         <input type="text" class="workout-name" value="${safeName}" ${workout.done ? 'readonly' : ''} aria-label="Workout name for ${safeName}">
-                         <button class="delete-workout-button minimal-button danger ${workout.done ? 'hidden' : ''}" aria-label="Delete ${safeName}">
+
+                li.innerHTML = `
+                     <div class="run-session-item-main">
+                         <input type="checkbox" class="checkbox" aria-label="Mark ${safeName} as done" ${runSession.done ? 'checked' : ''}>
+                         <input type="text" class="run-session-name" value="${safeName}" ${runSession.done ? 'readonly' : ''} aria-label="Run session name for ${safeName}">
+                         <button class="delete-run-session-button-main minimal-button danger ${runSession.done ? 'hidden' : ''}" aria-label="Delete ${safeName}">
                              <i class="fa-solid fa-trash-can"></i>
                          </button>
                      </div>
-                     <div class="workout-details-panel">
+                     <div class="run-session-details-panel">
                          <div class="details-input-group">
-                             <label for="distance-${workout.id}">Distance (km)</label>
-                             <input type="number" step="0.01" id="distance-${workout.id}" placeholder="e.g., 5.25" value="${workout.distance !== null ? workout.distance : ''}">
+                             <label for="run-date-${runSession.id}">Date of Run</label>
+                             <input type="date" id="run-date-${runSession.id}" value="${runSession.runDate || today}">
                          </div>
                          <div class="details-input-group">
-                             <label for="time-${workout.id}">Time (HH:MM:SS or MM:SS)</label>
-                             <input type="text" id="time-${workout.id}" placeholder="e.g., 45:30 or 01:15:00" value="${formattedTime}">
+                             <label for="run-time-${runSession.id}">Time of Run (HH:MM)</label>
+                             <input type="time" id="run-time-${runSession.id}" value="${runSession.runTime || currentTime}">
                          </div>
-                        <button class="minimal-button danger delete-workout-button" aria-label="Delete Workout" style="float: left;">
-                            <i class="fa-solid fa-trash-can"></i>
-                        </button>
-                        <button class="minimal-button save-details-button" aria-label="Save Details">
-                            <i class="fa-solid fa-save"></i> Save
-                        </button>
+                         <div class="details-input-group">
+                             <label for="distance-${runSession.id}">Distance (km)</label>
+                             <input type="number" step="0.01" id="distance-${runSession.id}" placeholder="e.g., 5.25" value="${runSession.distance !== null ? runSession.distance : ''}">
+                         </div>
+                         <div class="details-input-group">
+                             <label for="time-${runSession.id}">Duration (HH:MM:SS or MM:SS)</label>
+                             <input type="text" id="time-${runSession.id}" placeholder="e.g., 45:30 or 01:15:00" value="${formattedTime}">
+                         </div>
+                         <div class="details-buttons-container">
+                            <button class="minimal-button danger delete-run-session-button-panel" aria-label="Delete Run Session">
+                                <i class="fa-solid fa-trash-can"></i>Delete
+                            </button>
+                            <button class="minimal-button save-details-button" aria-label="Save Details">
+                                <i class="fa-solid fa-save"></i>Save
+                            </button>
+                        </div>
                      </div>
-                     <div class="workout-compact-display ${workout.done ? 'visible' : ''}">
+                     <div class="run-session-compact-display ${runSession.done && hasDetails ? 'visible' : ''}">
                          <span class="compact-info">
-                             ${workout.done ? '🏅 ' : ''}
-                             ${workout.distance !== null ? `${workout.distance} km` : ''}
-                             ${workout.distance !== null && formattedTime ? ' · ' : ''}
-                             ${formattedTime || (workout.done && !hasDetails ? 'Done (no details)' : '')}
+                             ${runSession.done ? '🏅 ' : ''}
+                             ${runSession.distance !== null ? `${runSession.distance} km` : ''}
+                             ${runSession.distance !== null && formattedTime ? ' · ' : ''}
+                             ${formattedTime || (runSession.done && !hasDetails ? 'Completed' : '')}
+                             ${runSession.runDate ? ` <br><small>On: ${formatDateForDisplay(runSession.runDate)} ${runSession.runTime ? ` at ${formatTimeForDisplaySimple(runSession.runTime)}` : ''}</small>` : (runSession.done && !hasDetails && !formattedTime ? '<br><small>(No details)</small>' : '')}
                          </span>
-                         ${workout.done ? `<button class="edit-details-button" aria-label="Edit Details"><i class="fa-solid fa-pencil"></i></button>` : ''}
+                         ${runSession.done ? `<button class="edit-details-button" aria-label="Edit Details"><i class="fa-solid fa-pencil"></i></button>` : ''}
                      </div>
                  `;
+                const nameInput = li.querySelector('.run-session-name');
+                nameInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !li.classList.contains('done') && li.dataset.temporarilyChecked !== "true") {
+                        nameInput.blur(); e.preventDefault();
+                    }
+                });
+                if (!runSession.done) {
+                    const dateInput = li.querySelector(`#run-date-${runSession.id}`);
+                    const timeInput = li.querySelector(`#run-time-${runSession.id}`);
+                    if (dateInput && !dateInput.value) dateInput.value = today;
+                    if (timeInput && !timeInput.value) timeInput.value = currentTime;
+                }
 
-                 // Add Enter key listener for name saving
-                 const nameInput = li.querySelector('.workout-name');
-                 nameInput.addEventListener('keypress', (e) => {
-                     if (e.key === 'Enter' && !li.classList.contains('done')) {
-                         nameInput.blur(); // Trigger focusout which triggers save
-                         e.preventDefault();
-                     }
-                 });
-
-                 return li;
+                return li;
             }
 
-            function handleAddWorkout(event) {
+            function handleAddRunSession(event) {
                 event.preventDefault();
-                const name = newWorkoutInput.value.trim();
+                const name = newRunSessionInput.value.trim();
                 if (!name) return;
-
-                const newWorkout = {
-                    id: Date.now(), // Simple unique ID
-                    name: name,
-                    done: false,
-                    distance: null,
-                    time: null, // Stored as HH:MM:SS
-                    completionTimestamp: null
+                const newRunSession = {
+                    id: Date.now(), name: name, done: false, distance: null, time: null,
+                    completionTimestamp: null, runDate: null, runTime: null
                 };
+                const template = getRunSessionTemplate();
+                template.push({ id: newRunSession.id, name: newRunSession.name });
+                saveRunSessionTemplate(template);
 
-                // Add to template
-                const template = getWorkoutTemplate();
-                template.push({ id: newWorkout.id, name: newWorkout.name }); // Only ID and name in template
-                saveWorkoutTemplate(template);
-
-                // Add to current week's data
                 const { isoWeekString } = currentIsoWeekInfo;
                 const weekData = getWeekData(isoWeekString);
-                weekData.push(newWorkout);
+                weekData.push(newRunSession);
                 saveWeekData(isoWeekString, weekData);
 
-                newWorkoutInput.value = '';
-                // Add the new item visually
-                 const listItem = createWorkoutListItem(newWorkout);
-                 workoutListContainer.appendChild(listItem);
-                 checkEmptyListState(); // Ensure message is hidden
+                newRunSessionInput.value = '';
+                runSessionListContainer.appendChild(createRunSessionListItem(newRunSession));
+                checkEmptyListState();
             }
 
-             function handleWorkoutCheck(workoutId, listItemElement, checkboxElement) {
-                 const { isoWeekString } = currentIsoWeekInfo;
-                 const weekData = getWeekData(isoWeekString);
-                 const workoutIndex = weekData.findIndex(w => w.id === workoutId);
-                 if (workoutIndex === -1) return;
+            function handleRunSessionCheck(runSessionId, listItemElement, checkboxElement) {
+                const { isoWeekString } = currentIsoWeekInfo;
+                const weekData = getWeekData(isoWeekString);
+                const runSessionFromStorage = weekData.find(rs => rs.id === runSessionId);
 
-                 const workout = weekData[workoutIndex];
-                 const isChecking = checkboxElement.checked; // The new state *after* the click
+                if (!runSessionFromStorage) return;
 
-                 const nameInput = listItemElement.querySelector('.workout-name');
-                 const detailsPanel = listItemElement.querySelector('.workout-details-panel');
-                 const compactDisplay = listItemElement.querySelector('.workout-compact-display');
-                 const editButtonContainer = compactDisplay; // Button is inside compact display
-                 const deleteButton = listItemElement.querySelector('.delete-workout-button');
+                const isChecking = checkboxElement.checked;
+                const nameInput = listItemElement.querySelector('.run-session-name');
+                const detailsPanel = listItemElement.querySelector('.run-session-details-panel');
+                const deleteButtonMain = listItemElement.querySelector('.delete-run-session-button-main');
+                const dateInput = detailsPanel.querySelector(`#run-date-${runSessionId}`);
+                const timeInput = detailsPanel.querySelector(`#run-time-${runSessionId}`);
 
+                if (isChecking) {
+                    listItemElement.classList.add('done');
+                    nameInput.setAttribute('readonly', true);
+                    deleteButtonMain?.classList.add('hidden');
+                    detailsPanel.classList.add('open');
 
-                 workout.done = isChecking; // Update data model
+                    dateInput.value = new Date().toISOString().split('T')[0];
+                    timeInput.value = new Date().toTimeString().split(' ')[0].substring(0, 5);
 
-                 if (isChecking) {
-                     // --- Mark as DONE ---
-                     workout.completionTimestamp = new Date().toISOString(); // Record completion time
+                    listItemElement.dataset.temporarilyChecked = "true";
 
-                     listItemElement.classList.add('done');
-                     nameInput.setAttribute('readonly', true);
-                     deleteButton?.classList.add('hidden'); // Hide delete button
-                     detailsPanel.classList.add('open'); // Auto-open details panel
-                      // Focus first input in panel for convenience
-                     const firstInput = detailsPanel.querySelector('input');
-                     if (firstInput) setTimeout(() => firstInput.focus(), 10); // Small delay
+                    const firstInput = detailsPanel.querySelector('input[type="number"]');
+                    if (firstInput) setTimeout(() => firstInput.focus(), 10);
+                    if ('vibrate' in navigator) navigator.vibrate(50);
+                } else {
+                    listItemElement.classList.remove('done');
+                    nameInput.removeAttribute('readonly');
+                    deleteButtonMain?.classList.remove('hidden');
+                    detailsPanel.classList.remove('open');
 
-                     // Ensure edit button exists in compact display
-                     if (compactDisplay && !editButtonContainer.querySelector('.edit-details-button')) {
-                          const editButton = document.createElement('button');
-                          editButton.className = 'edit-details-button';
-                          editButton.setAttribute('aria-label', 'Edit Details');
-                          editButton.innerHTML = '<i class="fa-solid fa-pencil"></i>';
-                          // Append edit button at the end of compact display
-                          compactDisplay.appendChild(editButton);
-                     }
-
-                     // Vibrate!
-                     if ('vibrate' in navigator) {
-                         navigator.vibrate(50); // Short feedback
-                     }
-                 } else {
-                     // --- Mark as NOT DONE ---
-                     workout.completionTimestamp = null; // Clear completion time
-
-                     listItemElement.classList.remove('done');
-                     nameInput.removeAttribute('readonly');
-                     deleteButton?.classList.remove('hidden'); // Show delete button
-                     detailsPanel.classList.remove('open'); // Close details panel
-
-                     // Remove edit button from compact display
-                     if (compactDisplay){
-                         const editButton = editButtonContainer.querySelector('.edit-details-button');
-                         if (editButton) editButton.remove();
-                     }
-
-                 }
-
-                 updateCompactDisplay(workout, listItemElement); // Update the compact display content/visibility
-
-                 saveWeekData(isoWeekString, weekData);
-             }
+                    if (listItemElement.dataset.temporarilyChecked === "true") {
+                        listItemElement.removeAttribute("temporarilyChecked");
+                        dateInput.value = runSessionFromStorage.runDate || new Date().toISOString().split('T')[0];
+                        timeInput.value = runSessionFromStorage.runTime || new Date().toTimeString().split(' ')[0].substring(0, 5);
+                    } else {
+                        const rsToUpdate = weekData.find(rs => rs.id === runSessionId);
+                        if (rsToUpdate) {
+                            rsToUpdate.done = false;
+                            rsToUpdate.completionTimestamp = null;
+                            saveWeekData(isoWeekString, weekData);
+                        }
+                    }
+                    updateCompactDisplay(runSessionFromStorage, listItemElement);
+                }
+            }
 
 
-            function handleWorkoutNameEdit(workoutId, newName) {
+            function handleRunSessionNameEdit(runSessionId, newName) {
                 newName = newName.trim();
                 const { isoWeekString } = currentIsoWeekInfo;
-                let nameChanged = false;
-
-                // Retrieve current name from data to avoid saving if unchanged
                 const weekData = getWeekData(isoWeekString);
-                const workout = weekData.find(w => w.id === workoutId);
-                const originalName = workout ? workout.name : '';
+                const runSession = weekData.find(rs => rs.id === runSessionId);
+                if (!runSession) return;
 
-                const nameInput = document.querySelector(`.workout-item[data-id="${workoutId}"] .workout-name`);
-
-                if (!newName) {
-                    // Revert if name is empty
-                    if (nameInput) nameInput.value = originalName; // Restore value visually
+                const listItemElement = document.querySelector(`.run-session-item[data-id="${runSessionId}"]`);
+                if (listItemElement && listItemElement.dataset.temporarilyChecked === "true") {
+                    const nameInput = listItemElement.querySelector('.run-session-name');
+                    if (nameInput) nameInput.value = runSession.name;
+                    alert("Please save or cancel the current 'done' state before editing the name.");
                     return;
                 }
 
-                if (originalName === newName) {
-                     // No actual change, ensure visual matches data just in case
-                     if (nameInput) nameInput.value = originalName;
-                     return;
-                }
+                const originalName = runSession.name;
+                const nameInput = document.querySelector(`.run-session-item[data-id="${runSessionId}"] .run-session-name`);
 
-                // Proceed with update
-                let templateUpdated = false;
-                const template = getWorkoutTemplate();
-                const templateIndex = template.findIndex(w => w.id === workoutId);
+                if (!newName) { if (nameInput) nameInput.value = originalName; return; }
+                if (originalName === newName) { return; }
+
+                let nameChangedInTemplate = false;
+                const template = getRunSessionTemplate();
+                const templateIndex = template.findIndex(rs => rs.id === runSessionId);
                 if (templateIndex !== -1 && template[templateIndex].name !== newName) {
                     template[templateIndex].name = newName;
-                    saveWorkoutTemplate(template);
-                    templateUpdated = true;
-                    nameChanged = true;
+                    saveRunSessionTemplate(template);
+                    nameChangedInTemplate = true;
                 }
 
-                let weekDataUpdated = false;
-                // weekData already loaded above
-                const weekIndex = weekData.findIndex(w => w.id === workoutId);
-                if (weekIndex !== -1 && weekData[weekIndex].name !== newName) {
-                    weekData[weekIndex].name = newName;
-                    saveWeekData(isoWeekString, weekData);
-                    weekDataUpdated = true;
-                    nameChanged = true;
-                }
+                runSession.name = newName;
+                saveWeekData(isoWeekString, weekData);
 
-                 if (nameChanged) {
-                    // Update aria-labels potentially referencing the name
-                    const listItem = document.querySelector(`.workout-item[data-id="${workoutId}"]`);
+                if (nameChangedInTemplate || runSession.name !== originalName) {
+                    const listItem = document.querySelector(`.run-session-item[data-id="${runSessionId}"]`);
                     if (listItem) {
                         const safeNewName = escapeHtml(newName);
-                        const checkbox = listItem.querySelector('.checkbox');
-                        if (checkbox) checkbox.setAttribute('aria-label', `Mark ${safeNewName} as done`);
-                         // nameInput is already updated visually
-                         if (nameInput) nameInput.setAttribute('aria-label', `Workout name for ${safeNewName}`);
-                         const deleteButton = listItem.querySelector('.delete-workout-button');
-                         if (deleteButton) deleteButton.setAttribute('aria-label', `Delete ${safeNewName}`);
+                        listItem.querySelector('.checkbox')?.setAttribute('aria-label', `Mark ${safeNewName} as done`);
+                        if (nameInput) nameInput.setAttribute('aria-label', `Run session name for ${safeNewName}`);
+                        listItem.querySelector('.delete-run-session-button-main')?.setAttribute('aria-label', `Delete ${safeNewName}`);
                     }
-                    console.log(`Name updated for ${workoutId}. Template: ${templateUpdated}, WeekData: ${weekDataUpdated}`);
-                 }
+                }
             }
 
-            function handleSaveDetails(workoutId, listItemElement) {
-                 const { isoWeekString } = currentIsoWeekInfo;
-                 const weekData = getWeekData(isoWeekString);
-                 const workoutIndex = weekData.findIndex(w => w.id === workoutId);
-                 if (workoutIndex === -1) return;
+            function handleSaveDetails(runSessionId, listItemElement) {
+                const currentWeekOriginalIso = currentIsoWeekInfo.isoWeekString; // The week the item is currently displayed in (Home screen)
 
-                 const workout = weekData[workoutIndex];
-                 const distanceInput = listItemElement.querySelector(`#distance-${workout.id}`);
-                 const timeInput = listItemElement.querySelector(`#time-${workout.id}`);
-                 const detailsPanel = listItemElement.querySelector('.workout-details-panel');
+                const distanceInput = listItemElement.querySelector(`#distance-${runSessionId}`);
+                const timeInput = listItemElement.querySelector(`#time-${runSessionId}`);
+                const runDateInput = listItemElement.querySelector(`#run-date-${runSessionId}`);
+                const runTimeInput = listItemElement.querySelector(`#run-time-${runSessionId}`);
+                const detailsPanel = listItemElement.querySelector('.run-session-details-panel');
 
-                 const distance = distanceInput.value ? parseFloat(distanceInput.value) : null;
-                 const timeInputValue = timeInput.value.trim();
-                 let parsedTime = null; // Will be stored as HH:MM:SS or null
+                const distance = distanceInput.value ? parseFloat(distanceInput.value) : null;
+                const timeInputValue = timeInput.value.trim();
+                let parsedTime = null;
+                if (timeInputValue) {
+                    parsedTime = parseTimeInput(timeInputValue);
+                    if (parsedTime === null) {
+                        alert('Invalid duration format. Please use HH:MM:SS or MM:SS (e.g., 01:15:30 or 45:00).');
+                        timeInput.focus(); return;
+                    }
+                    timeInput.value = formatTimeForDisplay(parsedTime);
+                }
 
-                 if (timeInputValue) {
-                     parsedTime = parseTimeInput(timeInputValue);
-                     if (parsedTime === null) { // Invalid format
-                         alert('Invalid time format. Please use HH:MM:SS or MM:SS (e.g., 01:15:30 or 45:00).');
-                         timeInput.focus();
-                         return; // Stop saving
-                     }
-                      // Update the input field to show the standardized format
-                      timeInput.value = formatTimeForDisplay(parsedTime);
-                 }
+                // Use today's date if runDateInput.value is empty or invalid for some reason
+                const runDateValue = runDateInput.value || new Date().toISOString().split('T')[0];
+                const runTimeValue = runTimeInput.value || null;
 
-                 // Update workout data
-                 workout.distance = (distance !== null && !isNaN(distance)) ? distance : null;
-                 workout.time = parsedTime; // Store HH:MM:SS or null
+                // Determine the target ISO week based on the runDateValue
+                // Ensure date is parsed as local by appending a neutral time part for Date constructor.
+                const targetRunActualDate = new Date(runDateValue + "T00:00:00");
+                const targetIsoWeekInfo = getCurrentIsoWeek(targetRunActualDate);
+                const targetWeekIso = targetIsoWeekInfo.isoWeekString;
 
-                 saveWeekData(isoWeekString, weekData);
+                // Load data for the week the item is currently in (on Home screen)
+                let currentWeekData = getWeekData(currentWeekOriginalIso);
+                const rsIndex = currentWeekData.findIndex(rs => rs.id === runSessionId);
 
-                 detailsPanel.classList.remove('open'); // Close panel after saving
-                 updateCompactDisplay(workout, listItemElement); // Refresh compact display
-             }
+                if (rsIndex === -1) {
+                    console.error("Run session not found in current week data for save.");
+                    // Attempt to find it in the template if it's a new item not yet fully in weekData
+                    // This scenario should ideally be handled by ensuring item exists before save is possible
+                    // For now, if not found, we cannot proceed safely with this logic.
+                    return;
+                }
 
-            function updateCompactDisplay(workout, listItemElement) {
-                const compactDisplay = listItemElement.querySelector('.workout-compact-display');
+                // Work with a copy of the run session object to update it
+                const runSessionToUpdate = { ...currentWeekData[rsIndex] };
+
+                runSessionToUpdate.done = true;
+                runSessionToUpdate.distance = (distance !== null && !isNaN(distance)) ? distance : null;
+                runSessionToUpdate.time = parsedTime;
+                runSessionToUpdate.runDate = runDateValue;
+                runSessionToUpdate.runTime = runTimeValue;
+
+                let completedDate;
+                if (runSessionToUpdate.runDate) {
+                    const [year, month, day] = runSessionToUpdate.runDate.split('-').map(Number);
+                    completedDate = new Date(year, month - 1, day); // Month is 0-indexed for Date constructor
+                    if (runSessionToUpdate.runTime) {
+                        const [hours, minutes] = runSessionToUpdate.runTime.split(':').map(Number);
+                        if (!isNaN(hours) && !isNaN(minutes)) completedDate.setHours(hours, minutes);
+                    }
+                } else {
+                    completedDate = new Date(); // Fallback to now if no specific date/time
+                }
+                runSessionToUpdate.completionTimestamp = completedDate.toISOString();
+
+                if (targetWeekIso === currentWeekOriginalIso) {
+                    // Staying in the same week
+                    currentWeekData[rsIndex] = runSessionToUpdate;
+                    saveWeekData(currentWeekOriginalIso, currentWeekData);
+
+                    // UI updates for the item since it remained on the home screen
+                    listItemElement.removeAttribute("temporarilyChecked");
+                    listItemElement.classList.add('done');
+                    listItemElement.querySelector('.run-session-name').setAttribute('readonly', true);
+                    listItemElement.querySelector('.delete-run-session-button-main')?.classList.add('hidden');
+                    detailsPanel.classList.remove('open');
+                    updateCompactDisplay(runSessionToUpdate, listItemElement);
+
+                } else {
+                    // Moving to a different week
+                    currentWeekData.splice(rsIndex, 1); // Remove from original week's data
+                    saveWeekData(currentWeekOriginalIso, currentWeekData);
+
+                    let targetWeekData = getWeekData(targetWeekIso);
+                    // Check if item already exists in target week (e.g. if moved back and forth)
+                    const existingIndexInTarget = targetWeekData.findIndex(rs => rs.id === runSessionId);
+                    if (existingIndexInTarget !== -1) {
+                        targetWeekData[existingIndexInTarget] = runSessionToUpdate;
+                    } else {
+                        targetWeekData.push(runSessionToUpdate);
+                    }
+                    saveWeekData(targetWeekIso, targetWeekData);
+
+                    // Remove from home screen UI as it's no longer in the current week
+                    listItemElement.remove();
+                    checkEmptyListState();
+                }
+
+                if (currentScreenId === 'profile-screen') renderProfileScreen();
+                if (currentScreenId === 'stats-screen') renderStatsScreen();
+            }
+
+            function updateCompactDisplay(runSession, listItemElement) {
+                const compactDisplay = listItemElement.querySelector('.run-session-compact-display');
                 if (!compactDisplay) return;
-
                 const compactInfoSpan = compactDisplay.querySelector('.compact-info');
-                const formattedTime = workout.time ? formatTimeForDisplay(workout.time) : '';
-                const hasDetails = workout.distance !== null || formattedTime;
+                const editButton = compactDisplay.querySelector('.edit-details-button');
 
-                if (workout.done) {
+                if (runSession.done) {
+                    const formattedDuration = runSession.time ? formatTimeForDisplay(runSession.time) : '';
+                    const hasActualDetails = runSession.distance !== null || formattedDuration || runSession.runDate;
+
+                    let runDateTimeInfo = '';
+                    if (runSession.runDate) {
+                        runDateTimeInfo = ` <br><small>On: ${formatDateForDisplay(runSession.runDate)}${runSession.runTime ? ` at ${formatTimeForDisplaySimple(runSession.runTime)}` : ''}</small>`;
+                    }
+
                     compactInfoSpan.innerHTML = `
-                        🏅 
-                        ${workout.distance !== null ? `${workout.distance} km` : ''}
-                        ${workout.distance !== null && formattedTime ? ' · ' : ''}
-                        ${formattedTime || (!hasDetails ? 'Done (no details)' : '')}
+                        🏅
+                        ${runSession.distance !== null ? `${runSession.distance} km` : ''}
+                        ${runSession.distance !== null && formattedDuration ? ' · ' : ''}
+                        ${formattedDuration || (!hasActualDetails ? 'Completed' : '')}
+                        ${runDateTimeInfo || (!hasActualDetails && !formattedDuration ? '<br><small>(No details)</small>' : '')}
                     `;
                     compactDisplay.classList.add('visible');
+                    if (!editButton) {
+                        const newEditButton = document.createElement('button');
+                        newEditButton.className = 'edit-details-button';
+                        newEditButton.setAttribute('aria-label', 'Edit Details');
+                        newEditButton.innerHTML = '<i class="fa-solid fa-pencil"></i>';
+                        compactDisplay.appendChild(newEditButton);
+                    }
                 } else {
-                    // If not done, the compact display should not be visible
                     compactDisplay.classList.remove('visible');
-                    // Clear content when not visible for cleaner transition/state
                     compactInfoSpan.innerHTML = '';
+                    if (editButton) editButton.remove();
                 }
             }
 
-            // --- Deletion Logic ---
-            function handleDeleteWorkout(workoutId, listItemElement) {
-                const workoutName = listItemElement.querySelector('.workout-name')?.value || 'this workout'; // Get name for confirmation
-                const safeName = escapeHtml(workoutName);
-
+            function handleDeleteRunSession(runSessionId, listItemElement) {
+                const runSessionName = listItemElement.querySelector('.run-session-name')?.value || 'this run session';
+                const safeName = escapeHtml(runSessionName);
                 if (confirm(`Are you sure you want to delete "${safeName}"?\nThis will remove it permanently from the template and this week.`)) {
-
-                    // 1. Add deleting class to start animation
                     listItemElement.classList.add('deleting');
-
-                    // 2. Remove data immediately
                     try {
-                        // Remove from current week
                         const { isoWeekString } = currentIsoWeekInfo;
                         let weekData = getWeekData(isoWeekString);
-                        const weekDataOriginalLength = weekData.length;
-                        weekData = weekData.filter(w => w.id !== workoutId);
-                        if (weekData.length < weekDataOriginalLength) {
-                            saveWeekData(isoWeekString, weekData);
-                        } else {
-                            console.warn(`Workout ID ${workoutId} not found in week ${isoWeekString} during delete.`);
-                        }
+                        weekData = weekData.filter(rs => rs.id !== runSessionId);
+                        saveWeekData(isoWeekString, weekData);
 
-                        // Remove from template
-                        let template = getWorkoutTemplate();
-                        const templateOriginalLength = template.length;
-                        template = template.filter(w => w.id !== workoutId);
-                        if (template.length < templateOriginalLength) {
-                            saveWorkoutTemplate(template);
-                        } else {
-                            console.warn(`Workout ID ${workoutId} not found in template during delete.`);
-                        }
-
+                        let template = getRunSessionTemplate();
+                        template = template.filter(rs => rs.id !== runSessionId);
+                        saveRunSessionTemplate(template);
                     } catch (error) {
-                        console.error("Error deleting workout data:", error);
-                        alert("Failed to delete workout data. Please try again.");
-                        // Remove animation class if data deletion fails to prevent removal
-                        listItemElement.classList.remove('deleting');
-                        return; // Stop process
+                        console.error("Error deleting run session data:", error);
+                        alert("Failed to delete run session data.");
+                        listItemElement.classList.remove('deleting'); return;
                     }
-
-                    // 3. Remove from DOM after animation completes
                     listItemElement.addEventListener('animationend', () => {
                         listItemElement.remove();
-                        checkEmptyListState(); // Check if list is now empty
-                    }, { once: true }); // Ensure listener is removed after firing
+                        checkEmptyListState();
+                        if (currentScreenId === 'profile-screen') renderProfileScreen();
+                        if (currentScreenId === 'stats-screen') renderStatsScreen();
+                    }, { once: true });
                 }
             }
 
-            // --- Check Empty List State ---
             function checkEmptyListState() {
-                // Query only items that are NOT currently being deleted
-                const remainingItems = workoutListContainer.querySelectorAll('.workout-item:not(.deleting)');
-                if (remainingItems.length === 0) {
-                    noWorkoutsMessage.classList.remove('hidden');
-                } else {
-                    noWorkoutsMessage.classList.add('hidden');
-                }
+                const remainingItems = runSessionListContainer.querySelectorAll('.run-session-item:not(.deleting)');
+                noRunSessionsMessage.classList.toggle('hidden', remainingItems.length > 0);
             }
 
 
             // --- Profile Screen Logic ---
+            function handleProfileListClick(event) {
+                const editorForm = event.target.closest('.profile-editor-form');
 
-            function renderProfileScreen() {
-                 weeklyProgressContainer.innerHTML = ''; // Clear existing content
-                 const allKeys = Object.keys(localStorage);
-                 const weekKeys = allKeys
-                     .filter(key => key.startsWith(WEEK_DATA_PREFIX))
-                     .sort()
-                     .reverse(); // Newest first
+                if (editorForm) { // Click is inside an editor
+                    if (event.target.classList.contains('profile-save-button') || event.target.closest('.profile-save-button')) {
+                        saveProfileEdit(editorForm);
+                    } else if (event.target.classList.contains('profile-cancel-button') || event.target.closest('.profile-cancel-button')) {
+                        closeOpenProfileEditor();
+                    } else if (event.target.classList.contains('profile-delete-button') || event.target.closest('.profile-delete-button')) {
+                        handleDeleteProfileItem(editorForm);
+                    }
+                    return;
+                }
 
-                 if (weekKeys.length === 0) {
-                     noHistoryMessage.classList.remove('hidden');
-                     resetAllButton.classList.add('hidden'); // Hide reset if no data
-                     return;
-                 }
-                 noHistoryMessage.classList.add('hidden');
-                 resetAllButton.classList.remove('hidden');
+                const itemElement = event.target.closest('.profile-run-session-item');
+                if (!itemElement) return;
 
-                 weekKeys.forEach(key => {
-                     const isoWeek = key.substring(WEEK_DATA_PREFIX.length);
-                     const weekData = loadData(key);
-                     // Only render weeks with actual workout entries
-                     if (!weekData || weekData.length === 0) return;
+                const runSessionId = parseInt(itemElement.dataset.id);
+                const isoWeek = itemElement.dataset.week;
+                toggleProfileItemEditor(itemElement, runSessionId, isoWeek);
+            }
 
-                     const weekBlock = document.createElement('div');
-                     weekBlock.classList.add('week-block');
+            function closeEditor(itemElement, editorForm) {
+                if (!itemElement || !editorForm) return;
 
-                     const weekRange = getWeekRangeFromIsoString(isoWeek) || isoWeek;
-                     const doneCount = weekData.filter(w => w.done).length;
-                     const totalCount = weekData.length;
+                itemElement.classList.remove('editing');
+                editorForm.style.maxHeight = '0px';
+                editorForm.style.opacity = '0';
+                editorForm.style.paddingTop = '0';
+                editorForm.style.paddingBottom = '0';
+                editorForm.style.marginTop = '0';
 
-                     weekBlock.innerHTML = `
-                         <div class="week-header">
-                             <span>Week ${isoWeek.split('-W')[1]} (${weekRange})</span>
-                             <span class="week-summary">${doneCount} / ${totalCount} done</span>
-                         </div>
-                         <ul class="profile-workout-list">
-                             ${weekData.map(workout => {
-                                 const formattedTime = workout.time ? formatTimeForDisplay(workout.time) : '';
-                                 const hasDetails = workout.distance !== null || formattedTime;
-                                 const completionInfo = workout.done && workout.completionTimestamp
-                                    ? formatTimestamp(workout.completionTimestamp)
-                                    : (workout.done ? 'Completed (date unknown)' : '');
-                                 const safeName = escapeHtml(workout.name);
+                const handleTransitionEnd = (e) => {
+                    if (e.propertyName === 'opacity' && editorForm.style.opacity === '0') {
+                        editorForm.remove();
+                        editorForm.removeEventListener('transitionend', handleTransitionEnd);
+                    }
+                };
+                editorForm.addEventListener('transitionend', handleTransitionEnd);
+                setTimeout(() => { // Failsafe
+                    if (editorForm.parentNode && editorForm.style.opacity === '0') editorForm.remove();
+                }, parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--long-transition-speed') || '0.4') * 1000 + 100);
+            }
 
-                                 return `
-                                     <li class="profile-workout-item" data-id="${workout.id}" data-week="${isoWeek}">
-                                         <span class="profile-workout-status">
-                                             ${workout.done ? '✅' : '❌'}
-                                         </span>
-                                         <div class="profile-workout-content">
-                                             <div class="profile-workout-main-info">
-                                                 <span class="profile-workout-name">${safeName}</span>
-                                                 ${workout.done && hasDetails ? `
-                                                     <span class="profile-workout-details-info">
-                                                         ${workout.distance !== null ? `${workout.distance} km` : ''}
-                                                         ${workout.distance !== null && formattedTime ? ' · ' : ''}
-                                                         ${formattedTime || ''}
-                                                     </span>
-                                                 ` : (workout.done ? '<span class="profile-workout-details-info">(No details)</span>' : '')}
-                                             </div>
-                                             ${workout.done ? `
-                                                 <span class="profile-workout-timestamp">
-                                                     ${completionInfo}
-                                                 </span>
-                                             ` : ''}
-                                         </div>
-                                     </li>
-                                 `;
-                             }).join('')}
-                         </ul>
-                     `;
-                     weeklyProgressContainer.appendChild(weekBlock);
-                 });
-             }
-
-            function getWeekRangeFromIsoString(isoWeek) {
-                try {
-                    const [year, weekNum] = isoWeek.split('-W').map(Number);
-                    if (!year || !weekNum) return isoWeek;
-
-                    // Calculate date for Thursday of that week (determines ISO year)
-                    const firstDayOfYear = new Date(year, 0, 1);
-                    const firstDayOfWeek = firstDayOfYear.getDay(); // 0=Sun, 1=Mon...
-                    // Calculate days to add to Jan 4th (always in week 1)
-                    const daysToAdd = (weekNum - 1) * 7 + (4 - (firstDayOfWeek === 0 ? 7 : firstDayOfWeek));
-                    const thursdayDate = new Date(year, 0, 4 + daysToAdd);
-
-                    // Monday is 3 days before Thursday
-                    const monday = new Date(thursdayDate);
-                    monday.setDate(thursdayDate.getDate() - 3);
-                    monday.setHours(0, 0, 0, 0);
-
-                    // Sunday is 3 days after Thursday
-                    const sunday = new Date(thursdayDate);
-                    sunday.setDate(thursdayDate.getDate() + 3);
-                    sunday.setHours(23, 59, 59, 999);
-
-                    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-                     const monStr = `${monthNames[monday.getMonth()]} ${monday.getDate()}`;
-                     const sunStr = `${monthNames[sunday.getMonth()]} ${sunday.getDate()}${sunday.getFullYear() !== monday.getFullYear() ? `, ${sunday.getFullYear()}` : ''}`;
-
-                     return `${monStr} – ${sunStr}`;
-                } catch (e) {
-                    console.error("Error calculating week range for", isoWeek, ":", e);
-                    return isoWeek; // Fallback
+            function closeOpenProfileEditor() {
+                if (openProfileEditor && openProfileEditor.form) {
+                    closeEditor(openProfileEditor.itemElement, openProfileEditor.form);
+                    openProfileEditor = null;
                 }
             }
 
+            function toggleProfileItemEditor(itemElement, runSessionId, isoWeek) {
+                const editorAlreadyOpenForThisItem = itemElement.querySelector('.profile-editor-form');
+
+                if (editorAlreadyOpenForThisItem) {
+                    closeEditor(itemElement, editorAlreadyOpenForThisItem);
+                    if (openProfileEditor && openProfileEditor.id === runSessionId) {
+                        openProfileEditor = null;
+                    }
+                    return;
+                }
+
+                // Close any other editor that might be open
+                if (openProfileEditor && openProfileEditor.id !== runSessionId) {
+                    closeOpenProfileEditor();
+                }
+
+                const weekData = getWeekData(isoWeek);
+                const runSession = weekData.find(rs => rs.id === runSessionId);
+                if (!runSession) return;
+
+                itemElement.classList.add('editing');
+                const editorForm = createProfileEditorForm(runSession, runSessionId, isoWeek);
+                itemElement.appendChild(editorForm);
+
+                // Force reflow for transition
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        editorForm.style.paddingTop = '15px';
+                        editorForm.style.paddingBottom = '15px';
+                        editorForm.style.marginTop = '10px';
+                        editorForm.style.maxHeight = (editorForm.scrollHeight + 15 * 2) + 'px';
+                        editorForm.style.opacity = '1';
+                    });
+                });
+
+                openProfileEditor = { form: editorForm, id: runSessionId, itemElement: itemElement, isoWeek: isoWeek };
+            }
+
+
+            function createProfileEditorForm(runSession, runSessionId, isoWeek) {
+                const form = document.createElement('form');
+                form.className = 'profile-editor-form';
+                form.dataset.id = runSessionId;
+                form.dataset.week = isoWeek;
+                form.addEventListener('submit', e => e.preventDefault());
+
+                const today = new Date().toISOString().split('T')[0];
+                const currentTime = new Date().toTimeString().split(' ')[0].substring(0, 5);
+                const safeName = escapeHtml(runSession.name);
+                const formattedTime = runSession.time ? formatTimeForDisplay(runSession.time) : '';
+
+                form.innerHTML = `
+                    <div class="profile-editor-checkbox-group">
+                        <input type="checkbox" id="profile-edit-done-${runSessionId}" ${runSession.done ? 'checked' : ''}>
+                        <label for="profile-edit-done-${runSessionId}">Finished</label>
+                    </div>
+                    <div class="details-input-group">
+                        <label for="profile-edit-name-${runSessionId}">Name</label>
+                        <input type="text" id="profile-edit-name-${runSessionId}" value="${safeName}">
+                    </div>
+                    <div class="details-input-group">
+                        <label for="profile-edit-date-${runSessionId}">Date of Run</label>
+                        <input type="date" id="profile-edit-date-${runSessionId}" value="${runSession.runDate || today}">
+                    </div>
+                    <div class="details-input-group">
+                        <label for="profile-edit-time-${runSessionId}">Time of Run (HH:MM)</label>
+                        <input type="time" id="profile-edit-time-${runSessionId}" value="${runSession.runTime || currentTime}">
+                    </div>
+                    <div class="details-input-group">
+                        <label for="profile-edit-distance-${runSessionId}">Distance (km)</label>
+                        <input type="number" step="0.01" id="profile-edit-distance-${runSessionId}" placeholder="e.g., 5.25" value="${runSession.distance !== null ? runSession.distance : ''}">
+                    </div>
+                    <div class="details-input-group">
+                        <label for="profile-edit-duration-${runSessionId}">Duration (HH:MM:SS or MM:SS)</label>
+                        <input type="text" id="profile-edit-duration-${runSessionId}" placeholder="e.g., 45:30" value="${formattedTime}">
+                    </div>
+                    <div class="details-buttons-container">
+                        <button type="button" class="minimal-button danger profile-delete-button">
+                            <i class="fa-solid fa-trash-can"></i> Delete
+                        </button>
+                        <div> <!-- Wrapper for right-aligned buttons -->
+                            <button type="button" class="minimal-button profile-cancel-button">Cancel</button>
+                            <button type="button" class="minimal-button profile-save-button">
+                                <i class="fa-solid fa-save"></i> Save
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return form;
+            }
+
+            function saveProfileEdit(editorForm) {
+                const runSessionId = parseInt(editorForm.dataset.id);
+                const originalIsoWeek = editorForm.dataset.week;
+
+                const newName = editorForm.querySelector(`#profile-edit-name-${runSessionId}`).value.trim();
+                const newDoneState = editorForm.querySelector(`#profile-edit-done-${runSessionId}`).checked;
+                const newRunDateValue = editorForm.querySelector(`#profile-edit-date-${runSessionId}`).value || new Date().toISOString().split('T')[0];
+                const newRunTimeValue = editorForm.querySelector(`#profile-edit-time-${runSessionId}`).value || null;
+                const distanceVal = editorForm.querySelector(`#profile-edit-distance-${runSessionId}`).value;
+                const newDistance = distanceVal ? parseFloat(distanceVal) : null;
+                const durationVal = editorForm.querySelector(`#profile-edit-duration-${runSessionId}`).value.trim();
+                const newParsedTime = durationVal ? parseTimeInput(durationVal) : null;
+
+                if (durationVal && newParsedTime === null) {
+                    alert('Invalid duration format. Please use HH:MM:SS or MM:SS.');
+                    return;
+                }
+
+                // Determine the target ISO week based on the newRunDateValue
+                const targetRunActualDate = new Date(newRunDateValue + "T00:00:00"); // Local date for week calc
+                const newTargetIsoWeekInfo = getCurrentIsoWeek(targetRunActualDate);
+                const newTargetIsoWeek = newTargetIsoWeekInfo.isoWeekString;
+
+                // Load data from the original week
+                let originalWeekData = getWeekData(originalIsoWeek);
+                const rsIndexInOriginal = originalWeekData.findIndex(rs => rs.id === runSessionId);
+
+                if (rsIndexInOriginal === -1) {
+                    console.error("Run session not found in original week data for profile edit.");
+                    closeOpenProfileEditor();
+                    renderProfileScreen();
+                    return;
+                }
+
+                const updatedRunSession = { ...originalWeekData[rsIndexInOriginal] }; // Create a mutable copy
+
+                updatedRunSession.name = newName;
+                updatedRunSession.done = newDoneState;
+                updatedRunSession.runDate = newRunDateValue;
+                updatedRunSession.runTime = newRunTimeValue;
+                updatedRunSession.distance = newDistance;
+                updatedRunSession.time = newParsedTime;
+
+                if (updatedRunSession.done) {
+                    let completedDate;
+                    if (updatedRunSession.runDate) {
+                        const [year, month, day] = updatedRunSession.runDate.split('-').map(Number);
+                        completedDate = new Date(year, month - 1, day); // Month is 0-indexed
+                        if (updatedRunSession.runTime) {
+                            const [hours, minutes] = updatedRunSession.runTime.split(':').map(Number);
+                            if (!isNaN(hours) && !isNaN(minutes)) completedDate.setHours(hours, minutes);
+                        }
+                    } else {
+                        completedDate = new Date();
+                    }
+                    updatedRunSession.completionTimestamp = completedDate.toISOString();
+                } else {
+                    updatedRunSession.completionTimestamp = null;
+                }
+
+                // Update template if name changed
+                const template = getRunSessionTemplate();
+                const templateIndex = template.findIndex(t => t.id === runSessionId);
+                if (templateIndex !== -1 && template[templateIndex].name !== updatedRunSession.name) {
+                    template[templateIndex].name = updatedRunSession.name;
+                    saveRunSessionTemplate(template);
+                }
+
+                if (newTargetIsoWeek === originalIsoWeek) {
+                    // Staying in the same week
+                    originalWeekData[rsIndexInOriginal] = updatedRunSession;
+                    saveWeekData(originalIsoWeek, originalWeekData);
+                } else {
+                    // Moving to a different week
+                    originalWeekData.splice(rsIndexInOriginal, 1); // Remove from original week's data
+                    saveWeekData(originalIsoWeek, originalWeekData);
+
+                    let newTargetWeekData = getWeekData(newTargetIsoWeek);
+                    const existingIndexInNewTarget = newTargetWeekData.findIndex(rs => rs.id === runSessionId);
+                    if (existingIndexInNewTarget !== -1) {
+                        newTargetWeekData[existingIndexInNewTarget] = updatedRunSession;
+                    } else {
+                        newTargetWeekData.push(updatedRunSession);
+                    }
+                    saveWeekData(newTargetIsoWeek, newTargetWeekData);
+                }
+
+                closeOpenProfileEditor();
+                renderProfileScreen();
+                // If the edit affects the current week's display on home screen, re-render it.
+                if (currentScreenId === 'home-screen' &&
+                    (currentIsoWeekInfo.isoWeekString === originalIsoWeek || currentIsoWeekInfo.isoWeekString === newTargetIsoWeek)) {
+                    renderHomeRunSessions();
+                }
+                if (currentScreenId === 'stats-screen') renderStatsScreen();
+            }
+
+            function handleDeleteProfileItem(editorForm) {
+                const runSessionId = parseInt(editorForm.dataset.id);
+                const isoWeek = editorForm.dataset.week;
+                const itemElement = editorForm.closest('.profile-run-session-item');
+                const runSessionName = itemElement.querySelector('.profile-run-session-name')?.textContent || 'this run session';
+                const weekInfo = getWeekRangeFromIsoString(isoWeek); // Will use corrected getCurrentIsoWeek
+
+                if (confirm(`Are you sure you want to delete "${escapeHtml(runSessionName)}" from Week ${weekInfo.weekNumber} (${weekInfo.weekRange})? This action cannot be undone.`)) {
+                    closeOpenProfileEditor();
+
+                    itemElement.style.opacity = '0';
+                    itemElement.style.maxHeight = '0px';
+                    itemElement.style.paddingTop = '0px';
+                    itemElement.style.paddingBottom = '0px';
+                    itemElement.style.marginBottom = '0px';
+                    itemElement.style.borderWidth = '0px';
+
+                    itemElement.addEventListener('transitionend', function handleRemovalTransition(e) {
+                        if (e.propertyName === 'opacity' && itemElement.style.opacity === '0') {
+                            const listInWeekBlock = itemElement.parentElement;
+                            itemElement.remove();
+
+                            if (listInWeekBlock && listInWeekBlock.children.length === 0) {
+                                const weekBlockElement = listInWeekBlock.closest('.week-block');
+                                if (weekBlockElement) weekBlockElement.remove();
+                            }
+                            if (weeklyProgressContainer.querySelectorAll('.week-block').length === 0) {
+                                noHistoryMessage.classList.remove('hidden');
+                                resetAllButton.classList.add('hidden');
+                            }
+                            itemElement.removeEventListener('transitionend', handleRemovalTransition);
+                        }
+                    });
+                    setTimeout(() => {
+                        if (itemElement.parentNode && itemElement.style.opacity === '0') {
+                            const listInWeekBlock = itemElement.parentElement;
+                            itemElement.remove();
+                            if (listInWeekBlock && listInWeekBlock.children.length === 0) {
+                                const weekBlockElement = listInWeekBlock.closest('.week-block');
+                                if (weekBlockElement) weekBlockElement.remove();
+                            }
+                            if (weeklyProgressContainer.querySelectorAll('.week-block').length === 0) {
+                                noHistoryMessage.classList.remove('hidden');
+                                resetAllButton.classList.add('hidden');
+                            }
+                        }
+                    }, parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--transition-speed') || '0.3') * 1000 + 100);
+
+
+                    let weekData = getWeekData(isoWeek);
+                    weekData = weekData.filter(rs => rs.id !== runSessionId);
+                    saveWeekData(isoWeek, weekData);
+
+                    if (isoWeek === currentIsoWeekInfo.isoWeekString) {
+                        renderHomeRunSessions();
+                    }
+                    renderStatsScreen();
+                }
+            }
+
+
+            function renderProfileScreen() {
+                weeklyProgressContainer.innerHTML = '';
+                if (openProfileEditor && openProfileEditor.form) {
+                    openProfileEditor.form.remove();
+                    openProfileEditor = null;
+                }
+
+                const allKeys = Object.keys(localStorage).filter(key => key.startsWith(WEEK_DATA_PREFIX)).sort().reverse();
+                if (allKeys.length === 0) {
+                    noHistoryMessage.classList.remove('hidden');
+                    resetAllButton.classList.add('hidden'); return;
+                }
+                noHistoryMessage.classList.add('hidden');
+                resetAllButton.classList.remove('hidden');
+
+                allKeys.forEach(key => {
+                    const isoWeek = key.substring(WEEK_DATA_PREFIX.length);
+                    const weekData = loadData(key);
+                    if (!weekData || weekData.length === 0) return;
+
+                    const weekBlock = document.createElement('div');
+                    weekBlock.classList.add('week-block');
+                    const weekInfo = getWeekRangeFromIsoString(isoWeek);
+                    const doneCount = weekData.filter(rs => rs.done).length;
+                    const totalCount = weekData.length;
+
+                    const ul = document.createElement('ul');
+                    ul.classList.add('profile-run-session-list');
+
+                    weekData.forEach(rs => {
+                        const formattedDuration = rs.time ? formatTimeForDisplay(rs.time) : '';
+                        const hasDetails = rs.distance !== null || formattedDuration;
+                        let completionInfo = '';
+                        if (rs.done) {
+                            if (rs.runDate) {
+                                completionInfo = `Completed: ${formatDateForDisplay(rs.runDate)}`;
+                                if (rs.runTime) completionInfo += `, ${formatTimeForDisplaySimple(rs.runTime)}`;
+                            } else if (rs.completionTimestamp) {
+                                completionInfo = formatCompletionTimestamp(rs.completionTimestamp);
+                            } else {
+                                completionInfo = 'Completed (date unknown)';
+                            }
+                        }
+                        const safeName = escapeHtml(rs.name);
+                        const li = document.createElement('li');
+                        li.classList.add('profile-run-session-item');
+                        li.dataset.id = rs.id;
+                        li.dataset.week = isoWeek;
+                        li.innerHTML = `
+                            <div class="profile-run-session-item-content-wrapper">
+                                 <span class="profile-run-session-status">${rs.done ? '✅' : '❌'}</span>
+                                 <div class="profile-run-session-content">
+                                     <div class="profile-run-session-main-info">
+                                         <span class="profile-run-session-name">${safeName}</span>
+                                         ${rs.done && hasDetails ? `
+                                             <span class="profile-run-session-details-info">
+                                                 ${rs.distance !== null ? `${rs.distance} km` : ''}
+                                                 ${rs.distance !== null && formattedDuration ? ' · ' : ''}
+                                                 ${formattedDuration || ''}
+                                             </span>
+                                         ` : (rs.done ? '<span class="profile-run-session-details-info">(No details)</span>' : '')}
+                                     </div>
+                                     ${rs.done ? `<span class="profile-run-session-timestamp">${completionInfo}</span>` : ''}
+                                 </div>
+                            </div>
+                         `;
+                        ul.appendChild(li);
+                    });
+
+                    weekBlock.innerHTML = `
+                         <div class="week-header">
+                             Week ${weekInfo.weekNumber} (${weekInfo.weekRange})
+                             <span class="week-summary">${doneCount} / ${totalCount} done</span>
+                         </div>`;
+                    weekBlock.appendChild(ul);
+                    weeklyProgressContainer.appendChild(weekBlock);
+                });
+            }
+
+            /**
+             * Derives week display information from an ISO week string (e.g., "2023-W42").
+             * It determines a date within that week (specifically, the Thursday) and
+             * then calls getCurrentIsoWeek() to get the full details.
+             */
+            function getWeekRangeFromIsoString(isoWeek) {
+                try {
+                    const [yearStr, weekNumStr] = isoWeek.split('-W');
+                    const year = parseInt(yearStr);
+                    const weekNum = parseInt(weekNumStr);
+
+                    if (isNaN(year) || isNaN(weekNum) || weekNum < 1 || weekNum > 53) {
+                        console.warn("Invalid isoWeek format for getWeekRangeFromIsoString:", isoWeek);
+                        return { weekRange: `Invalid Week: ${isoWeek}`, weekNumber: weekNumStr || '', year: year || new Date().getFullYear(), startDate: null, endDate: null };
+                    }
+
+                    // Jan 4th is always in ISO week 1. Find the Thursday of that week.
+                    // Using UTC for consistency with ISO 8601.
+                    const jan4UTC = new Date(Date.UTC(year, 0, 4));
+                    const dayOfWeekJan4 = jan4UTC.getUTCDay(); // 0 (Sun) to 6 (Sat)
+
+                    // Offset from Jan 4th to the Thursday of its week.
+                    // Thursday is day 4 in getUTCDay() results.
+                    const offsetToWeek1Thursday = 4 - dayOfWeekJan4;
+                    const firstThursdayUTC = new Date(Date.UTC(year, 0, 4 + offsetToWeek1Thursday));
+
+                    // Add (weekNum - 1) weeks to the first Thursday to get to Thursday of the target week
+                    const thursdayOfGivenWeekUTC = new Date(firstThursdayUTC.getTime());
+                    thursdayOfGivenWeekUTC.setUTCDate(firstThursdayUTC.getUTCDate() + (weekNum - 1) * 7);
+
+                    // Calculate Monday (start) and Sunday (end) of the target week
+                    const mondayOfWeekUTC = new Date(thursdayOfGivenWeekUTC.getTime());
+                    mondayOfWeekUTC.setUTCDate(thursdayOfGivenWeekUTC.getUTCDate() - 3);
+
+                    const sundayOfWeekUTC = new Date(thursdayOfGivenWeekUTC.getTime());
+                    sundayOfWeekUTC.setUTCDate(sundayOfWeekUTC.getUTCDate() + 3); // Corrected: operate on sundayOfWeekUTC
+
+                    // Helper to format date as "Month Day"
+                    const formatMonthDayUTC = (date) => {
+                        if (!date) return '';
+                        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                        const month = monthNames[date.getUTCMonth()];
+                        const day = date.getUTCDate();
+                        return `${month} ${day}`;
+                    };
+
+                    // Determine if the week spans two months
+                    const startMonthDay = formatMonthDayUTC(mondayOfWeekUTC);
+                    const endMonthDay = formatMonthDayUTC(sundayOfWeekUTC);
+
+                    let rangeString;
+                    if (mondayOfWeekUTC.getUTCMonth() === sundayOfWeekUTC.getUTCMonth()) {
+                        // Same month: "Month Day1 – Day2"
+                        const month = formatMonthDayUTC(mondayOfWeekUTC).split(' ')[0]; // Get month name from start date
+                        const startDay = mondayOfWeekUTC.getUTCDate();
+                        const endDay = sundayOfWeekUTC.getUTCDate();
+                        rangeString = `${month} ${startDay} – ${endDay}`;
+                    } else {
+                        // Different months: "Month1 Day1 – Month2 Day2"
+                        rangeString = `${startMonthDay} – ${endMonthDay}`;
+                    }
+
+
+                    return {
+                        weekRange: rangeString,
+                        weekNumber: String(weekNum).padStart(2, '0'), // Return padded week number
+                        year: year,
+                        startDate: mondayOfWeekUTC, // Still include Date objects for potential use
+                        endDate: sundayOfWeekUTC
+                    };
+
+                } catch (e) {
+                    console.error("Error calculating week range for", isoWeek, ":", e);
+                    const parts = isoWeek.split('-W');
+                    return {
+                        weekRange: `Error calculating range for ${isoWeek}`,
+                        weekNumber: parts[1] || '',
+                        year: parseInt(parts[0]) || new Date().getFullYear(),
+                        startDate: null,
+                        endDate: null
+                    };
+                }
+            }
+
+            // --- Stats Screen Logic ---
+            function renderStatsScreen() {
+                const period = statsPeriodFilter.value;
+                const allRunSessions = getAllHistoricalRunSessions();
+                const filteredSessions = filterSessionsByPeriod(allRunSessions, period);
+
+                let chartData, chartLabels, chartType = 'bar', chartLabel = "Kilometers";
+                let totalKmForPeriod = 0;
+
+                const today = new Date();
+                const currentYear = today.getFullYear();
+                const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim();
+                const gridBorderColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim();
+                const tooltipBgColor = getComputedStyle(document.documentElement).getPropertyValue('--nav-background-color').trim();
+
+
+                if (period === 'week') {
+                    chartLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                    const dailyKm = Array(7).fill(0);
+                    filteredSessions.forEach(rs => {
+                        if (rs.distance && rs.runDate) {
+                            const runDate = new Date(rs.runDate + "T00:00:00");
+                            const dayOfWeek = runDate.getDay();
+                            const isoDayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                            dailyKm[isoDayIndex] += rs.distance;
+                            totalKmForPeriod += rs.distance;
+                        }
+                    });
+                    chartData = dailyKm;
+                    chartLabel = `KM This Week (Total: ${totalKmForPeriod.toFixed(2)} km)`;
+                } else if (period === 'year') {
+                    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    chartLabels = monthNames;
+                    const monthlyKm = Array(12).fill(0);
+                    filteredSessions.forEach(rs => {
+                        if (rs.distance && rs.runDate) {
+                            const runDateObj = new Date(rs.runDate + "T00:00:00");
+                            if (runDateObj.getFullYear() === currentYear) {
+                                monthlyKm[runDateObj.getMonth()] += rs.distance;
+                                totalKmForPeriod += rs.distance;
+                            }
+                        }
+                    });
+                    chartData = monthlyKm;
+                    chartLabel = `KM This Year (Total: ${totalKmForPeriod.toFixed(2)} km)`;
+                }
+
+                if (totalKilometersChart) totalKilometersChart.destroy();
+                if (statsChartCanvas) {
+                    const ctx = statsChartCanvas.getContext('2d');
+                    totalKilometersChart = new Chart(ctx, {
+                        type: chartType,
+                        data: {
+                            labels: chartLabels,
+                            datasets: [{
+                                label: chartLabel,
+                                data: chartData,
+                                backgroundColor: 'rgba(10, 132, 255, 0.6)',
+                                borderColor: 'rgba(10, 132, 255, 1)',
+                                borderWidth: 1,
+                                borderRadius: 5,
+                                barThickness: period === 'week' ? 'flex' : 20,
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+
+                            animations: {
+                                x: {
+                                    type: 'number',
+                                    easing: 'linear',
+                                    duration: 0,
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: { color: textColor },
+                                    grid: { color: gridBorderColor }
+                                },
+                                x: {
+                                    ticks: { color: textColor },
+                                    grid: { display: false }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: false,
+                                    labels: { color: textColor }
+                                },
+                                tooltip: {
+                                    titleColor: textColor,
+                                    bodyColor: textColor,
+                                    backgroundColor: tooltipBgColor,
+                                    borderColor: gridBorderColor,
+                                    borderWidth: 1,
+                                    padding: 10,
+                                    callbacks: {
+                                        label: function (context) {
+                                            let label = '';
+                                            if (context.parsed.y !== null) {
+                                                label += context.parsed.y.toFixed(2) + ' km';
+                                            }
+                                            return label;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                statsSummaryElement.textContent = chartLabel;
+            }
+
+            function getAllHistoricalRunSessions() {
+                const allSessions = [];
+                const allKeys = Object.keys(localStorage).filter(key => key.startsWith(WEEK_DATA_PREFIX));
+                allKeys.forEach(key => {
+                    const weekData = loadData(key);
+                    if (weekData && weekData.length > 0) {
+                        weekData.forEach(rs => {
+                            if (rs.done && rs.distance != null && rs.runDate) {
+                                allSessions.push(rs);
+                            }
+                        });
+                    }
+                });
+                return allSessions;
+            }
+
+            function filterSessionsByPeriod(sessions, period) {
+                const today = new Date();
+                const currentWeekInfo = getCurrentIsoWeek(today); // Uses corrected function
+                const currentYearStart = new Date(today.getFullYear(), 0, 1);
+                const currentYearEnd = new Date(today.getFullYear(), 11, 31, 23, 59, 59);
+
+                return sessions.filter(rs => {
+                    if (!rs.runDate) return false;
+                    const runDate = new Date(rs.runDate + "T00:00:00"); // Treat as local
+                    if (isNaN(runDate.getTime())) return false;
+
+                    switch (period) {
+                        case 'week':
+                            return runDate >= currentWeekInfo.startDate && runDate <= currentWeekInfo.endDate;
+                        case 'year':
+                            return runDate >= currentYearStart && runDate <= currentYearEnd;
+                        default: return false;
+                    }
+                });
+            }
+
+
             // --- Reset Logic ---
-
             function handleResetAll() {
-                if (confirm("⚠️ Are you sure you want to permanently delete ALL your Stay Fit! workout data? This cannot be undone.")) {
-                    if (confirm("⚠️ FINAL WARNING: Delete all data?")) { // Double confirmation
-                         const allKeys = Object.keys(localStorage);
-                         let clearedCount = 0;
-                         allKeys.forEach(key => {
-                             if (key.startsWith('stayfit_')) { // Target all keys for this app
-                                 localStorage.removeItem(key);
-                                 clearedCount++;
-                             }
-                         });
-
-                         // Clear current state and re-render
-                         currentIsoWeekInfo = getCurrentIsoWeek(); // Reset current week info
-                         // Force empty template and current week data
-                         saveWorkoutTemplate([]);
-                         saveWeekData(currentIsoWeekInfo.isoWeekString, []);
-
-                         initializeApp(); // Re-initialize (will find no data)
-                         alert(`All Stay Fit! data entries have been cleared.`);
-                         switchScreen('home-screen', true); // Go back to home
+                if (confirm("⚠️ Are you sure you want to permanently delete ALL your Stay Fit! run session data? This cannot be undone.")) {
+                    if (confirm("⚠️ FINAL WARNING: Delete all data?")) {
+                        Object.keys(localStorage).forEach(key => { if (key.startsWith('stayfit_')) localStorage.removeItem(key); });
+                        currentIsoWeekInfo = getCurrentIsoWeek(); // Re-initialize with corrected function
+                        saveRunSessionTemplate([]);
+                        saveWeekData(currentIsoWeekInfo.isoWeekString, []);
+                        initializeApp();
+                        alert(`All Stay Fit! data entries have been cleared.`);
+                        switchScreen('home-screen', true);
                     }
                 }
             }
 
             // --- Utilities ---
             function escapeHtml(unsafe) {
-                if (typeof unsafe !== 'string') return unsafe;
+                if (typeof unsafe !== 'string') return String(unsafe);
                 return unsafe
-                     .replace(/&/g, "&") // Must be first
-                     .replace(/</g, "<")
-                     .replace(/>/g, ">")
-                     .replace(/"/g, '"')
-                     .replace(/'/g, "'"); // Use HTML entity for single quote
+                    .replace(/&/g, "&")
+                    .replace(/</g, "<")
+                    .replace(/>/g, ">")
+                    .replace(/"/g, '"')
+                    .replace(/'/g, "'");
             }
+            function parseTimeInput(timeString) {
+                timeString = String(timeString).trim().replace(/[.,]/g, ":");
+                const parts = timeString.split(':').map(part => part.trim()).filter(part => part !== '');
+                let hours = 0, minutes = 0, seconds = 0;
+                if (parts.length === 2) { minutes = parseInt(parts[0], 10); seconds = parseInt(parts[1], 10); }
+                else if (parts.length === 3) { hours = parseInt(parts[0], 10); minutes = parseInt(parts[1], 10); seconds = parseInt(parts[2], 10); }
+                else if (parts.length === 1 && !isNaN(parseInt(parts[0], 10))) { minutes = parseInt(parts[0], 10); }
+                else { return null; }
 
-            // Parses MM:SS or HH:MM:SS input into HH:MM:SS format or null if invalid
-             function parseTimeInput(timeString) {
-                 timeString = timeString.trim();
-                 timeString = timeString.replace(/[.,]/g, ":"); // Replace dots/commas with colons
-                 const parts = timeString.split(':').map(part => part.trim()).filter(part => part !== ''); // Filter empty parts
+                if (isNaN(hours) || isNaN(minutes) || isNaN(seconds) || hours < 0 || minutes < 0 || seconds < 0 || minutes > 59 || seconds > 59) {
+                    if (parts.length === 2 && minutes >= 60 && !isNaN(minutes) && !isNaN(seconds) && seconds <= 59) { /* valid, will convert */ }
+                    else if (parts.length === 1 && minutes >= 0 && !isNaN(minutes)) { /* valid (treat as minutes) */ }
+                    else { return null; }
+                }
+                if (parts.length === 2 && minutes >= 60) { hours = Math.floor(minutes / 60); minutes %= 60; }
+                else if (parts.length === 1) { hours = Math.floor(minutes / 60); minutes %= 60; }
 
-                 let hours = 0, minutes = 0, seconds = 0;
-
-                 if (parts.length === 2) { // MM:SS format
-                     minutes = parseInt(parts[0], 10);
-                     seconds = parseInt(parts[1], 10);
-                 } else if (parts.length === 3) { // HH:MM:SS format
-                     hours = parseInt(parts[0], 10);
-                     minutes = parseInt(parts[1], 10);
-                     seconds = parseInt(parts[2], 10);
-                 } else if (parts.length === 1 && !isNaN(parseInt(parts[0], 10))) { // Treat single number as minutes
-                     minutes = parseInt(parts[0], 10);
-                     seconds = 0;
-                 } else {
-                     return null; // Invalid number of parts
-                 }
-
-                 // Validate parts are numbers and within reasonable range
-                 if (isNaN(hours) || isNaN(minutes) || isNaN(seconds) ||
-                     hours < 0 || minutes < 0 || seconds < 0 ||
-                     minutes > 59 || seconds > 59) { // Allow more than 59 minutes if entered directly in MM:SS
-                      if(parts.length === 2 && minutes >= 60) {
-                         // Allow MM:SS like 75:30, convert to HH:MM:SS
-                         hours = Math.floor(minutes / 60);
-                         minutes = minutes % 60;
-                      } else if (minutes > 59 || seconds > 59) {
-                         return null; // Invalid values otherwise
-                      }
-                 }
-
-                 // Format to HH:MM:SS with leading zeros
-                 const hh = String(hours).padStart(2, '0');
-                 const mm = String(minutes).padStart(2, '0');
-                 const ss = String(seconds).padStart(2, '0');
-
-                 return `${hh}:${mm}:${ss}`;
-             }
-
-             // Formats stored HH:MM:SS for display (e.g., omits 00: if hours are 0)
-             function formatTimeForDisplay(timeString) {
-                 if (!timeString || !/^\d{2}:\d{2}:\d{2}$/.test(timeString)) {
-                     return timeString || ''; // Return original or empty if invalid/null
-                 }
-                 if (timeString.startsWith('00:')) {
-                     return timeString.substring(3); // Return MM:SS
-                 }
-                 return timeString; // Return HH:MM:SS
-             }
-
-             // Formats ISO timestamp for display in Profile
-             function formatTimestamp(isoString) {
-                 if (!isoString) return '';
-                 try {
-                     const date = new Date(isoString);
-                     // Example format: "Completed: Jan 15, 10:30 AM"
-                     return `Completed: ${date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}, ${date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}`;
-                 } catch (e) {
-                     console.error("Error formatting timestamp:", e);
-                     return 'Completed: (invalid date)';
-                 }
-             }
-
+                return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }
+            function formatTimeForDisplay(timeString) {
+                if (!timeString || !/^\d{2}:\d{2}:\d{2}$/.test(timeString)) return timeString || '';
+                return timeString.startsWith('00:') ? timeString.substring(3) : timeString;
+            }
+            function formatTimeForDisplaySimple(timeString) {
+                if (!timeString || !/^\d{2}:\d{2}$/.test(timeString.substring(0, 5))) return timeString || '';
+                const [h, m] = timeString.split(':');
+                const hour = parseInt(h, 10);
+                if (isNaN(hour) || isNaN(parseInt(m, 10))) return timeString;
+                const period = hour >= 12 ? 'PM' : 'AM';
+                const displayHour = hour % 12 === 0 ? 12 : hour % 12;
+                return `${displayHour}:${m} ${period}`;
+            }
+            function formatDateForDisplay(isoDateString) {
+                if (!isoDateString) return '';
+                try {
+                    const date = new Date(isoDateString + "T00:00:00"); // Treat as local
+                    return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+                } catch (e) { return isoDateString; }
+            }
+            function formatCompletionTimestamp(isoString) {
+                if (!isoString) return '';
+                try {
+                    const date = new Date(isoString); // Assumes ISO string is UTC or has TZ, Date constructor handles it
+                    return `Completed: ${date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}, ${date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}`;
+                } catch (e) { return 'Completed: (invalid date)'; }
+            }
 
             // --- Start the app ---
             initializeApp();
@@ -1462,4 +2169,5 @@
     </script>
 
 </body>
+
 </html>
