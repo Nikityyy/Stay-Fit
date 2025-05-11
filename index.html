@@ -486,6 +486,7 @@
         /* Profile Screen & Stats Screen common*/
         .week-block,
         .stats-block {
+            /* .stats-block is old, maybe remove if not used */
             margin-bottom: 30px;
             padding-bottom: 20px;
             border-bottom: 1px solid var(--border-color);
@@ -603,9 +604,6 @@
                 margin-top var(--long-transition-speed) ease-out;
         }
 
-        /* .profile-editor-form.open is not strictly needed for animated properties if JS sets them directly */
-        /* It could be used for :focus-within type things if needed, or just as a marker class */
-
         .profile-editor-form .details-input-group {
             /* Reuse existing styles */
             margin-bottom: 12px;
@@ -648,7 +646,8 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            /* Increased space before cards */
             flex-wrap: wrap;
             /* Allow wrapping on small screens */
         }
@@ -658,24 +657,45 @@
             color: var(--secondary-text-color);
         }
 
-        #stats-chart-container {
-            width: 100%;
-            max-width: 700px;
-            /* Max width for larger screens */
-            margin: 20px auto;
-            padding: 10px;
-            background-color: var(--card-background);
-            border-radius: var(--border-radius);
-            box-shadow: 0 2px 5px var(--shadow-color);
-            height: 300px;
-            /* Give chart a fixed height or responsive aspect ratio */
+        #stats-metrics-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            /* Space between cards */
+            justify-content: center;
+            /* Center cards if they don't fill the row */
+            margin-bottom: 20px;
+            /* Space below the cards block */
         }
 
-        #stats-summary {
+        .stats-metric-card {
+            background-color: var(--card-background);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            box-shadow: 0 2px 5px var(--shadow-color);
+            flex: 1 1 320px;
+            /* Grow, shrink, with a basis for responsive two-column */
+            max-width: 500px;
+            /* Max width for a single card on larger screens */
+            min-width: 280px;
+            /* Min width before stacking */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stats-chart-canvas-container {
+            width: 100%;
+            height: 300px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .stats-summary-text {
             text-align: center;
-            margin-top: 20px;
             font-size: 16px;
             color: var(--secondary-text-color);
+            margin-top: 0;
+            /* Spacing controlled by card padding and canvas container margin */
         }
 
 
@@ -723,7 +743,10 @@
             display: flex;
             justify-content: space-around;
             align-items: flex-start;
-            padding: 5px 0;
+            padding-top: 5px;
+            /* Ensure icons are not cut off */
+            padding-bottom: calc(5px + env(safe-area-inset-bottom));
+            /* Add padding to bottom for text too*/
         }
 
         nav button {
@@ -735,9 +758,14 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            /* vertically center icon and text */
             height: 100%;
             color: var(--secondary-text-color);
             transition: color var(--transition-speed) ease;
+            padding-top: 5px;
+            /* Added to give space from top of nav bar */
+            padding-bottom: 5px;
+            /* Added for symmetry and space for text */
         }
 
         nav button i {
@@ -745,6 +773,7 @@
             margin-bottom: 4px;
             flex-shrink: 0;
             height: 24px;
+            /* Fixed height for icon */
             display: flex;
             align-items: center;
         }
@@ -795,14 +824,29 @@
                 <label for="stats-period-filter">Show data for:</label>
                 <select id="stats-period-filter">
                     <option value="week">This Week</option>
+                    <option value="month">This Month</option>
                     <option value="year">This Year</option>
                 </select>
             </div>
-            <div id="stats-chart-container">
-                <canvas id="totalKilometersChart"></canvas>
-            </div>
-            <div id="stats-summary" style="text-align: center; margin-top: 20px;">
-                <!-- Summary text like "Total KM this week: X" will be populated by JS -->
+
+            <div id="stats-metrics-wrapper">
+                <div class="stats-metric-card">
+                    <div class="stats-chart-canvas-container">
+                        <canvas id="totalKilometersChart"></canvas>
+                    </div>
+                    <div class="stats-summary-text" id="stats-summary">
+                        <!-- Summary text for distance -->
+                    </div>
+                </div>
+
+                <div class="stats-metric-card">
+                    <div class="stats-chart-canvas-container">
+                        <canvas id="averagePaceChart"></canvas>
+                    </div>
+                    <div class="stats-summary-text" id="stats-pace-summary">
+                        <!-- Summary text for pace -->
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -855,14 +899,18 @@
             const statsSummaryElement = document.getElementById('stats-summary');
             let totalKilometersChart = null;
 
+            const statsPaceChartCanvas = document.getElementById('averagePaceChart');
+            const statsPaceSummaryElement = document.getElementById('stats-pace-summary');
+            let averagePaceChartInstance = null;
+
 
             const TEMPLATE_KEY = 'stayfit_template';
             const WEEK_DATA_PREFIX = 'stayfit_week';
             const LAST_ACTIVE_SCREEN_KEY = 'stayfit_last_screen';
 
             let currentScreenId = localStorage.getItem(LAST_ACTIVE_SCREEN_KEY) || 'home-screen';
-            let currentIsoWeekInfo = null; // Will be set by initializeApp calling getCurrentIsoWeek
-            let openProfileEditor = null; // To manage the currently open editor in profile: {form, id, itemElement, isoWeek}
+            let currentIsoWeekInfo = null;
+            let openProfileEditor = null;
 
             // --- Data Management ---
             function loadData(key, defaultValue = []) {
@@ -904,71 +952,41 @@
             function getWeekData(isoWeek) { return loadData(WEEK_DATA_PREFIX + isoWeek); }
             function saveWeekData(isoWeek, data) { saveData(WEEK_DATA_PREFIX + isoWeek, data); }
 
-            // --- Week Calculation (Corrected) ---
-            /**
-             * Helper function to get the ISO 8601 week number and year for a given date.
-             * @param {Date} dateInput - The local date for which to find the ISO week data.
-             * @returns {{year: number, week: number}} - The ISO year and week number.
-             */
+            // --- Week Calculation ---
             function getIsoWeekAndYear(dateInput) {
                 const date = new Date(Date.UTC(dateInput.getFullYear(), dateInput.getMonth(), dateInput.getDate()));
-                // Move to Thursday of the week (ISO week day 4)
-                // getUTCDay() is 0 for Sunday, 1 for Monday, ..., 6 for Saturday
-                // (date.getUTCDay() || 7) makes Sunday 7, Monday 1, etc.
                 date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
-
                 const year = date.getUTCFullYear();
                 const yearStart = new Date(Date.UTC(year, 0, 1));
-                // Calculate week number
                 const weekNumber = Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
-
                 return { year: year, week: weekNumber };
             }
 
-            /**
-             * Gets comprehensive information about the ISO 8601 week for a given date.
-             * @param {Date} dateInput - The local date (defaults to current date).
-             * @returns {{isoWeekString: string, weekRange: string, startDate: Date, endDate: Date, weekNumber: number, year: number}}
-             */
             function getCurrentIsoWeek(dateInput = new Date()) {
-                const localDate = new Date(dateInput.getTime()); // Work with a copy
-
+                const localDate = new Date(dateInput.getTime());
                 const { year: isoYear, week: isoWeekNumber } = getIsoWeekAndYear(localDate);
-
-                // Calculate Monday of the week localDate is in.
-                const dayOfWeekLocal = localDate.getDay(); // 0 for Sunday, 1 for Mon ...
-                // Offset to get to Monday:
-                // If localDate is Sunday (0), offset is -6.
-                // If localDate is Monday (1), offset is 0.
-                // If localDate is Saturday (6), offset is -5.
+                const dayOfWeekLocal = localDate.getDay();
                 const offsetToMonday = (dayOfWeekLocal === 0) ? -6 : (1 - dayOfWeekLocal);
-
                 const monday = new Date(localDate.getTime());
                 monday.setDate(localDate.getDate() + offsetToMonday);
                 monday.setHours(0, 0, 0, 0);
-
                 const sunday = new Date(monday.getTime());
                 sunday.setDate(monday.getDate() + 6);
                 sunday.setHours(23, 59, 59, 999);
-
                 const isoWeekString = `${isoYear}-W${String(isoWeekNumber).padStart(2, '0')}`;
                 const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
                 const weekRange = `${monthNames[monday.getMonth()]} ${monday.getDate()} – ${monthNames[sunday.getMonth()]} ${sunday.getDate()}`;
+                return { isoWeekString, weekRange, startDate: monday, endDate: sunday, weekNumber: isoWeekNumber, year: isoYear };
+            }
 
-                return {
-                    isoWeekString,
-                    weekRange,
-                    startDate: monday,
-                    endDate: sunday,
-                    weekNumber: isoWeekNumber,
-                    year: isoYear
-                };
+            function getDaysInMonth(year, monthZeroIndexed) {
+                return new Date(year, monthZeroIndexed + 1, 0).getDate();
             }
 
 
             // --- Initialization ---
             function initializeApp() {
-                currentIsoWeekInfo = getCurrentIsoWeek(); // Set initial currentIsoWeekInfo
+                currentIsoWeekInfo = getCurrentIsoWeek();
                 const { isoWeekString } = currentIsoWeekInfo;
                 let currentWeekData = getWeekData(isoWeekString);
                 const template = getRunSessionTemplate();
@@ -991,12 +1009,23 @@
                         }
                         updated = true;
                     }
+                    if (runSession.done && runSession.distance && runSession.distance > 0 && runSession.time && (typeof runSession.pace === 'undefined' || runSession.pace === null)) {
+                        const totalSeconds = timeStringToSeconds(runSession.time);
+                        if (totalSeconds !== null && totalSeconds > 0) {
+                            runSession.pace = totalSeconds / runSession.distance;
+                            updated = true;
+                        } else {
+                            runSession.pace = null;
+                        }
+                    } else if (runSession.done && (typeof runSession.pace === 'undefined')) {
+                        runSession.pace = null;
+                    }
                     return updated;
                 };
 
                 if (!currentWeekData || currentWeekData.length === 0 && template.length > 0) {
                     currentWeekData = template.map(rs => ({
-                        id: rs.id, name: rs.name, done: false, distance: null, time: null,
+                        id: rs.id, name: rs.name, done: false, distance: null, time: null, pace: null,
                         completionTimestamp: null, runDate: null, runTime: null
                     }));
                     dataUpdated = true;
@@ -1005,16 +1034,17 @@
                     template.forEach(tRunSession => {
                         if (!existingIds.has(tRunSession.id)) {
                             currentWeekData.push({
-                                id: tRunSession.id, name: tRunSession.name, done: false, distance: null, time: null,
+                                id: tRunSession.id, name: tRunSession.name, done: false, distance: null, time: null, pace: null,
                                 completionTimestamp: null, runDate: null, runTime: null
                             });
                             dataUpdated = true;
                         }
                     });
-                    currentWeekData.forEach(rs => { if (migrateRunSession(rs)) dataUpdated = true; });
                 } else {
                     currentWeekData = [];
                 }
+
+                currentWeekData.forEach(rs => { if (migrateRunSession(rs)) dataUpdated = true; });
 
                 if (dataUpdated) saveWeekData(isoWeekString, currentWeekData);
 
@@ -1030,7 +1060,6 @@
                 statsPeriodFilter.addEventListener('change', renderStatsScreen);
                 weeklyProgressContainer.addEventListener('click', handleProfileListClick);
 
-
                 checkEmptyListState();
             }
 
@@ -1042,7 +1071,7 @@
                 const targetButton = document.querySelector(`nav button[data-target="${targetId}"]`);
 
                 if (openProfileEditor) {
-                    closeOpenProfileEditor(); // Close profile editor if switching screens
+                    closeOpenProfileEditor();
                 }
 
                 if (!targetScreen) return;
@@ -1131,7 +1160,8 @@
                 if (runSession.done) li.classList.add('done');
 
                 const formattedTime = runSession.time ? formatTimeForDisplay(runSession.time) : '';
-                const hasDetails = runSession.distance !== null || formattedTime || runSession.runDate;
+                const formattedPace = runSession.pace ? formatPace(runSession.pace) : '';
+                const hasDetails = runSession.distance !== null || formattedTime || runSession.runDate || formattedPace;
                 const safeName = escapeHtml(runSession.name);
                 const today = new Date().toISOString().split('T')[0];
                 const currentTime = new Date().toTimeString().split(' ')[0].substring(0, 5);
@@ -1173,15 +1203,13 @@
                      </div>
                      <div class="run-session-compact-display ${runSession.done && hasDetails ? 'visible' : ''}">
                          <span class="compact-info">
-                             ${runSession.done ? '🏅 ' : ''}
-                             ${runSession.distance !== null ? `${runSession.distance} km` : ''}
-                             ${runSession.distance !== null && formattedTime ? ' · ' : ''}
-                             ${formattedTime || (runSession.done && !hasDetails ? 'Completed' : '')}
-                             ${runSession.runDate ? ` <br><small>On: ${formatDateForDisplay(runSession.runDate)} ${runSession.runTime ? ` at ${formatTimeForDisplaySimple(runSession.runTime)}` : ''}</small>` : (runSession.done && !hasDetails && !formattedTime ? '<br><small>(No details)</small>' : '')}
+                             <!-- Content updated by updateCompactDisplay -->
                          </span>
                          ${runSession.done ? `<button class="edit-details-button" aria-label="Edit Details"><i class="fa-solid fa-pencil"></i></button>` : ''}
                      </div>
                  `;
+                updateCompactDisplay(runSession, li);
+
                 const nameInput = li.querySelector('.run-session-name');
                 nameInput.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter' && !li.classList.contains('done') && li.dataset.temporarilyChecked !== "true") {
@@ -1194,7 +1222,6 @@
                     if (dateInput && !dateInput.value) dateInput.value = today;
                     if (timeInput && !timeInput.value) timeInput.value = currentTime;
                 }
-
                 return li;
             }
 
@@ -1203,7 +1230,7 @@
                 const name = newRunSessionInput.value.trim();
                 if (!name) return;
                 const newRunSession = {
-                    id: Date.now(), name: name, done: false, distance: null, time: null,
+                    id: Date.now(), name: name, done: false, distance: null, time: null, pace: null,
                     completionTimestamp: null, runDate: null, runTime: null
                 };
                 const template = getRunSessionTemplate();
@@ -1316,7 +1343,7 @@
             }
 
             function handleSaveDetails(runSessionId, listItemElement) {
-                const currentWeekOriginalIso = currentIsoWeekInfo.isoWeekString; // The week the item is currently displayed in (Home screen)
+                const currentWeekOriginalIso = currentIsoWeekInfo.isoWeekString;
 
                 const distanceInput = listItemElement.querySelector(`#distance-${runSessionId}`);
                 const timeInput = listItemElement.querySelector(`#time-${runSessionId}`);
@@ -1336,29 +1363,21 @@
                     timeInput.value = formatTimeForDisplay(parsedTime);
                 }
 
-                // Use today's date if runDateInput.value is empty or invalid for some reason
                 const runDateValue = runDateInput.value || new Date().toISOString().split('T')[0];
                 const runTimeValue = runTimeInput.value || null;
 
-                // Determine the target ISO week based on the runDateValue
-                // Ensure date is parsed as local by appending a neutral time part for Date constructor.
                 const targetRunActualDate = new Date(runDateValue + "T00:00:00");
                 const targetIsoWeekInfo = getCurrentIsoWeek(targetRunActualDate);
                 const targetWeekIso = targetIsoWeekInfo.isoWeekString;
 
-                // Load data for the week the item is currently in (on Home screen)
                 let currentWeekData = getWeekData(currentWeekOriginalIso);
                 const rsIndex = currentWeekData.findIndex(rs => rs.id === runSessionId);
 
                 if (rsIndex === -1) {
                     console.error("Run session not found in current week data for save.");
-                    // Attempt to find it in the template if it's a new item not yet fully in weekData
-                    // This scenario should ideally be handled by ensuring item exists before save is possible
-                    // For now, if not found, we cannot proceed safely with this logic.
                     return;
                 }
 
-                // Work with a copy of the run session object to update it
                 const runSessionToUpdate = { ...currentWeekData[rsIndex] };
 
                 runSessionToUpdate.done = true;
@@ -1367,25 +1386,30 @@
                 runSessionToUpdate.runDate = runDateValue;
                 runSessionToUpdate.runTime = runTimeValue;
 
+                runSessionToUpdate.pace = null;
+                if (runSessionToUpdate.distance && runSessionToUpdate.distance > 0 && runSessionToUpdate.time) {
+                    const totalSeconds = timeStringToSeconds(runSessionToUpdate.time);
+                    if (totalSeconds !== null && totalSeconds > 0) {
+                        runSessionToUpdate.pace = totalSeconds / runSessionToUpdate.distance;
+                    }
+                }
+
                 let completedDate;
                 if (runSessionToUpdate.runDate) {
                     const [year, month, day] = runSessionToUpdate.runDate.split('-').map(Number);
-                    completedDate = new Date(year, month - 1, day); // Month is 0-indexed for Date constructor
+                    completedDate = new Date(year, month - 1, day);
                     if (runSessionToUpdate.runTime) {
                         const [hours, minutes] = runSessionToUpdate.runTime.split(':').map(Number);
                         if (!isNaN(hours) && !isNaN(minutes)) completedDate.setHours(hours, minutes);
                     }
                 } else {
-                    completedDate = new Date(); // Fallback to now if no specific date/time
+                    completedDate = new Date();
                 }
                 runSessionToUpdate.completionTimestamp = completedDate.toISOString();
 
                 if (targetWeekIso === currentWeekOriginalIso) {
-                    // Staying in the same week
                     currentWeekData[rsIndex] = runSessionToUpdate;
                     saveWeekData(currentWeekOriginalIso, currentWeekData);
-
-                    // UI updates for the item since it remained on the home screen
                     listItemElement.removeAttribute("temporarilyChecked");
                     listItemElement.classList.add('done');
                     listItemElement.querySelector('.run-session-name').setAttribute('readonly', true);
@@ -1394,12 +1418,9 @@
                     updateCompactDisplay(runSessionToUpdate, listItemElement);
 
                 } else {
-                    // Moving to a different week
-                    currentWeekData.splice(rsIndex, 1); // Remove from original week's data
+                    currentWeekData.splice(rsIndex, 1);
                     saveWeekData(currentWeekOriginalIso, currentWeekData);
-
                     let targetWeekData = getWeekData(targetWeekIso);
-                    // Check if item already exists in target week (e.g. if moved back and forth)
                     const existingIndexInTarget = targetWeekData.findIndex(rs => rs.id === runSessionId);
                     if (existingIndexInTarget !== -1) {
                         targetWeekData[existingIndexInTarget] = runSessionToUpdate;
@@ -1407,8 +1428,6 @@
                         targetWeekData.push(runSessionToUpdate);
                     }
                     saveWeekData(targetWeekIso, targetWeekData);
-
-                    // Remove from home screen UI as it's no longer in the current week
                     listItemElement.remove();
                     checkEmptyListState();
                 }
@@ -1424,23 +1443,38 @@
                 const editButton = compactDisplay.querySelector('.edit-details-button');
 
                 if (runSession.done) {
-                    const formattedDuration = runSession.time ? formatTimeForDisplay(runSession.time) : '';
-                    const hasActualDetails = runSession.distance !== null || formattedDuration || runSession.runDate;
+                    let infoParts = [];
+                    if (runSession.distance !== null) {
+                        infoParts.push(`${runSession.distance} km`);
+                    }
+                    const formattedDurationForDisplay = runSession.time ? formatTimeForDisplay(runSession.time) : '';
+                    if (formattedDurationForDisplay) {
+                        infoParts.push(formattedDurationForDisplay);
+                    }
+                    if (runSession.pace) {
+                        const formattedPace = formatPace(runSession.pace);
+                        if (formattedPace) infoParts.push(formattedPace);
+                    }
+
+                    let detailsText = infoParts.join(' · ');
 
                     let runDateTimeInfo = '';
                     if (runSession.runDate) {
                         runDateTimeInfo = ` <br><small>On: ${formatDateForDisplay(runSession.runDate)}${runSession.runTime ? ` at ${formatTimeForDisplaySimple(runSession.runTime)}` : ''}</small>`;
                     }
 
+                    if (!detailsText && !runDateTimeInfo) {
+                        detailsText = 'Completed (No details)';
+                    } else if (!detailsText && runDateTimeInfo) {
+                        detailsText = 'Completed';
+                    }
+
                     compactInfoSpan.innerHTML = `
-                        🏅
-                        ${runSession.distance !== null ? `${runSession.distance} km` : ''}
-                        ${runSession.distance !== null && formattedDuration ? ' · ' : ''}
-                        ${formattedDuration || (!hasActualDetails ? 'Completed' : '')}
-                        ${runDateTimeInfo || (!hasActualDetails && !formattedDuration ? '<br><small>(No details)</small>' : '')}
+                        🏅 ${detailsText}
+                        ${runDateTimeInfo}
                     `;
                     compactDisplay.classList.add('visible');
-                    if (!editButton) {
+                    if (!editButton && compactDisplay.querySelector('.edit-details-button') === null) {
                         const newEditButton = document.createElement('button');
                         newEditButton.className = 'edit-details-button';
                         newEditButton.setAttribute('aria-label', 'Edit Details');
@@ -1492,7 +1526,7 @@
             function handleProfileListClick(event) {
                 const editorForm = event.target.closest('.profile-editor-form');
 
-                if (editorForm) { // Click is inside an editor
+                if (editorForm) {
                     if (event.target.classList.contains('profile-save-button') || event.target.closest('.profile-save-button')) {
                         saveProfileEdit(editorForm);
                     } else if (event.target.classList.contains('profile-cancel-button') || event.target.closest('.profile-cancel-button')) {
@@ -1528,7 +1562,7 @@
                     }
                 };
                 editorForm.addEventListener('transitionend', handleTransitionEnd);
-                setTimeout(() => { // Failsafe
+                setTimeout(() => {
                     if (editorForm.parentNode && editorForm.style.opacity === '0') editorForm.remove();
                 }, parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--long-transition-speed') || '0.4') * 1000 + 100);
             }
@@ -1551,7 +1585,6 @@
                     return;
                 }
 
-                // Close any other editor that might be open
                 if (openProfileEditor && openProfileEditor.id !== runSessionId) {
                     closeOpenProfileEditor();
                 }
@@ -1564,7 +1597,6 @@
                 const editorForm = createProfileEditorForm(runSession, runSessionId, isoWeek);
                 itemElement.appendChild(editorForm);
 
-                // Force reflow for transition
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
                         editorForm.style.paddingTop = '15px';
@@ -1620,7 +1652,7 @@
                         <button type="button" class="minimal-button danger profile-delete-button">
                             <i class="fa-solid fa-trash-can"></i> Delete
                         </button>
-                        <div> <!-- Wrapper for right-aligned buttons -->
+                        <div> 
                             <button type="button" class="minimal-button profile-cancel-button">Cancel</button>
                             <button type="button" class="minimal-button profile-save-button">
                                 <i class="fa-solid fa-save"></i> Save
@@ -1649,12 +1681,10 @@
                     return;
                 }
 
-                // Determine the target ISO week based on the newRunDateValue
-                const targetRunActualDate = new Date(newRunDateValue + "T00:00:00"); // Local date for week calc
+                const targetRunActualDate = new Date(newRunDateValue + "T00:00:00");
                 const newTargetIsoWeekInfo = getCurrentIsoWeek(targetRunActualDate);
                 const newTargetIsoWeek = newTargetIsoWeekInfo.isoWeekString;
 
-                // Load data from the original week
                 let originalWeekData = getWeekData(originalIsoWeek);
                 const rsIndexInOriginal = originalWeekData.findIndex(rs => rs.id === runSessionId);
 
@@ -1665,7 +1695,7 @@
                     return;
                 }
 
-                const updatedRunSession = { ...originalWeekData[rsIndexInOriginal] }; // Create a mutable copy
+                const updatedRunSession = { ...originalWeekData[rsIndexInOriginal] };
 
                 updatedRunSession.name = newName;
                 updatedRunSession.done = newDoneState;
@@ -1674,11 +1704,19 @@
                 updatedRunSession.distance = newDistance;
                 updatedRunSession.time = newParsedTime;
 
+                updatedRunSession.pace = null;
+                if (updatedRunSession.done && updatedRunSession.distance && updatedRunSession.distance > 0 && updatedRunSession.time) {
+                    const totalSeconds = timeStringToSeconds(updatedRunSession.time);
+                    if (totalSeconds !== null && totalSeconds > 0) {
+                        updatedRunSession.pace = totalSeconds / updatedRunSession.distance;
+                    }
+                }
+
                 if (updatedRunSession.done) {
                     let completedDate;
                     if (updatedRunSession.runDate) {
                         const [year, month, day] = updatedRunSession.runDate.split('-').map(Number);
-                        completedDate = new Date(year, month - 1, day); // Month is 0-indexed
+                        completedDate = new Date(year, month - 1, day);
                         if (updatedRunSession.runTime) {
                             const [hours, minutes] = updatedRunSession.runTime.split(':').map(Number);
                             if (!isNaN(hours) && !isNaN(minutes)) completedDate.setHours(hours, minutes);
@@ -1691,7 +1729,6 @@
                     updatedRunSession.completionTimestamp = null;
                 }
 
-                // Update template if name changed
                 const template = getRunSessionTemplate();
                 const templateIndex = template.findIndex(t => t.id === runSessionId);
                 if (templateIndex !== -1 && template[templateIndex].name !== updatedRunSession.name) {
@@ -1700,14 +1737,11 @@
                 }
 
                 if (newTargetIsoWeek === originalIsoWeek) {
-                    // Staying in the same week
                     originalWeekData[rsIndexInOriginal] = updatedRunSession;
                     saveWeekData(originalIsoWeek, originalWeekData);
                 } else {
-                    // Moving to a different week
-                    originalWeekData.splice(rsIndexInOriginal, 1); // Remove from original week's data
+                    originalWeekData.splice(rsIndexInOriginal, 1);
                     saveWeekData(originalIsoWeek, originalWeekData);
-
                     let newTargetWeekData = getWeekData(newTargetIsoWeek);
                     const existingIndexInNewTarget = newTargetWeekData.findIndex(rs => rs.id === runSessionId);
                     if (existingIndexInNewTarget !== -1) {
@@ -1720,7 +1754,6 @@
 
                 closeOpenProfileEditor();
                 renderProfileScreen();
-                // If the edit affects the current week's display on home screen, re-render it.
                 if (currentScreenId === 'home-screen' &&
                     (currentIsoWeekInfo.isoWeekString === originalIsoWeek || currentIsoWeekInfo.isoWeekString === newTargetIsoWeek)) {
                     renderHomeRunSessions();
@@ -1733,7 +1766,7 @@
                 const isoWeek = editorForm.dataset.week;
                 const itemElement = editorForm.closest('.profile-run-session-item');
                 const runSessionName = itemElement.querySelector('.profile-run-session-name')?.textContent || 'this run session';
-                const weekInfo = getWeekRangeFromIsoString(isoWeek); // Will use corrected getCurrentIsoWeek
+                const weekInfo = getWeekRangeFromIsoString(isoWeek);
 
                 if (confirm(`Are you sure you want to delete "${escapeHtml(runSessionName)}" from Week ${weekInfo.weekNumber} (${weekInfo.weekRange})? This action cannot be undone.`)) {
                     closeOpenProfileEditor();
@@ -1749,7 +1782,6 @@
                         if (e.propertyName === 'opacity' && itemElement.style.opacity === '0') {
                             const listInWeekBlock = itemElement.parentElement;
                             itemElement.remove();
-
                             if (listInWeekBlock && listInWeekBlock.children.length === 0) {
                                 const weekBlockElement = listInWeekBlock.closest('.week-block');
                                 if (weekBlockElement) weekBlockElement.remove();
@@ -1820,7 +1852,7 @@
 
                     weekData.forEach(rs => {
                         const formattedDuration = rs.time ? formatTimeForDisplay(rs.time) : '';
-                        const hasDetails = rs.distance !== null || formattedDuration;
+
                         let completionInfo = '';
                         if (rs.done) {
                             if (rs.runDate) {
@@ -1833,6 +1865,16 @@
                             }
                         }
                         const safeName = escapeHtml(rs.name);
+
+                        const detailParts = [];
+                        if (rs.distance !== null) detailParts.push(`${rs.distance} km`);
+                        if (formattedDuration) detailParts.push(formattedDuration);
+                        if (rs.pace) {
+                            const formattedPace = formatPace(rs.pace);
+                            if (formattedPace) detailParts.push(formattedPace);
+                        }
+                        const detailsInfoText = detailParts.join(' · ');
+
                         const li = document.createElement('li');
                         li.classList.add('profile-run-session-item');
                         li.dataset.id = rs.id;
@@ -1843,13 +1885,7 @@
                                  <div class="profile-run-session-content">
                                      <div class="profile-run-session-main-info">
                                          <span class="profile-run-session-name">${safeName}</span>
-                                         ${rs.done && hasDetails ? `
-                                             <span class="profile-run-session-details-info">
-                                                 ${rs.distance !== null ? `${rs.distance} km` : ''}
-                                                 ${rs.distance !== null && formattedDuration ? ' · ' : ''}
-                                                 ${formattedDuration || ''}
-                                             </span>
-                                         ` : (rs.done ? '<span class="profile-run-session-details-info">(No details)</span>' : '')}
+                                         ${rs.done && detailsInfoText ? `<span class="profile-run-session-details-info">${detailsInfoText}</span>` : (rs.done ? '<span class="profile-run-session-details-info">(No details)</span>' : '')}
                                      </div>
                                      ${rs.done ? `<span class="profile-run-session-timestamp">${completionInfo}</span>` : ''}
                                  </div>
@@ -1868,11 +1904,6 @@
                 });
             }
 
-            /**
-             * Derives week display information from an ISO week string (e.g., "2023-W42").
-             * It determines a date within that week (specifically, the Thursday) and
-             * then calls getCurrentIsoWeek() to get the full details.
-             */
             function getWeekRangeFromIsoString(isoWeek) {
                 try {
                     const [yearStr, weekNumStr] = isoWeek.split('-W');
@@ -1883,29 +1914,16 @@
                         console.warn("Invalid isoWeek format for getWeekRangeFromIsoString:", isoWeek);
                         return { weekRange: `Invalid Week: ${isoWeek}`, weekNumber: weekNumStr || '', year: year || new Date().getFullYear(), startDate: null, endDate: null };
                     }
-
-                    // Jan 4th is always in ISO week 1. Find the Thursday of that week.
-                    // Using UTC for consistency with ISO 8601.
                     const jan4UTC = new Date(Date.UTC(year, 0, 4));
-                    const dayOfWeekJan4 = jan4UTC.getUTCDay(); // 0 (Sun) to 6 (Sat)
-
-                    // Offset from Jan 4th to the Thursday of its week.
-                    // Thursday is day 4 in getUTCDay() results.
+                    const dayOfWeekJan4 = jan4UTC.getUTCDay();
                     const offsetToWeek1Thursday = 4 - dayOfWeekJan4;
                     const firstThursdayUTC = new Date(Date.UTC(year, 0, 4 + offsetToWeek1Thursday));
-
-                    // Add (weekNum - 1) weeks to the first Thursday to get to Thursday of the target week
                     const thursdayOfGivenWeekUTC = new Date(firstThursdayUTC.getTime());
                     thursdayOfGivenWeekUTC.setUTCDate(firstThursdayUTC.getUTCDate() + (weekNum - 1) * 7);
-
-                    // Calculate Monday (start) and Sunday (end) of the target week
                     const mondayOfWeekUTC = new Date(thursdayOfGivenWeekUTC.getTime());
                     mondayOfWeekUTC.setUTCDate(thursdayOfGivenWeekUTC.getUTCDate() - 3);
-
                     const sundayOfWeekUTC = new Date(thursdayOfGivenWeekUTC.getTime());
-                    sundayOfWeekUTC.setUTCDate(sundayOfWeekUTC.getUTCDate() + 3); // Corrected: operate on sundayOfWeekUTC
-
-                    // Helper to format date as "Month Day"
+                    sundayOfWeekUTC.setUTCDate(thursdayOfGivenWeekUTC.getUTCDate() + 3);
                     const formatMonthDayUTC = (date) => {
                         if (!date) return '';
                         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -1913,32 +1931,24 @@
                         const day = date.getUTCDate();
                         return `${month} ${day}`;
                     };
-
-                    // Determine if the week spans two months
                     const startMonthDay = formatMonthDayUTC(mondayOfWeekUTC);
                     const endMonthDay = formatMonthDayUTC(sundayOfWeekUTC);
-
                     let rangeString;
                     if (mondayOfWeekUTC.getUTCMonth() === sundayOfWeekUTC.getUTCMonth()) {
-                        // Same month: "Month Day1 – Day2"
-                        const month = formatMonthDayUTC(mondayOfWeekUTC).split(' ')[0]; // Get month name from start date
+                        const month = formatMonthDayUTC(mondayOfWeekUTC).split(' ')[0];
                         const startDay = mondayOfWeekUTC.getUTCDate();
                         const endDay = sundayOfWeekUTC.getUTCDate();
                         rangeString = `${month} ${startDay} – ${endDay}`;
                     } else {
-                        // Different months: "Month1 Day1 – Month2 Day2"
                         rangeString = `${startMonthDay} – ${endMonthDay}`;
                     }
-
-
                     return {
                         weekRange: rangeString,
-                        weekNumber: String(weekNum).padStart(2, '0'), // Return padded week number
+                        weekNumber: String(weekNum).padStart(2, '0'),
                         year: year,
-                        startDate: mondayOfWeekUTC, // Still include Date objects for potential use
+                        startDate: mondayOfWeekUTC,
                         endDate: sundayOfWeekUTC
                     };
-
                 } catch (e) {
                     console.error("Error calculating week range for", isoWeek, ":", e);
                     const parts = isoWeek.split('-W');
@@ -1958,105 +1968,221 @@
                 const allRunSessions = getAllHistoricalRunSessions();
                 const filteredSessions = filterSessionsByPeriod(allRunSessions, period);
 
-                let chartData, chartLabels, chartType = 'bar', chartLabel = "Kilometers";
-                let totalKmForPeriod = 0;
-
                 const today = new Date();
                 const currentYear = today.getFullYear();
+                const currentMonth = today.getMonth(); // 0-indexed
                 const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim();
                 const gridBorderColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim();
                 const tooltipBgColor = getComputedStyle(document.documentElement).getPropertyValue('--nav-background-color').trim();
 
+                let distChartData, distChartLabels, distChartLabel = "Kilometers";
+                let totalKmForPeriod = 0;
+
+                let paceChartData, paceChartLabels;
+                let totalPeriodRunSeconds = 0;
+                let totalPeriodDistanceForPace = 0;
+
 
                 if (period === 'week') {
-                    chartLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                    distChartLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                    paceChartLabels = distChartLabels;
                     const dailyKm = Array(7).fill(0);
+                    const dailyTotalRunSeconds = Array(7).fill(0);
+                    const dailyTotalDistance = Array(7).fill(0);
+                    const dailyAvgPaceData = Array(7).fill(0);
+
                     filteredSessions.forEach(rs => {
-                        if (rs.distance && rs.runDate) {
+                        if (rs.runDate) {
                             const runDate = new Date(rs.runDate + "T00:00:00");
                             const dayOfWeek = runDate.getDay();
                             const isoDayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-                            dailyKm[isoDayIndex] += rs.distance;
-                            totalKmForPeriod += rs.distance;
-                        }
-                    });
-                    chartData = dailyKm;
-                    chartLabel = `KM This Week (Total: ${totalKmForPeriod.toFixed(2)} km)`;
-                } else if (period === 'year') {
-                    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                    chartLabels = monthNames;
-                    const monthlyKm = Array(12).fill(0);
-                    filteredSessions.forEach(rs => {
-                        if (rs.distance && rs.runDate) {
-                            const runDateObj = new Date(rs.runDate + "T00:00:00");
-                            if (runDateObj.getFullYear() === currentYear) {
-                                monthlyKm[runDateObj.getMonth()] += rs.distance;
+
+                            if (rs.distance && rs.distance > 0) {
+                                dailyKm[isoDayIndex] += rs.distance;
                                 totalKmForPeriod += rs.distance;
+
+                                if (rs.time) {
+                                    const runDurationSeconds = timeStringToSeconds(rs.time);
+                                    if (runDurationSeconds !== null && runDurationSeconds > 0) {
+                                        dailyTotalRunSeconds[isoDayIndex] += runDurationSeconds;
+                                        dailyTotalDistance[isoDayIndex] += rs.distance;
+                                    }
+                                }
                             }
                         }
                     });
-                    chartData = monthlyKm;
-                    chartLabel = `KM This Year (Total: ${totalKmForPeriod.toFixed(2)} km)`;
+                    distChartData = dailyKm;
+                    distChartLabel = `KM This Week (Total: ${totalKmForPeriod.toFixed(2)} km)`;
+
+                    for (let i = 0; i < 7; i++) {
+                        if (dailyTotalDistance[i] > 0) {
+                            dailyAvgPaceData[i] = dailyTotalRunSeconds[i] / dailyTotalDistance[i];
+                            totalPeriodRunSeconds += dailyTotalRunSeconds[i];
+                            totalPeriodDistanceForPace += dailyTotalDistance[i];
+                        } else {
+                            dailyAvgPaceData[i] = 0;
+                        }
+                    }
+                    paceChartData = dailyAvgPaceData;
+                } else if (period === 'month') {
+                    const numDaysInCurrentMonth = getDaysInMonth(currentYear, currentMonth);
+                    distChartLabels = Array.from({ length: numDaysInCurrentMonth }, (_, i) => (i + 1).toString());
+                    paceChartLabels = distChartLabels;
+
+                    const dailyKm = Array(numDaysInCurrentMonth).fill(0);
+                    const dailyTotalRunSeconds = Array(numDaysInCurrentMonth).fill(0);
+                    const dailyTotalDistance = Array(numDaysInCurrentMonth).fill(0);
+                    const dailyAvgPaceData = Array(numDaysInCurrentMonth).fill(0);
+
+                    filteredSessions.forEach(rs => {
+                        if (rs.runDate) {
+                            const runDateObj = new Date(rs.runDate + "T00:00:00");
+                            // Filter ensures it's current month, but good to be defensive
+                            if (runDateObj.getFullYear() === currentYear && runDateObj.getMonth() === currentMonth) {
+                                const dayOfMonthIndex = runDateObj.getDate() - 1; // 0-indexed
+
+                                if (rs.distance && rs.distance > 0) {
+                                    dailyKm[dayOfMonthIndex] += rs.distance;
+                                    totalKmForPeriod += rs.distance;
+
+                                    if (rs.time) {
+                                        const runDurationSeconds = timeStringToSeconds(rs.time);
+                                        if (runDurationSeconds !== null && runDurationSeconds > 0) {
+                                            dailyTotalRunSeconds[dayOfMonthIndex] += runDurationSeconds;
+                                            dailyTotalDistance[dayOfMonthIndex] += rs.distance;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    distChartData = dailyKm;
+                    distChartLabel = `KM This Month (Total: ${totalKmForPeriod.toFixed(2)} km)`;
+
+                    for (let i = 0; i < numDaysInCurrentMonth; i++) {
+                        if (dailyTotalDistance[i] > 0) {
+                            dailyAvgPaceData[i] = dailyTotalRunSeconds[i] / dailyTotalDistance[i];
+                            totalPeriodRunSeconds += dailyTotalRunSeconds[i];
+                            totalPeriodDistanceForPace += dailyTotalDistance[i];
+                        } else {
+                            dailyAvgPaceData[i] = 0;
+                        }
+                    }
+                    paceChartData = dailyAvgPaceData;
+                } else if (period === 'year') {
+                    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    distChartLabels = monthNames;
+                    paceChartLabels = distChartLabels;
+                    const monthlyKm = Array(12).fill(0);
+                    const monthlyTotalRunSeconds = Array(12).fill(0);
+                    const monthlyTotalDistance = Array(12).fill(0);
+                    const monthlyAvgPaceData = Array(12).fill(0);
+
+                    filteredSessions.forEach(rs => {
+                        if (rs.runDate) {
+                            const runDateObj = new Date(rs.runDate + "T00:00:00");
+                            if (runDateObj.getFullYear() === currentYear) {
+                                const monthIndex = runDateObj.getMonth();
+                                if (rs.distance && rs.distance > 0) {
+                                    monthlyKm[monthIndex] += rs.distance;
+                                    totalKmForPeriod += rs.distance;
+
+                                    if (rs.time) {
+                                        const runDurationSeconds = timeStringToSeconds(rs.time);
+                                        if (runDurationSeconds !== null && runDurationSeconds > 0) {
+                                            monthlyTotalRunSeconds[monthIndex] += runDurationSeconds;
+                                            monthlyTotalDistance[monthIndex] += rs.distance;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    distChartData = monthlyKm;
+                    distChartLabel = `KM This Year (Total: ${totalKmForPeriod.toFixed(2)} km)`;
+
+                    for (let i = 0; i < 12; i++) {
+                        if (monthlyTotalDistance[i] > 0) {
+                            monthlyAvgPaceData[i] = monthlyTotalRunSeconds[i] / monthlyTotalDistance[i];
+                            totalPeriodRunSeconds += monthlyTotalRunSeconds[i];
+                            totalPeriodDistanceForPace += monthlyTotalDistance[i];
+                        } else {
+                            monthlyAvgPaceData[i] = 0;
+                        }
+                    }
+                    paceChartData = monthlyAvgPaceData;
                 }
+
+                const chartBarThickness = (period === 'year') ? 20 : 'flex';
 
                 if (totalKilometersChart) totalKilometersChart.destroy();
                 if (statsChartCanvas) {
                     const ctx = statsChartCanvas.getContext('2d');
                     totalKilometersChart = new Chart(ctx, {
-                        type: chartType,
+                        type: 'bar',
                         data: {
-                            labels: chartLabels,
+                            labels: distChartLabels,
                             datasets: [{
-                                label: chartLabel,
-                                data: chartData,
+                                label: 'Kilometers',
+                                data: distChartData,
                                 backgroundColor: 'rgba(10, 132, 255, 0.6)',
                                 borderColor: 'rgba(10, 132, 255, 1)',
                                 borderWidth: 1,
                                 borderRadius: 5,
-                                barThickness: period === 'week' ? 'flex' : 20,
+                                barThickness: chartBarThickness,
                             }]
                         },
                         options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
+                            responsive: true, maintainAspectRatio: false,
+                            animations: { x: { type: 'number', easing: 'linear', duration: 0, } },
+                            scales: { y: { beginAtZero: true, ticks: { color: textColor }, grid: { color: gridBorderColor } }, x: { ticks: { color: textColor }, grid: { display: false } } },
+                            plugins: { legend: { display: false, labels: { color: textColor } }, tooltip: { titleColor: textColor, bodyColor: textColor, backgroundColor: tooltipBgColor, borderColor: gridBorderColor, borderWidth: 1, padding: 10, callbacks: { label: function (context) { let label = ''; if (context.parsed.y !== null) { label += context.parsed.y.toFixed(2) + ' km'; } return label; } } } }
+                        }
+                    });
+                }
+                statsSummaryElement.textContent = distChartLabel;
 
-                            animations: {
-                                x: {
-                                    type: 'number',
-                                    easing: 'linear',
-                                    duration: 0,
-                                }
-                            },
+                if (averagePaceChartInstance) averagePaceChartInstance.destroy();
+                if (statsPaceChartCanvas) {
+                    const paceCtx = statsPaceChartCanvas.getContext('2d');
+                    averagePaceChartInstance = new Chart(paceCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: paceChartLabels,
+                            datasets: [{
+                                label: 'Average Pace /km',
+                                data: paceChartData,
+                                backgroundColor: 'rgba(48, 209, 88, 0.6)',
+                                borderColor: 'rgba(48, 209, 88, 1)',
+                                borderWidth: 1,
+                                borderRadius: 5,
+                                barThickness: chartBarThickness,
+                            }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            animations: { x: { type: 'number', easing: 'linear', duration: 0, } },
                             scales: {
                                 y: {
                                     beginAtZero: true,
-                                    ticks: { color: textColor },
+                                    ticks: {
+                                        color: textColor,
+                                        callback: function (value) { return formatPaceForChart(value); }
+                                    },
                                     grid: { color: gridBorderColor }
                                 },
-                                x: {
-                                    ticks: { color: textColor },
-                                    grid: { display: false }
-                                }
+                                x: { ticks: { color: textColor }, grid: { display: false } }
                             },
                             plugins: {
-                                legend: {
-                                    display: false,
-                                    labels: { color: textColor }
-                                },
+                                legend: { display: false },
                                 tooltip: {
-                                    titleColor: textColor,
-                                    bodyColor: textColor,
-                                    backgroundColor: tooltipBgColor,
-                                    borderColor: gridBorderColor,
-                                    borderWidth: 1,
-                                    padding: 10,
+                                    titleColor: textColor, bodyColor: textColor, backgroundColor: tooltipBgColor,
+                                    borderColor: gridBorderColor, borderWidth: 1, padding: 10,
                                     callbacks: {
                                         label: function (context) {
-                                            let label = '';
-                                            if (context.parsed.y !== null) {
-                                                label += context.parsed.y.toFixed(2) + ' km';
-                                            }
-                                            return label;
+                                            const paceValue = context.parsed.y;
+                                            const formatted = formatPaceForChart(paceValue);
+                                            return formatted === 'N/A' ? formatted : `${formatted}/km`;
                                         }
                                     }
                                 }
@@ -2064,7 +2190,18 @@
                         }
                     });
                 }
-                statsSummaryElement.textContent = chartLabel;
+                const overallAveragePaceSeconds = totalPeriodDistanceForPace > 0 ? totalPeriodRunSeconds / totalPeriodDistanceForPace : 0;
+                const formattedOverallAvgPace = formatPace(overallAveragePaceSeconds);
+                statsPaceSummaryElement.textContent = `Avg Pace This ${getPeriodDisplayName(period)}: ${formattedOverallAvgPace || 'N/A'}`;
+            }
+
+            function getPeriodDisplayName(period) {
+                switch (period) {
+                    case 'week': return 'Week';
+                    case 'month': return 'Month';
+                    case 'year': return 'Year';
+                    default: return '';
+                }
             }
 
             function getAllHistoricalRunSessions() {
@@ -2074,8 +2211,17 @@
                     const weekData = loadData(key);
                     if (weekData && weekData.length > 0) {
                         weekData.forEach(rs => {
-                            if (rs.done && rs.distance != null && rs.runDate) {
-                                allSessions.push(rs);
+                            if (rs.done && rs.distance != null && rs.distance > 0 && rs.runDate && rs.time) {
+                                const sessionToAdd = { ...rs };
+                                if ((typeof sessionToAdd.pace === 'undefined' || sessionToAdd.pace === null)) {
+                                    const totalSeconds = timeStringToSeconds(sessionToAdd.time);
+                                    if (totalSeconds !== null && totalSeconds > 0) {
+                                        sessionToAdd.pace = totalSeconds / sessionToAdd.distance;
+                                    } else {
+                                        sessionToAdd.pace = null;
+                                    }
+                                }
+                                allSessions.push(sessionToAdd);
                             }
                         });
                     }
@@ -2085,18 +2231,25 @@
 
             function filterSessionsByPeriod(sessions, period) {
                 const today = new Date();
-                const currentWeekInfo = getCurrentIsoWeek(today); // Uses corrected function
+                const currentWeekInfo = getCurrentIsoWeek(today);
                 const currentYearStart = new Date(today.getFullYear(), 0, 1);
                 const currentYearEnd = new Date(today.getFullYear(), 11, 31, 23, 59, 59);
 
                 return sessions.filter(rs => {
                     if (!rs.runDate) return false;
-                    const runDate = new Date(rs.runDate + "T00:00:00"); // Treat as local
+                    if (rs.distance == null || rs.distance <= 0 || !rs.time) return false;
+
+                    const runDate = new Date(rs.runDate + "T00:00:00");
                     if (isNaN(runDate.getTime())) return false;
 
                     switch (period) {
                         case 'week':
                             return runDate >= currentWeekInfo.startDate && runDate <= currentWeekInfo.endDate;
+                        case 'month':
+                            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+                            firstDayOfMonth.setHours(0, 0, 0, 0); // Ensure start of the day
+                            const endOfPeriodForMonth = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999); // End of current day
+                            return runDate >= firstDayOfMonth && runDate <= endOfPeriodForMonth;
                         case 'year':
                             return runDate >= currentYearStart && runDate <= currentYearEnd;
                         default: return false;
@@ -2110,7 +2263,7 @@
                 if (confirm("⚠️ Are you sure you want to permanently delete ALL your Stay Fit! run session data? This cannot be undone.")) {
                     if (confirm("⚠️ FINAL WARNING: Delete all data?")) {
                         Object.keys(localStorage).forEach(key => { if (key.startsWith('stayfit_')) localStorage.removeItem(key); });
-                        currentIsoWeekInfo = getCurrentIsoWeek(); // Re-initialize with corrected function
+                        currentIsoWeekInfo = getCurrentIsoWeek();
                         saveRunSessionTemplate([]);
                         saveWeekData(currentIsoWeekInfo.isoWeekString, []);
                         initializeApp();
@@ -2124,11 +2277,11 @@
             function escapeHtml(unsafe) {
                 if (typeof unsafe !== 'string') return String(unsafe);
                 return unsafe
-                    .replace(/&/g, "&")
-                    .replace(/</g, "<")
-                    .replace(/>/g, ">")
-                    .replace(/"/g, '"')
-                    .replace(/'/g, "'");
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#39;");
             }
             function parseTimeInput(timeString) {
                 timeString = String(timeString).trim().replace(/[.,]/g, ":");
@@ -2165,16 +2318,56 @@
             function formatDateForDisplay(isoDateString) {
                 if (!isoDateString) return '';
                 try {
-                    const date = new Date(isoDateString + "T00:00:00"); // Treat as local
+                    const date = new Date(isoDateString + "T00:00:00");
                     return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
                 } catch (e) { return isoDateString; }
             }
             function formatCompletionTimestamp(isoString) {
                 if (!isoString) return '';
                 try {
-                    const date = new Date(isoString); // Assumes ISO string is UTC or has TZ, Date constructor handles it
+                    const date = new Date(isoString);
                     return `Completed: ${date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}, ${date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}`;
                 } catch (e) { return 'Completed: (invalid date)'; }
+            }
+
+            // --- Pace Utilities ---
+            function timeStringToSeconds(timeString) {
+                if (!timeString) return null;
+                const parts = String(timeString).split(':').map(Number);
+                let hours = 0, minutes = 0, seconds = 0;
+
+                if (parts.length === 3) { [hours, minutes, seconds] = parts; }
+                else if (parts.length === 2) { [minutes, seconds] = parts; }
+                else { return null; }
+
+                if (isNaN(hours) || isNaN(minutes) || isNaN(seconds)) return null;
+                if (minutes > 59 || seconds > 59 || minutes < 0 || seconds < 0 || hours < 0) return null;
+                return (hours * 3600) + (minutes * 60) + seconds;
+            }
+
+            function formatPace(secondsPerKm) {
+                if (secondsPerKm === null || isNaN(secondsPerKm) || !isFinite(secondsPerKm) || secondsPerKm <= 0) {
+                    return '';
+                }
+                const totalSeconds = Math.round(secondsPerKm);
+                const minutes = Math.floor(totalSeconds / 60);
+                const remainingSeconds = totalSeconds % 60;
+                return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}/km`;
+            }
+
+            function formatPaceForChart(valueInSeconds) { // Used for ticks and tooltips
+                if (valueInSeconds === 0) { // Handle 0 specifically, often for the axis baseline
+                    return "00:00";
+                }
+                // For other cases (tooltips with bad data, or non-zero ticks if data is problematic)
+                if (valueInSeconds === null || isNaN(valueInSeconds) || !isFinite(valueInSeconds) || valueInSeconds < 0) {
+                    return "N/A";
+                }
+                // This part now only runs for valueInSeconds > 0
+                const totalSeconds = Math.round(valueInSeconds);
+                const minutes = Math.floor(totalSeconds / 60);
+                const remainingSeconds = totalSeconds % 60;
+                return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
             }
 
             // --- Start the app ---
