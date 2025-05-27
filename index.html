@@ -22,47 +22,46 @@
 
     <style>
         :root {
-            --background-color: #000000;
-            --text-color: #FFFFFF;
-            --secondary-text-color: #D3D3D3;
+            --background-color: #121212;
+            --text-color: #E0E0E0;
+            --secondary-text-color: #A0A0A0;
             --accent-color: #0A84FF;
-            /* Apple's brighter blue for dark mode */
-            --card-background: #1C1C1E;
-            /* iOS dark mode card color */
+            --accent-color-rgb: 10, 132, 255;
+            /* For RGBA usage */
+            --card-background: #1E1E1E;
             --border-color: #38383A;
-            /* iOS dark mode separator color */
-            --shadow-color: rgba(0, 0, 0, 0.4);
-            /* Darker shadow for dark mode */
+            --input-background-color: #28282B;
+            /* Slightly different from card for depth */
+            --input-focus-background-color: #333336;
+            --shadow-color: rgba(0, 0, 0, 0.35);
+            /* Slightly darker shadow */
             --danger-color: #FF453A;
-            /* iOS dark mode red */
+            --danger-hover-color: #E03C30;
             --success-color: #30D158;
-            /* iOS dark mode green */
-            --done-background-color: rgba(48, 209, 88, 0.1);
-            /* Subtle green tint on dark */
-            --input-background-color: #2C2C2E;
-            --input-focus-background-color: #3A3A3C;
-            --nav-background-color: rgba(28, 28, 30, 0.85);
-            /* Darker, slightly transparent nav */
+            --success-hover-color: #28B84A;
+            --done-background-color: rgba(48, 209, 88, 0.15);
+            --nav-background-color: rgba(24, 24, 26, 0.85);
+            /* More opaque */
 
-            --border-radius: 12px;
+            --border-radius: 10px;
+            --border-radius-small: 8px;
             --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-            --transition-speed: 0.3s;
-            --long-transition-speed: 0.4s;
-            /* For panel animations */
+            --transition-speed: 0.25s;
+            --long-transition-speed: 0.35s;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            -webkit-tap-highlight-color: transparent;
+            /* Remove tap highlight on mobile */
         }
 
         html,
         body {
             height: 100svh;
-            /* Fallback for older browsers */
             height: 100dvh;
-            /* Dynamic viewport height */
         }
 
         body {
@@ -70,19 +69,38 @@
             background-color: var(--background-color);
             color: var(--text-color);
             font-size: 16px;
-            line-height: 1.5;
+            line-height: 1.6;
+            /* Increased for readability */
             display: flex;
             flex-direction: column;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            /* Prevent horizontal scroll */
         }
 
         main {
             flex-grow: 1;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            padding: 20px 15px 80px 15px;
+            padding: 25px 20px 90px 20px;
+            /* Increased top/bottom padding */
         }
+
+        /* Focus Visible Styling */
+        *:focus-visible {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible {
+            border-color: var(--accent-color) !important;
+            /* Ensure border changes */
+            box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.3);
+        }
+
 
         /* Screen Management */
         .screen {
@@ -97,7 +115,8 @@
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(5px);
+                transform: translateY(15px);
+                /* Slightly more pronounced */
             }
 
             to {
@@ -118,30 +137,40 @@
 
             to {
                 opacity: 0;
-                transform: translateY(-5px);
+                transform: translateY(-15px);
+                /* Slightly more pronounced */
             }
         }
 
         h1.screen-header {
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 25px;
+            font-size: 30px;
+            /* Larger screen titles */
+            font-weight: 700;
+            /* Bolder */
+            margin-bottom: 30px;
             color: var(--text-color);
             text-align: center;
+            letter-spacing: -0.5px;
         }
 
         img.screen-logo {
             width: 100%;
-            max-width: 300px;
-            margin: 0 auto 20px auto;
+            max-width: 280px;
+            /* Slightly smaller max */
+            max-height: 80px;
+            /* Prevent overly tall logos */
+            object-fit: contain;
+            margin: 0 auto 30px auto;
+            /* Increased bottom margin */
             display: block;
         }
 
         /* Forms & Inputs */
         .add-run-session-form {
             display: flex;
-            gap: 10px;
-            margin-bottom: 25px;
+            gap: 12px;
+            /* Slightly more gap */
+            margin-bottom: 30px;
         }
 
         .add-run-session-form input[type="text"],
@@ -155,26 +184,29 @@
         .profile-editor-form input[type="date"],
         .profile-editor-form input[type="time"] {
             flex-grow: 1;
-            padding: 12px 15px;
+            padding: 9px;
+            /* Increased padding */
             border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
+            border-radius: var(--border-radius-small);
             font-size: 16px;
             font-family: var(--font-family);
             background-color: var(--input-background-color);
             color: var(--text-color);
+            transition: border-color var(--transition-speed) ease, background-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
         }
 
         select#stats-period-filter {
             flex-grow: 0;
-            /* Don't let select grow too much */
-            min-width: 150px;
+            min-width: 160px;
+            /* Slightly wider */
         }
 
         .add-run-session-form input[type="text"]::placeholder,
         .details-input-group input::placeholder,
         .profile-editor-form input::placeholder {
             color: var(--secondary-text-color);
-            opacity: 0.7;
+            opacity: 0.8;
+            /* More visible placeholder */
         }
 
         .add-run-session-form input[type="text"]:focus,
@@ -182,77 +214,94 @@
         select#stats-period-filter:focus,
         .profile-editor-form input:focus {
             outline: none;
+            /* Handled by focus-visible */
             border-color: var(--accent-color);
             background-color: var(--input-focus-background-color);
+            box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.3);
+            /* Softer focus glow */
         }
 
-        /* Style for date/time input indicators */
         .details-input-group input[type="date"]::-webkit-calendar-picker-indicator,
         .details-input-group input[type="time"]::-webkit-calendar-picker-indicator,
         .profile-editor-form input[type="date"]::-webkit-calendar-picker-indicator,
         .profile-editor-form input[type="time"]::-webkit-calendar-picker-indicator {
-            filter: invert(1) brightness(0.7);
-            /* Adjust for dark mode */
+            filter: invert(0.8) brightness(0.9);
+            /* Adjusted for better visibility */
+            cursor: pointer;
         }
 
 
         .add-run-session-form button,
         .minimal-button {
-            padding: 10px 15px;
+            padding: 9px;
+            /* Consistent padding */
             background-color: var(--accent-color);
-            color: var(--background-color);
-            /* Text color on accent button for contrast */
+            color: #FFFFFF;
+            /* Ensure white text on accent */
             border: none;
-            border-radius: var(--border-radius);
+            border-radius: var(--border-radius-small);
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
-            /* Bolder text on buttons */
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            transition: background-color var(--transition-speed) ease, transform 0.1s ease;
-            box-shadow: 0 1px 3px var(--shadow-color);
-            gap: 5px;
+            transition: background-color var(--transition-speed) ease, transform 0.15s ease, box-shadow var(--transition-speed) ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+            gap: 8px;
+            /* Slightly more gap for icon and text */
         }
+
+        .add-run-session-form button {
+            /* Specific style for the plus button if needed */
+            padding: 12px 15px;
+            /* More square-ish for icon only */
+            flex-shrink: 0;
+        }
+
 
         .add-run-session-form button:hover,
         .minimal-button:hover {
-            background-color: #0056b3;
-            /* Slightly darker accent */
+            background-color: color-mix(in srgb, var(--accent-color) 85%, black);
+            box-shadow: 0 3px 7px rgba(0, 0, 0, 0.2);
         }
 
         .add-run-session-form button:active,
         .minimal-button:active {
-            transform: scale(0.98);
+            transform: scale(0.97) translateY(1px);
+            /* More pronounced active state */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
         }
 
         .minimal-button.danger {
             background-color: var(--danger-color);
-            color: var(--text-color);
+            color: #FFFFFF;
         }
 
         .minimal-button.danger:hover {
-            background-color: #d9362e;
+            background-color: var(--danger-hover-color);
         }
 
         .minimal-button.save-details-button,
         .minimal-button.profile-save-button {
-            /* Ensure save button uses success color */
             background-color: var(--success-color);
-            color: var(--background-color);
+            color: #FFFFFF;
+            /* Ensure white text for contrast */
         }
 
         .minimal-button.save-details-button:hover,
         .minimal-button.profile-save-button:hover {
-            background-color: #2ca34a;
+            background-color: var(--success-hover-color);
         }
 
+        .minimal-button i {
+            font-size: 0.9em;
+        }
+
+        /* Adjust icon size in buttons */
         .minimal-button.delete-run-session-button-panel i {
             margin: 0;
-            /* Remove gap if only icon */
         }
-
 
         /* Run Session List Items */
         .run-session-list {
@@ -262,17 +311,30 @@
 
         .run-session-item {
             background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            /* Subtle border */
             border-radius: var(--border-radius);
-            margin-bottom: 15px;
-            padding: 15px;
-            box-shadow: 0 2px 5px var(--shadow-color);
+            margin-bottom: 18px;
+            /* More space */
+            padding: 18px;
+            /* More padding */
+            box-shadow: 0 3px 8px var(--shadow-color);
+            /* Refined shadow */
             overflow: hidden;
-            transition: background-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+            transition: background-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease, opacity var(--transition-speed) ease, transform var(--transition-speed) ease;
             position: relative;
         }
 
+        .run-session-item:hover:not(.done):not(.editing) {
+            background-color: color-mix(in srgb, var(--card-background) 95%, var(--text-color) 5%);
+            box-shadow: 0 5px 12px var(--shadow-color);
+            transform: translateY(-2px);
+        }
+
+
         .run-session-item.done {
             background-color: var(--done-background-color);
+            border-color: color-mix(in srgb, var(--success-color) 30%, transparent);
         }
 
         .run-session-item.deleting {
@@ -284,15 +346,15 @@
                 opacity: 1;
                 transform: translateY(0);
                 max-height: 250px;
-                padding: 15px;
-                margin-bottom: 15px;
+                padding: 18px;
+                margin-bottom: 18px;
             }
 
             to {
                 opacity: 0;
                 transform: translateY(-20px);
                 max-height: 0;
-                padding: 0 15px;
+                padding: 0 18px;
                 margin-bottom: 0;
                 border: none;
                 box-shadow: none;
@@ -302,14 +364,16 @@
         .run-session-item-main {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
+            /* More gap */
             cursor: default;
         }
 
         .run-session-item-main .checkbox {
             appearance: none;
-            width: 24px;
-            height: 24px;
+            width: 26px;
+            height: 26px;
+            /* Slightly larger */
             border: 2px solid var(--secondary-text-color);
             border-radius: 50%;
             cursor: pointer;
@@ -327,13 +391,20 @@
             border-color: var(--accent-color);
         }
 
+        .run-session-item-main .checkbox:focus-visible {
+            /* Specific focus for checkbox */
+            box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.4);
+            outline: none;
+        }
+
         .run-session-item-main .checkbox:checked::after {
             content: '\f00c';
             font-family: "Font Awesome 6 Free";
             font-weight: 900;
-            font-size: 12px;
-            color: var(--background-color);
-            /* Check mark color for contrast */
+            font-size: 13px;
+            /* Adjusted size */
+            color: #FFFFFF;
+            /* White checkmark */
             position: absolute;
             top: 50%;
             left: 50%;
@@ -342,9 +413,11 @@
 
         .run-session-name {
             flex-grow: 1;
-            font-size: 17px;
+            font-size: 18px;
+            /* Larger name */
             font-weight: 500;
-            padding: 5px 0;
+            padding: 8px 0;
+            /* Vertical padding for better feel */
             border: none;
             background: transparent;
             font-family: var(--font-family);
@@ -352,6 +425,8 @@
             outline: none;
             width: auto;
             min-width: 50px;
+            border-radius: var(--border-radius-small);
+            /* Add radius for consistency on focus */
         }
 
         .run-session-item:not(.done) .run-session-name {
@@ -359,25 +434,30 @@
         }
 
         .run-session-item:not(.done) .run-session-name:focus {
-            background-color: rgba(10, 132, 255, 0.1);
-            /* Subtle accent focus */
-            border-radius: 4px;
-            padding-left: 5px;
-            padding-right: 5px;
-            margin-left: -5px;
-            margin-right: -5px;
+            background-color: var(--input-background-color);
+            padding-left: 10px;
+            padding-right: 10px;
+            margin-left: -10px;
+            margin-right: -10px;
+            /* Compensate for padding */
+            box-shadow: inset 0 0 0 1px var(--border-color);
+            /* Subtle inset border */
         }
 
         .run-session-item.done .run-session-name {
             color: var(--secondary-text-color);
             text-decoration: line-through;
             text-decoration-color: var(--secondary-text-color);
+            text-decoration-thickness: 1.5px;
+            /* Slightly thicker */
         }
 
         .delete-run-session-button {
+            /* This class seems to be used for main delete */
             flex-shrink: 0;
             margin-left: auto;
-            padding: 6px 10px;
+            padding: 8px 12px;
+            /* Adjust padding */
         }
 
         .delete-run-session-button i {
@@ -390,24 +470,24 @@
             max-height: 0;
             overflow: hidden;
             transition: max-height var(--long-transition-speed) ease-out, padding var(--long-transition-speed) ease-out, margin-top var(--long-transition-speed) ease-out, border-top-color var(--long-transition-speed) ease-out;
-            padding: 0 15px;
-            /* Horizontal padding maintained during animation */
+            padding: 0 5px;
+            /* Horizontal padding for content inside */
             margin-top: 0;
             border-top: 1px solid transparent;
         }
 
         .run-session-details-panel.open {
-            max-height: 500px;
-            /* Increased for new date/time fields */
-            padding-top: 15px;
-            /* Vertical padding animates in */
+            max-height: 600px;
+            /* Generous height */
+            padding-top: 20px;
             padding-bottom: 15px;
-            margin-top: 15px;
+            margin-top: 20px;
             border-top: 1px solid var(--border-color);
         }
 
         .details-input-group {
-            margin-bottom: 15px;
+            margin-bottom: 18px;
+            /* More space */
             display: flex;
             flex-direction: column;
         }
@@ -415,7 +495,9 @@
         .details-input-group label {
             font-size: 14px;
             color: var(--secondary-text-color);
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            /* More space */
+            font-weight: 500;
         }
 
         .details-input-group input[type="number"],
@@ -434,9 +516,9 @@
         .details-buttons-container {
             display: flex;
             justify-content: space-between;
-            /* Pushes delete to left, save to right */
             align-items: center;
-            margin-top: 10px;
+            margin-top: 20px;
+            /* More space */
         }
 
         /* Compact Display */
@@ -452,15 +534,16 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            line-height: 1.3;
+            line-height: 1.4;
             transition: opacity var(--transition-speed) ease, max-height var(--transition-speed) ease, margin-top var(--transition-speed) ease, padding-top var(--transition-speed) ease, border-top-color var(--transition-speed) ease;
         }
 
         .run-session-compact-display.visible {
             opacity: 1;
-            max-height: 100px;
-            margin-top: 10px;
-            padding-top: 10px;
+            max-height: 120px;
+            /* Increased for potential two lines */
+            margin-top: 15px;
+            padding-top: 15px;
             border-top: 1px solid var(--border-color);
         }
 
@@ -469,47 +552,69 @@
             margin-right: 10px;
         }
 
+        .compact-info small {
+            font-size: 0.85em;
+            opacity: 0.8;
+        }
+
         .edit-details-button {
             background: none;
             border: none;
             color: var(--accent-color);
             cursor: pointer;
-            padding: 5px;
-            font-size: 18px;
+            padding: 8px;
+            /* Better touch target */
+            font-size: 20px;
+            /* Larger icon */
             flex-shrink: 0;
+            border-radius: 50%;
+            transition: background-color var(--transition-speed) ease, opacity var(--transition-speed) ease;
         }
 
         .edit-details-button:hover {
-            opacity: 0.7;
+            background-color: rgba(var(--accent-color-rgb), 0.1);
+            opacity: 0.8;
         }
+
+        .edit-details-button:focus-visible {
+            background-color: rgba(var(--accent-color-rgb), 0.15);
+            outline: none;
+            /* Custom focus already applied globally */
+        }
+
 
         /* Profile Screen & Stats Screen common*/
         .week-block,
         .stats-block {
-            /* .stats-block is old, maybe remove if not used */
             margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
+            padding: 20px;
+            /* Add padding to make it card-like */
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            box-shadow: 0 3px 8px var(--shadow-color);
         }
 
         .week-block:last-child,
         .stats-block:last-child {
-            border-bottom: none;
             margin-bottom: 0;
-            padding-bottom: 0;
         }
 
         .week-header {
-            font-size: 20px;
+            font-size: 22px;
+            /* Larger */
             font-weight: 600;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            /* Separator for header */
         }
 
         .week-summary {
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 400;
             color: var(--secondary-text-color);
         }
@@ -522,16 +627,13 @@
         .profile-run-session-item {
             display: flex;
             flex-direction: column;
-            /* Changed to column for editor */
-            padding: 12px 0;
+            padding: 15px 0;
+            /* Vertical padding */
             border-bottom: 1px solid var(--border-color);
             font-size: 16px;
             cursor: pointer;
-            /* To indicate clickable for editing */
-            transition: opacity var(--transition-speed) ease-out, max-height var(--transition-speed) ease-out, padding var(--transition-speed) ease-out, margin-bottom var(--transition-speed) ease-out;
-            /* For item deletion animation */
+            transition: opacity var(--transition-speed) ease-out, max-height var(--transition-speed) ease-out, padding var(--transition-speed) ease-out, margin-bottom var(--transition-speed) ease-out, background-color var(--transition-speed) ease;
             overflow: hidden;
-            /* For item deletion animation */
         }
 
         .profile-run-session-item:last-child {
@@ -539,17 +641,18 @@
         }
 
         .profile-run-session-item-content-wrapper {
-            /* New wrapper for existing content */
             display: flex;
             align-items: flex-start;
         }
 
         .profile-run-session-status {
-            margin-right: 15px;
-            font-size: 20px;
-            width: 25px;
+            margin-right: 18px;
+            font-size: 22px;
+            /* Larger emoji */
+            width: 28px;
             text-align: center;
-            padding-top: 1px;
+            padding-top: 0px;
+            /* Align with text */
             flex-shrink: 0;
         }
 
@@ -563,13 +666,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 4px;
+            gap: 12px;
+            margin-bottom: 5px;
         }
 
         .profile-run-session-name {
             font-weight: 500;
             color: var(--text-color);
+            font-size: 17px;
         }
 
         .profile-run-session-details-info {
@@ -577,26 +681,27 @@
             font-size: 14px;
             text-align: right;
             flex-shrink: 0;
+            opacity: 0.9;
         }
 
         .profile-run-session-timestamp {
             font-size: 13px;
             color: var(--secondary-text-color);
-            padding-top: 2px;
+            padding-top: 3px;
+            opacity: 0.8;
         }
 
         /* Profile Item Editor */
         .profile-editor-form {
-            background-color: var(--card-background);
+            background-color: color-mix(in srgb, var(--card-background) 85%, black);
+            /* Slightly darker editor */
             padding-left: 15px;
-            /* Static horizontal padding */
             padding-right: 15px;
-            border-radius: var(--border-radius);
+            border-radius: var(--border-radius-small);
             border: 1px solid var(--border-color);
             max-height: 0;
             opacity: 0;
             overflow: hidden;
-            /* Animated properties: padding-top, padding-bottom, margin-top, max-height, opacity */
             transition: max-height var(--long-transition-speed) ease-out,
                 opacity var(--long-transition-speed) ease-out,
                 padding-top var(--long-transition-speed) ease-out,
@@ -604,40 +709,48 @@
                 margin-top var(--long-transition-speed) ease-out;
         }
 
+        /* .profile-editor-form will have padding-top, padding-bottom, margin-top animated by JS */
+
         .profile-editor-form .details-input-group {
-            /* Reuse existing styles */
-            margin-bottom: 12px;
+            margin-bottom: 15px;
         }
 
         .profile-editor-form .details-input-group label {
             font-size: 13px;
-            /* Slightly smaller for editor */
+            font-weight: 500;
         }
 
         .profile-editor-form .details-buttons-container {
-            margin-top: 15px;
+            margin-top: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
         .profile-editor-form .details-buttons-container>div {
-            /* Wrapper for right-aligned buttons */
             display: flex;
-            gap: 10px;
+            gap: 6px;
         }
 
         .profile-editor-checkbox-group {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 12px;
+            gap: 6px;
+            margin-bottom: 15px;
+            padding: 10px 0;
+            /* Add some padding */
         }
 
         .profile-editor-checkbox-group input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             accent-color: var(--accent-color);
+            cursor: pointer;
+        }
+
+        .profile-editor-checkbox-group label {
+            font-size: 16px;
+            cursor: pointer;
         }
 
 
@@ -645,48 +758,48 @@
         .stats-controls {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 30px;
-            /* Increased space before cards */
+            gap: 15px;
+            margin-bottom: 35px;
             flex-wrap: wrap;
-            /* Allow wrapping on small screens */
+            padding: 15px;
+            /* Add padding */
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 5px var(--shadow-color);
         }
 
         .stats-controls label {
-            font-size: 15px;
+            font-size: 16px;
             color: var(--secondary-text-color);
+            font-weight: 500;
         }
 
         #stats-metrics-wrapper {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            /* Space between cards */
-            justify-content: center;
-            /* Center cards if they don't fill the row */
-            margin-bottom: 20px;
-            /* Space below the cards block */
+            display: grid;
+            /* Use grid for better responsiveness */
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+            /* Responsive columns */
+            gap: 25px;
+            margin-bottom: 25px;
         }
 
         .stats-metric-card {
             background-color: var(--card-background);
+            border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
-            padding: 20px;
-            box-shadow: 0 2px 5px var(--shadow-color);
-            flex: 1 1 320px;
-            /* Grow, shrink, with a basis for responsive two-column */
-            max-width: 500px;
-            /* Max width for a single card on larger screens */
-            min-width: 280px;
-            /* Min width before stacking */
+            padding: 25px;
+            /* More padding */
+            box-shadow: 0 3px 8px var(--shadow-color);
             display: flex;
             flex-direction: column;
         }
 
         .stats-chart-canvas-container {
             width: 100%;
-            height: 300px;
-            margin-bottom: 15px;
+            height: 280px;
+            /* Slightly smaller height */
+            margin-bottom: 20px;
             position: relative;
         }
 
@@ -694,39 +807,43 @@
             text-align: center;
             font-size: 16px;
             color: var(--secondary-text-color);
-            margin-top: 0;
-            /* Spacing controlled by card padding and canvas container margin */
+            margin-top: 5px;
+            font-weight: 500;
         }
-
 
         /* Reset Button */
         .reset-all-button {
             display: block;
             width: 100%;
-            margin: 30px 0 20px 0;
-            padding: 15px;
+            margin: 40px 0 20px 0;
+            /* More top margin */
+            padding: 16px;
+            /* More padding */
             background-color: var(--danger-color);
             color: white;
             border: none;
             border-radius: var(--border-radius);
             cursor: pointer;
-            font-size: 16px;
-            font-weight: 500;
+            font-size: 17px;
+            /* Larger font */
+            font-weight: 600;
             text-align: center;
-            transition: background-color var(--transition-speed) ease, transform 0.1s ease;
-            box-shadow: 0 2px 5px var(--shadow-color);
+            transition: background-color var(--transition-speed) ease, transform 0.15s ease, box-shadow var(--transition-speed) ease;
+            box-shadow: 0 3px 8px var(--shadow-color);
         }
 
         .reset-all-button i {
-            margin-right: 8px;
+            margin-right: 10px;
         }
 
         .reset-all-button:hover {
-            background-color: #d9362e;
+            background-color: var(--danger-hover-color);
+            box-shadow: 0 4px 10px var(--shadow-color);
         }
 
         .reset-all-button:active {
-            transform: scale(0.99);
+            transform: scale(0.98) translateY(1px);
+            box-shadow: 0 2px 5px var(--shadow-color);
         }
 
         nav {
@@ -734,19 +851,20 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: calc(65px + env(safe-area-inset-bottom));
+            height: calc(70px + env(safe-area-inset-bottom));
+            /* Increased height */
             padding-bottom: env(safe-area-inset-bottom);
             background-color: var(--nav-background-color);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
+            backdrop-filter: blur(20px);
+            /* Stronger blur */
+            -webkit-backdrop-filter: blur(20px);
             border-top: 1px solid var(--border-color);
             display: flex;
             justify-content: space-around;
-            align-items: flex-start;
-            padding-top: 5px;
-            /* Ensure icons are not cut off */
-            padding-bottom: calc(5px + env(safe-area-inset-bottom));
-            /* Add padding to bottom for text too*/
+            align-items: stretch;
+            /* Stretch items */
+            padding-top: 0;
+            /* Remove top padding, handled by button flex */
         }
 
         nav button {
@@ -758,22 +876,26 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            /* vertically center icon and text */
             height: 100%;
+            /* Full height of nav item */
             color: var(--secondary-text-color);
-            transition: color var(--transition-speed) ease;
-            padding-top: 5px;
-            /* Added to give space from top of nav bar */
-            padding-bottom: 5px;
-            /* Added for symmetry and space for text */
+            transition: color var(--transition-speed) ease, transform 0.1s ease;
+            padding: 8px 5px calc(8px + env(safe-area-inset-bottom)) 5px;
+            /* Adjust padding for text */
+            position: relative;
+            /* For pseudo-elements if needed */
+        }
+
+        nav button:active {
+            transform: scale(0.95);
         }
 
         nav button i {
-            font-size: 22px;
-            margin-bottom: 4px;
-            flex-shrink: 0;
-            height: 24px;
-            /* Fixed height for icon */
+            font-size: 23px;
+            /* Slightly larger icons */
+            margin-bottom: 5px;
+            /* More space */
+            height: 25px;
             display: flex;
             align-items: center;
         }
@@ -788,6 +910,52 @@
             color: var(--accent-color);
         }
 
+        nav button.active span {
+            font-weight: 600;
+            /* Bolder text for active tab */
+        }
+
+        nav button.active i {
+            transform: scale(1.05);
+            /* Slight scale for active icon */
+        }
+
+
+        /* Empty State Messages */
+        #no-run-sessions-message,
+        #no-history-message {
+            text-align: center;
+            color: var(--secondary-text-color);
+            padding: 40px 20px;
+            font-size: 1.1em;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            opacity: 0.7;
+        }
+
+        #no-run-sessions-message::before,
+        #no-history-message::before {
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            font-size: 2.5em;
+            /* Larger icon */
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+
+        #no-run-sessions-message::before {
+            content: '\f52c';
+            /* fa-running */
+        }
+
+        #no-history-message::before {
+            content: '\f1da';
+            /* fa-history */
+        }
+
+
         .hidden {
             display: none !important;
         }
@@ -797,7 +965,6 @@
 <body>
 
     <main>
-        <!-- Home Screen -->
         <section id="home-screen" class="screen active">
             <img class="screen-logo" src="media/text-logo.avif" alt="Stay Fit! Logo">
 
@@ -810,14 +977,12 @@
             </form>
 
             <ul class="run-session-list" id="run-session-list">
-                <!-- Run session items will be generated here by JS -->
-                <li id="no-run-sessions-message" class="hidden"
-                    style="text-align: center; color: var(--secondary-text-color); padding: 20px;">No run sessions added
-                    yet. Add one above!</li>
+                <li id="no-run-sessions-message" class="hidden">
+                    No run sessions added yet. Add one above!
+                </li>
             </ul>
         </section>
 
-        <!-- Stats Screen -->
         <section id="stats-screen" class="screen">
             <h1 class="screen-header">Statistics</h1>
             <div class="stats-controls">
@@ -835,7 +1000,6 @@
                         <canvas id="totalKilometersChart"></canvas>
                     </div>
                     <div class="stats-summary-text" id="stats-summary">
-                        <!-- Summary text for distance -->
                     </div>
                 </div>
 
@@ -844,20 +1008,17 @@
                         <canvas id="averagePaceChart"></canvas>
                     </div>
                     <div class="stats-summary-text" id="stats-pace-summary">
-                        <!-- Summary text for pace -->
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Profile Screen -->
         <section id="profile-screen" class="screen">
             <h1 class="screen-header">Weekly Progress</h1>
             <div id="weekly-progress-container">
-                <!-- Weekly blocks will be generated here by JS -->
-                <p id="no-history-message" class="hidden"
-                    style="text-align: center; color: var(--secondary-text-color); padding: 20px;">No run session data
-                    recorded yet.</p>
+                <p id="no-history-message" class="hidden">
+                    No run session data recorded yet.
+                </p>
             </div>
             <button id="reset-all-button" class="reset-all-button">
                 <i class="fa-solid fa-trash-can"></i> Reset All Data
@@ -865,7 +1026,6 @@
         </section>
     </main>
 
-    <!-- Bottom Navigation Bar -->
     <nav>
         <button data-target="home-screen" class="active" aria-label="Home">
             <i class="fa-solid fa-house"></i>
@@ -893,6 +1053,9 @@
             const noRunSessionsMessage = document.getElementById('no-run-sessions-message');
             const noHistoryMessage = document.getElementById('no-history-message');
 
+            // Add this line to define main:
+            const main = document.querySelector('main');
+
             // Stats Screen Elements
             const statsPeriodFilter = document.getElementById('stats-period-filter');
             const statsChartCanvas = document.getElementById('totalKilometersChart');
@@ -908,7 +1071,15 @@
             const WEEK_DATA_PREFIX = 'stayfit_week';
             const LAST_ACTIVE_SCREEN_KEY = 'stayfit_last_screen';
 
-            let currentScreenId = localStorage.getItem(LAST_ACTIVE_SCREEN_KEY) || 'home-screen';
+            let currentScreenId;
+
+            // Check if the app is reloaded or loaded
+            if (performance.getEntriesByType("navigation")[0]?.type === "reload") {
+                currentScreenId = localStorage.getItem(LAST_ACTIVE_SCREEN_KEY) || 'home-screen';
+            } else {
+                currentScreenId = 'home-screen';
+            }
+            
             let currentIsoWeekInfo = null;
             let openProfileEditor = null;
 
@@ -1082,10 +1253,12 @@
                     setTimeout(() => {
                         if (currentActiveScreen) currentActiveScreen.classList.remove('active', 'fade-out');
                         targetScreen.classList.add('active');
-                    }, parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--transition-speed') || '0.3') * 1000);
+                        main.scrollTop = 0; // Scroll to top of new screen
+                    }, parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--transition-speed') || '0.25') * 1000);
                 } else {
                     if (currentActiveScreen) currentActiveScreen.classList.remove('active', 'fade-out');
                     targetScreen.classList.add('active');
+                    main.scrollTop = 0; // Scroll to top of new screen
                 }
 
                 if (currentActiveButton) currentActiveButton.classList.remove('active');
@@ -1095,7 +1268,12 @@
                 localStorage.setItem(LAST_ACTIVE_SCREEN_KEY, currentScreenId);
 
                 if (targetId === 'profile-screen') renderProfileScreen();
-                else if (targetId === 'stats-screen') renderStatsScreen();
+                else if (targetId === 'stats-screen') {
+                    // Delay chart rendering until after the transition completes so the same bar animation is used as on reload.
+                    setTimeout(() => {
+                        renderStatsScreen();
+                    }, parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--transition-speed') || '0.25') * 1000);
+                }
                 else if (targetId === 'home-screen') {
                     renderHomeRunSessions();
                     checkEmptyListState();
@@ -1203,8 +1381,7 @@
                      </div>
                      <div class="run-session-compact-display ${runSession.done && hasDetails ? 'visible' : ''}">
                          <span class="compact-info">
-                             <!-- Content updated by updateCompactDisplay -->
-                         </span>
+                             </span>
                          ${runSession.done ? `<button class="edit-details-button" aria-label="Edit Details"><i class="fa-solid fa-pencil"></i></button>` : ''}
                      </div>
                  `;
@@ -1243,7 +1420,9 @@
                 saveWeekData(isoWeekString, weekData);
 
                 newRunSessionInput.value = '';
-                runSessionListContainer.appendChild(createRunSessionListItem(newRunSession));
+                const newItem = createRunSessionListItem(newRunSession);
+                runSessionListContainer.appendChild(newItem);
+                newItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); // Scroll to new item
                 checkEmptyListState();
             }
 
@@ -1308,8 +1487,8 @@
                 const listItemElement = document.querySelector(`.run-session-item[data-id="${runSessionId}"]`);
                 if (listItemElement && listItemElement.dataset.temporarilyChecked === "true") {
                     const nameInput = listItemElement.querySelector('.run-session-name');
-                    if (nameInput) nameInput.value = runSession.name;
-                    alert("Please save or cancel the current 'done' state before editing the name.");
+                    if (nameInput) nameInput.value = runSession.name; // Revert to original if edit attempted during temp check
+                    // Optionally alert user or just prevent edit
                     return;
                 }
 
@@ -1445,22 +1624,24 @@
                 if (runSession.done) {
                     let infoParts = [];
                     if (runSession.distance !== null) {
-                        infoParts.push(`${runSession.distance} km`);
+                        infoParts.push(`<strong>${runSession.distance}</strong> km`);
                     }
                     const formattedDurationForDisplay = runSession.time ? formatTimeForDisplay(runSession.time) : '';
                     if (formattedDurationForDisplay) {
-                        infoParts.push(formattedDurationForDisplay);
+                        infoParts.push(`<strong>${formattedDurationForDisplay}</strong>`);
                     }
                     if (runSession.pace) {
                         const formattedPace = formatPace(runSession.pace);
-                        if (formattedPace) infoParts.push(formattedPace);
+                        if (formattedPace) infoParts.push(`<strong>${formattedPace}</strong>`);
                     }
 
-                    let detailsText = infoParts.join(' · ');
+                    let detailsText = infoParts.join(' <span style="opacity:0.5; margin: 0 2px;">·</span> ');
 
                     let runDateTimeInfo = '';
                     if (runSession.runDate) {
-                        runDateTimeInfo = ` <br><small>On: ${formatDateForDisplay(runSession.runDate)}${runSession.runTime ? ` at ${formatTimeForDisplaySimple(runSession.runTime)}` : ''}</small>`;
+                        const friendlyDate = formatDateForDisplay(runSession.runDate);
+                        const friendlyTime = runSession.runTime ? ` at ${formatTimeForDisplaySimple(runSession.runTime)}` : '';
+                        runDateTimeInfo = ` <br><small>On: ${friendlyDate}${friendlyTime}</small>`;
                     }
 
                     if (!detailsText && !runDateTimeInfo) {
@@ -1470,7 +1651,7 @@
                     }
 
                     compactInfoSpan.innerHTML = `
-                        🏅 ${detailsText}
+                        🏅 ${detailsText || ''}
                         ${runDateTimeInfo}
                     `;
                     compactDisplay.classList.add('visible');
@@ -1562,15 +1743,38 @@
                     }
                 };
                 editorForm.addEventListener('transitionend', handleTransitionEnd);
+                // Fallback timeout to remove element if transitionend doesn't fire
                 setTimeout(() => {
                     if (editorForm.parentNode && editorForm.style.opacity === '0') editorForm.remove();
-                }, parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--long-transition-speed') || '0.4') * 1000 + 100);
+                }, parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--long-transition-speed') || '0.35') * 1000 + 100);
             }
 
             function closeOpenProfileEditor() {
                 if (openProfileEditor && openProfileEditor.form) {
                     closeEditor(openProfileEditor.itemElement, openProfileEditor.form);
                     openProfileEditor = null;
+                }
+            }
+
+            function openProfileEditorWithoutTransition(newItemElement, updatedRunSession, runSessionId, newTargetIsoWeek) {
+                if (newItemElement) {
+                    // Open the editor immediately without transition
+                    if (openProfileEditor && openProfileEditor.form) {
+                        openProfileEditor.form.remove();
+                        openProfileEditor = null;
+                    }
+                    const editorForm = createProfileEditorForm(updatedRunSession, runSessionId, newTargetIsoWeek);
+                    newItemElement.classList.add('editing');
+                    newItemElement.appendChild(editorForm);
+                    editorForm.style.transition = 'none';
+                    editorForm.style.paddingTop = '20px';
+                    editorForm.style.paddingBottom = '20px';
+                    editorForm.style.marginTop = '15px';
+                    editorForm.style.maxHeight = (editorForm.scrollHeight + 40) + 'px';
+                    editorForm.style.opacity = '1';
+                    void editorForm.offsetHeight;
+                    editorForm.style.transition = '';
+                    openProfileEditor = { form: editorForm, id: runSessionId, itemElement: newItemElement, isoWeek: newTargetIsoWeek };
                 }
             }
 
@@ -1585,6 +1789,7 @@
                     return;
                 }
 
+                // Close any other open editor
                 if (openProfileEditor && openProfileEditor.id !== runSessionId) {
                     closeOpenProfileEditor();
                 }
@@ -1597,12 +1802,13 @@
                 const editorForm = createProfileEditorForm(runSession, runSessionId, isoWeek);
                 itemElement.appendChild(editorForm);
 
-                requestAnimationFrame(() => {
-                    requestAnimationFrame(() => {
-                        editorForm.style.paddingTop = '15px';
-                        editorForm.style.paddingBottom = '15px';
-                        editorForm.style.marginTop = '10px';
-                        editorForm.style.maxHeight = (editorForm.scrollHeight + 15 * 2) + 'px';
+                // Animate open
+                requestAnimationFrame(() => { // First frame to ensure element is in DOM
+                    requestAnimationFrame(() => { // Second frame to trigger transition
+                        editorForm.style.paddingTop = '20px'; // Target padding
+                        editorForm.style.paddingBottom = '20px'; // Target padding
+                        editorForm.style.marginTop = '15px'; // Target margin
+                        editorForm.style.maxHeight = (editorForm.scrollHeight + 40) + 'px'; // scrollHeight + vertical paddings
                         editorForm.style.opacity = '1';
                     });
                 });
@@ -1616,7 +1822,7 @@
                 form.className = 'profile-editor-form';
                 form.dataset.id = runSessionId;
                 form.dataset.week = isoWeek;
-                form.addEventListener('submit', e => e.preventDefault());
+                form.addEventListener('submit', e => e.preventDefault()); // Prevent actual form submission
 
                 const today = new Date().toISOString().split('T')[0];
                 const currentTime = new Date().toTimeString().split(' ')[0].substring(0, 5);
@@ -1626,7 +1832,7 @@
                 form.innerHTML = `
                     <div class="profile-editor-checkbox-group">
                         <input type="checkbox" id="profile-edit-done-${runSessionId}" ${runSession.done ? 'checked' : ''}>
-                        <label for="profile-edit-done-${runSessionId}">Finished</label>
+                        <label for="profile-edit-done-${runSessionId}">Finished Run</label>
                     </div>
                     <div class="details-input-group">
                         <label for="profile-edit-name-${runSessionId}">Name</label>
@@ -1691,7 +1897,7 @@
                 if (rsIndexInOriginal === -1) {
                     console.error("Run session not found in original week data for profile edit.");
                     closeOpenProfileEditor();
-                    renderProfileScreen();
+                    renderProfileScreen(); // Re-render to reflect state
                     return;
                 }
 
@@ -1722,13 +1928,14 @@
                             if (!isNaN(hours) && !isNaN(minutes)) completedDate.setHours(hours, minutes);
                         }
                     } else {
-                        completedDate = new Date();
+                        completedDate = new Date(); // Fallback if date somehow cleared
                     }
                     updatedRunSession.completionTimestamp = completedDate.toISOString();
                 } else {
                     updatedRunSession.completionTimestamp = null;
                 }
 
+                // Update template if name changed
                 const template = getRunSessionTemplate();
                 const templateIndex = template.findIndex(t => t.id === runSessionId);
                 if (templateIndex !== -1 && template[templateIndex].name !== updatedRunSession.name) {
@@ -1736,12 +1943,16 @@
                     saveRunSessionTemplate(template);
                 }
 
+                // Save to correct week
                 if (newTargetIsoWeek === originalIsoWeek) {
                     originalWeekData[rsIndexInOriginal] = updatedRunSession;
                     saveWeekData(originalIsoWeek, originalWeekData);
                 } else {
+                    // Remove from original week
                     originalWeekData.splice(rsIndexInOriginal, 1);
                     saveWeekData(originalIsoWeek, originalWeekData);
+
+                    // Add/Update in new target week
                     let newTargetWeekData = getWeekData(newTargetIsoWeek);
                     const existingIndexInNewTarget = newTargetWeekData.findIndex(rs => rs.id === runSessionId);
                     if (existingIndexInNewTarget !== -1) {
@@ -1752,13 +1963,16 @@
                     saveWeekData(newTargetIsoWeek, newTargetWeekData);
                 }
 
-                closeOpenProfileEditor();
                 renderProfileScreen();
+                const newItemElement = document.querySelector(`.profile-run-session-item[data-id="${runSessionId}"][data-week="${newTargetIsoWeek}"]`);
+                openProfileEditorWithoutTransition(newItemElement, updatedRunSession, runSessionId, newTargetIsoWeek);
+                closeOpenProfileEditor();
+                // If home screen is active and relevant week changed, re-render home
                 if (currentScreenId === 'home-screen' &&
                     (currentIsoWeekInfo.isoWeekString === originalIsoWeek || currentIsoWeekInfo.isoWeekString === newTargetIsoWeek)) {
                     renderHomeRunSessions();
                 }
-                if (currentScreenId === 'stats-screen') renderStatsScreen();
+                if (currentScreenId === 'stats-screen') renderStatsScreen(); // Stats might change
             }
 
             function handleDeleteProfileItem(editorForm) {
@@ -1769,8 +1983,9 @@
                 const weekInfo = getWeekRangeFromIsoString(isoWeek);
 
                 if (confirm(`Are you sure you want to delete "${escapeHtml(runSessionName)}" from Week ${weekInfo.weekNumber} (${weekInfo.weekRange})? This action cannot be undone.`)) {
-                    closeOpenProfileEditor();
+                    closeOpenProfileEditor(); // Close editor before deleting
 
+                    // Animate item removal
                     itemElement.style.opacity = '0';
                     itemElement.style.maxHeight = '0px';
                     itemElement.style.paddingTop = '0px';
@@ -1786,6 +2001,7 @@
                                 const weekBlockElement = listInWeekBlock.closest('.week-block');
                                 if (weekBlockElement) weekBlockElement.remove();
                             }
+                            // Check if any week blocks are left
                             if (weeklyProgressContainer.querySelectorAll('.week-block').length === 0) {
                                 noHistoryMessage.classList.remove('hidden');
                                 resetAllButton.classList.add('hidden');
@@ -1793,6 +2009,7 @@
                             itemElement.removeEventListener('transitionend', handleRemovalTransition);
                         }
                     });
+                    // Fallback for removal
                     setTimeout(() => {
                         if (itemElement.parentNode && itemElement.style.opacity === '0') {
                             const listInWeekBlock = itemElement.parentElement;
@@ -1809,13 +2026,16 @@
                     }, parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--transition-speed') || '0.3') * 1000 + 100);
 
 
+                    // Update data
                     let weekData = getWeekData(isoWeek);
                     weekData = weekData.filter(rs => rs.id !== runSessionId);
                     saveWeekData(isoWeek, weekData);
 
+                    // If current week on home screen was affected, re-render home
                     if (isoWeek === currentIsoWeekInfo.isoWeekString) {
                         renderHomeRunSessions();
                     }
+                    // Re-render stats as data changed
                     renderStatsScreen();
                 }
             }
@@ -1823,23 +2043,25 @@
 
             function renderProfileScreen() {
                 weeklyProgressContainer.innerHTML = '';
-                if (openProfileEditor && openProfileEditor.form) {
+                if (openProfileEditor && openProfileEditor.form) { // Ensure any orphaned editor is removed
                     openProfileEditor.form.remove();
                     openProfileEditor = null;
                 }
 
                 const allKeys = Object.keys(localStorage).filter(key => key.startsWith(WEEK_DATA_PREFIX)).sort().reverse();
+
                 if (allKeys.length === 0) {
                     noHistoryMessage.classList.remove('hidden');
-                    resetAllButton.classList.add('hidden'); return;
+                    resetAllButton.classList.add('hidden'); // Hide reset button if no data
+                    return;
                 }
                 noHistoryMessage.classList.add('hidden');
-                resetAllButton.classList.remove('hidden');
+                resetAllButton.classList.remove('hidden'); // Show reset button
 
                 allKeys.forEach(key => {
                     const isoWeek = key.substring(WEEK_DATA_PREFIX.length);
                     const weekData = loadData(key);
-                    if (!weekData || weekData.length === 0) return;
+                    if (!weekData || weekData.length === 0) return; // Skip empty weeks
 
                     const weekBlock = document.createElement('div');
                     weekBlock.classList.add('week-block');
@@ -1873,7 +2095,8 @@
                             const formattedPace = formatPace(rs.pace);
                             if (formattedPace) detailParts.push(formattedPace);
                         }
-                        const detailsInfoText = detailParts.join(' · ');
+                        const detailsInfoText = detailParts.join(' <span style="opacity:0.5; margin: 0 1px;">·</span>');
+
 
                         const li = document.createElement('li');
                         li.classList.add('profile-run-session-item');
@@ -1896,7 +2119,7 @@
 
                     weekBlock.innerHTML = `
                          <div class="week-header">
-                             Week ${weekInfo.weekNumber} (${weekInfo.weekRange})
+                             <span>Week ${weekInfo.weekNumber} <small>(${weekInfo.weekRange})</small></span>
                              <span class="week-summary">${doneCount} / ${totalCount} done</span>
                          </div>`;
                     weekBlock.appendChild(ul);
@@ -1914,16 +2137,30 @@
                         console.warn("Invalid isoWeek format for getWeekRangeFromIsoString:", isoWeek);
                         return { weekRange: `Invalid Week: ${isoWeek}`, weekNumber: weekNumStr || '', year: year || new Date().getFullYear(), startDate: null, endDate: null };
                     }
+                    // Get the 4th of January of that year (always in week 1)
                     const jan4UTC = new Date(Date.UTC(year, 0, 4));
-                    const dayOfWeekJan4 = jan4UTC.getUTCDay();
-                    const offsetToWeek1Thursday = 4 - dayOfWeekJan4;
+                    // Get the day of the week for Jan 4th (0=Sun, 1=Mon, ..., 6=Sat)
+                    const dayOfWeekJan4 = jan4UTC.getUTCDay(); // Sunday is 0, Monday is 1...
+                    // Calculate offset to the first Thursday of week 1
+                    // ISO 8601 weeks start on Monday. Thursday of week 1 is used as a reference.
+                    // (dayOfWeekJan4 || 7) handles Sunday (0) as 7.
+                    const offsetToWeek1Thursday = 4 - (dayOfWeekJan4 || 7);
+
+                    // Get the date of the Thursday of the first week
                     const firstThursdayUTC = new Date(Date.UTC(year, 0, 4 + offsetToWeek1Thursday));
+
+                    // Get the Thursday of the target week
                     const thursdayOfGivenWeekUTC = new Date(firstThursdayUTC.getTime());
                     thursdayOfGivenWeekUTC.setUTCDate(firstThursdayUTC.getUTCDate() + (weekNum - 1) * 7);
+
+                    // Monday of that week is Thursday - 3 days
                     const mondayOfWeekUTC = new Date(thursdayOfGivenWeekUTC.getTime());
                     mondayOfWeekUTC.setUTCDate(thursdayOfGivenWeekUTC.getUTCDate() - 3);
+
+                    // Sunday of that week is Thursday + 3 days
                     const sundayOfWeekUTC = new Date(thursdayOfGivenWeekUTC.getTime());
                     sundayOfWeekUTC.setUTCDate(thursdayOfGivenWeekUTC.getUTCDate() + 3);
+
                     const formatMonthDayUTC = (date) => {
                         if (!date) return '';
                         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -1931,8 +2168,10 @@
                         const day = date.getUTCDate();
                         return `${month} ${day}`;
                     };
+
                     const startMonthDay = formatMonthDayUTC(mondayOfWeekUTC);
                     const endMonthDay = formatMonthDayUTC(sundayOfWeekUTC);
+
                     let rangeString;
                     if (mondayOfWeekUTC.getUTCMonth() === sundayOfWeekUTC.getUTCMonth()) {
                         const month = formatMonthDayUTC(mondayOfWeekUTC).split(' ')[0];
@@ -1942,18 +2181,19 @@
                     } else {
                         rangeString = `${startMonthDay} – ${endMonthDay}`;
                     }
+
                     return {
                         weekRange: rangeString,
                         weekNumber: String(weekNum).padStart(2, '0'),
                         year: year,
-                        startDate: mondayOfWeekUTC,
-                        endDate: sundayOfWeekUTC
+                        startDate: mondayOfWeekUTC, // This is UTC date, careful if using for local comparisons directly
+                        endDate: sundayOfWeekUTC   // This is UTC date
                     };
                 } catch (e) {
                     console.error("Error calculating week range for", isoWeek, ":", e);
                     const parts = isoWeek.split('-W');
                     return {
-                        weekRange: `Error calculating range for ${isoWeek}`,
+                        weekRange: `Error for ${isoWeek}`,
                         weekNumber: parts[1] || '',
                         year: parseInt(parts[0]) || new Date().getFullYear(),
                         startDate: null,
@@ -1973,7 +2213,7 @@
                 const currentMonth = today.getMonth(); // 0-indexed
                 const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim();
                 const gridBorderColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim();
-                const tooltipBgColor = getComputedStyle(document.documentElement).getPropertyValue('--nav-background-color').trim();
+                const tooltipBgColor = getComputedStyle(document.documentElement).getPropertyValue('--nav-background-color').trim(); // Use nav for consistency
 
                 let distChartData, distChartLabels, distChartLabel = "Kilometers";
                 let totalKmForPeriod = 0;
@@ -1993,9 +2233,9 @@
 
                     filteredSessions.forEach(rs => {
                         if (rs.runDate) {
-                            const runDate = new Date(rs.runDate + "T00:00:00");
-                            const dayOfWeek = runDate.getDay();
-                            const isoDayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                            const runDate = new Date(rs.runDate + "T00:00:00"); // Ensure interpretation as local date for getDay()
+                            const dayOfWeek = runDate.getDay(); // 0 (Sun) to 6 (Sat)
+                            const isoDayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Convert to Mon (0) to Sun (6)
 
                             if (rs.distance && rs.distance > 0) {
                                 dailyKm[isoDayIndex] += rs.distance;
@@ -2020,7 +2260,7 @@
                             totalPeriodRunSeconds += dailyTotalRunSeconds[i];
                             totalPeriodDistanceForPace += dailyTotalDistance[i];
                         } else {
-                            dailyAvgPaceData[i] = 0;
+                            dailyAvgPaceData[i] = 0; // Use 0 for no pace, chart will show 00:00
                         }
                     }
                     paceChartData = dailyAvgPaceData;
@@ -2037,7 +2277,6 @@
                     filteredSessions.forEach(rs => {
                         if (rs.runDate) {
                             const runDateObj = new Date(rs.runDate + "T00:00:00");
-                            // Filter ensures it's current month, but good to be defensive
                             if (runDateObj.getFullYear() === currentYear && runDateObj.getMonth() === currentMonth) {
                                 const dayOfMonthIndex = runDateObj.getDate() - 1; // 0-indexed
 
@@ -2113,7 +2352,10 @@
                     paceChartData = monthlyAvgPaceData;
                 }
 
-                const chartBarThickness = (period === 'year') ? 20 : 'flex';
+                const chartBarThickness = (period === 'year') ? 20 : (period === 'month' ? 10 : 'flex'); // Adjust thickness
+                const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+                const successColor = getComputedStyle(document.documentElement).getPropertyValue('--success-color').trim();
+
 
                 if (totalKilometersChart) totalKilometersChart.destroy();
                 if (statsChartCanvas) {
@@ -2125,18 +2367,38 @@
                             datasets: [{
                                 label: 'Kilometers',
                                 data: distChartData,
-                                backgroundColor: 'rgba(10, 132, 255, 0.6)',
-                                borderColor: 'rgba(10, 132, 255, 1)',
+                                backgroundColor: `rgba(${getComputedStyle(document.documentElement).getPropertyValue('--accent-color-rgb')}, 0.65)`,
+                                borderColor: accentColor,
                                 borderWidth: 1,
-                                borderRadius: 5,
+                                borderRadius: 5, // Rounded bars
                                 barThickness: chartBarThickness,
                             }]
                         },
                         options: {
                             responsive: true, maintainAspectRatio: false,
-                            animations: { x: { type: 'number', easing: 'linear', duration: 0, } },
-                            scales: { y: { beginAtZero: true, ticks: { color: textColor }, grid: { color: gridBorderColor } }, x: { ticks: { color: textColor }, grid: { display: false } } },
-                            plugins: { legend: { display: false, labels: { color: textColor } }, tooltip: { titleColor: textColor, bodyColor: textColor, backgroundColor: tooltipBgColor, borderColor: gridBorderColor, borderWidth: 1, padding: 10, callbacks: { label: function (context) { let label = ''; if (context.parsed.y !== null) { label += context.parsed.y.toFixed(2) + ' km'; } return label; } } } }
+                            animations: { x: { type: 'number', easing: 'linear', duration: 0 } },
+                            scales: { y: { beginAtZero: true, ticks: { color: textColor, font: { size: 11 } }, grid: { color: gridBorderColor } }, x: { ticks: { color: textColor, font: { size: 11 } }, grid: { display: false } } },
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    titleColor: textColor,
+                                    bodyColor: textColor,
+                                    backgroundColor: tooltipBgColor,
+                                    borderColor: gridBorderColor,
+                                    borderWidth: 1,
+                                    padding: 10,
+                                    displayColors: false,
+                                    callbacks: {
+                                        label: function (context) {
+                                            let label = '';
+                                            if (context.parsed.y !== null) {
+                                                label += context.parsed.y.toFixed(2) + ' km';
+                                            }
+                                            return label;
+                                        }
+                                    }
+                                }
+                            }
                         }
                     });
                 }
@@ -2152,8 +2414,8 @@
                             datasets: [{
                                 label: 'Average Pace /km',
                                 data: paceChartData,
-                                backgroundColor: 'rgba(48, 209, 88, 0.6)',
-                                borderColor: 'rgba(48, 209, 88, 1)',
+                                backgroundColor: `rgba(${getComputedStyle(document.documentElement).getPropertyValue('--success-color').match(/\d+/g).slice(0, 3).join(',')}, 0.65)`, // Dynamic success color
+                                borderColor: successColor,
                                 borderWidth: 1,
                                 borderRadius: 5,
                                 barThickness: chartBarThickness,
@@ -2161,23 +2423,23 @@
                         },
                         options: {
                             responsive: true, maintainAspectRatio: false,
-                            animations: { x: { type: 'number', easing: 'linear', duration: 0, } },
+                            animations: { x: { type: 'number', easing: 'linear', duration: 0 } },
                             scales: {
                                 y: {
                                     beginAtZero: true,
                                     ticks: {
-                                        color: textColor,
+                                        color: textColor, font: { size: 11 },
                                         callback: function (value) { return formatPaceForChart(value); }
                                     },
                                     grid: { color: gridBorderColor }
                                 },
-                                x: { ticks: { color: textColor }, grid: { display: false } }
+                                x: { ticks: { color: textColor, font: { size: 11 } }, grid: { display: false } }
                             },
                             plugins: {
                                 legend: { display: false },
                                 tooltip: {
                                     titleColor: textColor, bodyColor: textColor, backgroundColor: tooltipBgColor,
-                                    borderColor: gridBorderColor, borderWidth: 1, padding: 10,
+                                    borderColor: gridBorderColor, borderWidth: 1, padding: 10, displayColors: false,
                                     callbacks: {
                                         label: function (context) {
                                             const paceValue = context.parsed.y;
@@ -2231,24 +2493,33 @@
 
             function filterSessionsByPeriod(sessions, period) {
                 const today = new Date();
-                const currentWeekInfo = getCurrentIsoWeek(today);
+                today.setHours(0, 0, 0, 0); // Normalize today to start of day for comparisons
+
+                const currentWeekInfo = getCurrentIsoWeek(today); // currentWeekInfo.startDate and .endDate are already Date objects at midnight
+
                 const currentYearStart = new Date(today.getFullYear(), 0, 1);
-                const currentYearEnd = new Date(today.getFullYear(), 11, 31, 23, 59, 59);
+                const currentYearEnd = new Date(today.getFullYear(), 11, 31, 23, 59, 59, 999); // End of year
 
                 return sessions.filter(rs => {
                     if (!rs.runDate) return false;
                     if (rs.distance == null || rs.distance <= 0 || !rs.time) return false;
 
-                    const runDate = new Date(rs.runDate + "T00:00:00");
+                    // Parse rs.runDate as local date by splitting and creating new Date
+                    // Assumes rs.runDate is YYYY-MM-DD
+                    const parts = rs.runDate.split('-');
+                    const runDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+                    runDate.setHours(0, 0, 0, 0); // Normalize runDate to start of day
+
                     if (isNaN(runDate.getTime())) return false;
 
                     switch (period) {
                         case 'week':
+                            // currentWeekInfo.startDate and .endDate are already Date objects
                             return runDate >= currentWeekInfo.startDate && runDate <= currentWeekInfo.endDate;
                         case 'month':
                             const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-                            firstDayOfMonth.setHours(0, 0, 0, 0); // Ensure start of the day
-                            const endOfPeriodForMonth = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999); // End of current day
+                            // Filter for runs up to and including the current day of the month
+                            const endOfPeriodForMonth = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
                             return runDate >= firstDayOfMonth && runDate <= endOfPeriodForMonth;
                         case 'year':
                             return runDate >= currentYearStart && runDate <= currentYearEnd;
@@ -2263,12 +2534,12 @@
                 if (confirm("⚠️ Are you sure you want to permanently delete ALL your Stay Fit! run session data? This cannot be undone.")) {
                     if (confirm("⚠️ FINAL WARNING: Delete all data?")) {
                         Object.keys(localStorage).forEach(key => { if (key.startsWith('stayfit_')) localStorage.removeItem(key); });
-                        currentIsoWeekInfo = getCurrentIsoWeek();
-                        saveRunSessionTemplate([]);
-                        saveWeekData(currentIsoWeekInfo.isoWeekString, []);
-                        initializeApp();
+                        currentIsoWeekInfo = getCurrentIsoWeek(); // Recalculate current week
+                        saveRunSessionTemplate([]); // Clear template
+                        saveWeekData(currentIsoWeekInfo.isoWeekString, []); // Clear current week data
+                        initializeApp(); // Re-initialize the app to reflect cleared state
                         alert(`All Stay Fit! data entries have been cleared.`);
-                        switchScreen('home-screen', true);
+                        switchScreen('home-screen', true); // Go to home screen
                     }
                 }
             }
@@ -2283,42 +2554,73 @@
                     .replace(/"/g, "&quot;")
                     .replace(/'/g, "&#39;");
             }
-            function parseTimeInput(timeString) {
-                timeString = String(timeString).trim().replace(/[.,]/g, ":");
+            function parseTimeInput(timeString) { // HH:MM:SS or MM:SS
+                timeString = String(timeString).trim().replace(/[.,]/g, ":"); // Normalize separators
                 const parts = timeString.split(':').map(part => part.trim()).filter(part => part !== '');
                 let hours = 0, minutes = 0, seconds = 0;
-                if (parts.length === 2) { minutes = parseInt(parts[0], 10); seconds = parseInt(parts[1], 10); }
-                else if (parts.length === 3) { hours = parseInt(parts[0], 10); minutes = parseInt(parts[1], 10); seconds = parseInt(parts[2], 10); }
-                else if (parts.length === 1 && !isNaN(parseInt(parts[0], 10))) { minutes = parseInt(parts[0], 10); }
-                else { return null; }
 
-                if (isNaN(hours) || isNaN(minutes) || isNaN(seconds) || hours < 0 || minutes < 0 || seconds < 0 || minutes > 59 || seconds > 59) {
-                    if (parts.length === 2 && minutes >= 60 && !isNaN(minutes) && !isNaN(seconds) && seconds <= 59) { /* valid, will convert */ }
-                    else if (parts.length === 1 && minutes >= 0 && !isNaN(minutes)) { /* valid (treat as minutes) */ }
-                    else { return null; }
+                if (parts.length === 2) { // MM:SS
+                    minutes = parseInt(parts[0], 10);
+                    seconds = parseInt(parts[1], 10);
+                } else if (parts.length === 3) { // HH:MM:SS
+                    hours = parseInt(parts[0], 10);
+                    minutes = parseInt(parts[1], 10);
+                    seconds = parseInt(parts[2], 10);
+                } else if (parts.length === 1 && !isNaN(parseInt(parts[0], 10))) { // Treat single number as minutes
+                    minutes = parseInt(parts[0], 10);
                 }
-                if (parts.length === 2 && minutes >= 60) { hours = Math.floor(minutes / 60); minutes %= 60; }
-                else if (parts.length === 1) { hours = Math.floor(minutes / 60); minutes %= 60; }
+                else { return null; } // Invalid format
+
+                // Validate parts
+                if (isNaN(hours) || isNaN(minutes) || isNaN(seconds) ||
+                    hours < 0 || minutes < 0 || seconds < 0 ||
+                    minutes > 59 || seconds > 59) {
+
+                    // Allow MM:SS where MM >= 60 (e.g., 70:30 for 1 hour 10 mins 30 secs)
+                    if (parts.length === 2 && minutes >= 60 && !isNaN(minutes) && !isNaN(seconds) && seconds <= 59) {
+                        // Valid, will be converted below
+                    }
+                    // Allow single number as minutes
+                    else if (parts.length === 1 && minutes >= 0 && !isNaN(minutes)) {
+                        // Valid, will be converted below
+                    }
+                    else {
+                        return null;
+                    }
+                }
+
+                // Convert MM:SS with MM >= 60 or single number M to HH:MM:SS
+                if (parts.length === 2 && minutes >= 60) {
+                    hours = Math.floor(minutes / 60);
+                    minutes %= 60;
+                } else if (parts.length === 1) { // Single number was treated as minutes
+                    hours = Math.floor(minutes / 60);
+                    minutes %= 60;
+                }
 
                 return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
             }
-            function formatTimeForDisplay(timeString) {
+            function formatTimeForDisplay(timeString) { // Input HH:MM:SS, output MM:SS if hours is 00
                 if (!timeString || !/^\d{2}:\d{2}:\d{2}$/.test(timeString)) return timeString || '';
                 return timeString.startsWith('00:') ? timeString.substring(3) : timeString;
             }
-            function formatTimeForDisplaySimple(timeString) {
-                if (!timeString || !/^\d{2}:\d{2}$/.test(timeString.substring(0, 5))) return timeString || '';
+            function formatTimeForDisplaySimple(timeString) { // Input HH:MM or HH:MM:SS, output h:MM AM/PM
+                if (!timeString || !/^\d{2}:\d{2}(:\d{2})?$/.test(timeString)) return timeString || '';
                 const [h, m] = timeString.split(':');
                 const hour = parseInt(h, 10);
                 if (isNaN(hour) || isNaN(parseInt(m, 10))) return timeString;
+
                 const period = hour >= 12 ? 'PM' : 'AM';
                 const displayHour = hour % 12 === 0 ? 12 : hour % 12;
                 return `${displayHour}:${m} ${period}`;
             }
-            function formatDateForDisplay(isoDateString) {
+            function formatDateForDisplay(isoDateString) { // YYYY-MM-DD
                 if (!isoDateString) return '';
                 try {
-                    const date = new Date(isoDateString + "T00:00:00");
+                    // Create date as UTC to avoid timezone shifts when only date is known, then format locally.
+                    // Or, better: interpret YYYY-MM-DD as local date.
+                    const parts = isoDateString.split('-');
+                    const date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
                     return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
                 } catch (e) { return isoDateString; }
             }
@@ -2331,23 +2633,23 @@
             }
 
             // --- Pace Utilities ---
-            function timeStringToSeconds(timeString) {
+            function timeStringToSeconds(timeString) { // Expects HH:MM:SS
                 if (!timeString) return null;
                 const parts = String(timeString).split(':').map(Number);
                 let hours = 0, minutes = 0, seconds = 0;
 
                 if (parts.length === 3) { [hours, minutes, seconds] = parts; }
-                else if (parts.length === 2) { [minutes, seconds] = parts; }
+                else if (parts.length === 2) { [minutes, seconds] = parts; } // Should ideally be HH:MM:SS but handle MM:SS
                 else { return null; }
 
                 if (isNaN(hours) || isNaN(minutes) || isNaN(seconds)) return null;
-                if (minutes > 59 || seconds > 59 || minutes < 0 || seconds < 0 || hours < 0) return null;
+                if (minutes > 59 || seconds > 59 || minutes < 0 || seconds < 0 || hours < 0) return null; // Basic validation
                 return (hours * 3600) + (minutes * 60) + seconds;
             }
 
-            function formatPace(secondsPerKm) {
+            function formatPace(secondsPerKm) { // Output MM:SS/km
                 if (secondsPerKm === null || isNaN(secondsPerKm) || !isFinite(secondsPerKm) || secondsPerKm <= 0) {
-                    return '';
+                    return ''; // Return empty for invalid or zero pace
                 }
                 const totalSeconds = Math.round(secondsPerKm);
                 const minutes = Math.floor(totalSeconds / 60);
@@ -2355,13 +2657,12 @@
                 return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}/km`;
             }
 
-            function formatPaceForChart(valueInSeconds) { // Used for ticks and tooltips
-                if (valueInSeconds === 0) { // Handle 0 specifically, often for the axis baseline
-                    return "00:00";
+            function formatPaceForChart(valueInSeconds) { // Output MM:SS for chart ticks/tooltips
+                if (valueInSeconds === 0) {
+                    return "00:00"; // Explicitly handle 0 for baseline
                 }
-                // For other cases (tooltips with bad data, or non-zero ticks if data is problematic)
                 if (valueInSeconds === null || isNaN(valueInSeconds) || !isFinite(valueInSeconds) || valueInSeconds < 0) {
-                    return "N/A";
+                    return "N/A"; // Not Applicable for invalid data points
                 }
                 // This part now only runs for valueInSeconds > 0
                 const totalSeconds = Math.round(valueInSeconds);
