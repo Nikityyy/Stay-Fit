@@ -153,14 +153,6 @@
             filter: invert(1);
         }
 
-        nav .fa-solid {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 40px;
-            height: 40px;
-        }
-
         .add-run-session-form {
             display: flex;
             gap: 10px;
@@ -800,6 +792,7 @@
             right: 0;
             height: calc(80px + env(safe-area-inset-bottom));
             padding-bottom: env(safe-area-inset-bottom);
+            margin-bottom: 1rem;
             background-color: var(--nav-background-color);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
@@ -858,6 +851,14 @@
 
         nav button.active i {
             background-color: rgba(var(--accent-color-rgb), 0.1);
+        }
+
+        nav .fa-solid {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 40px;
         }
 
 
