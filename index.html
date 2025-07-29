@@ -4,11 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Stay Fit! - Run Tracker</title>
     <meta name="description"
         content="Track your weekly run sessions and stay fit with this simple tracker app. Mark tasks, add details like distance and time, and view your progress.">
-    <meta name="theme-color" content="#0A84FF">
-    <title>Stay Fit! - Run Tracker</title>
-    <link rel="icon" href="media/icon.avif" type="image/png">
+    <meta name="theme-color" content="#FFFFFF">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="media/icon.png" type="image/png">
     <link rel="apple-touch-icon" href="media/apple-touch-icon.png">
     <link rel="preload" href="media/text-logo.avif" as="image">
 
@@ -22,32 +23,31 @@
 
     <style>
         :root {
-            --background-color: #121212;
-            --text-color: #E0E0E0;
-            --secondary-text-color: #A0A0A0;
-            --accent-color: #0A84FF;
-            --accent-color-rgb: 10, 132, 255;
-            /* For RGBA usage */
-            --card-background: #1E1E1E;
-            --border-color: #38383A;
-            --input-background-color: #28282B;
-            /* Slightly different from card for depth */
-            --input-focus-background-color: #333336;
-            --shadow-color: rgba(0, 0, 0, 0.35);
-            /* Slightly darker shadow */
-            --danger-color: #FF453A;
-            --danger-hover-color: #E03C30;
-            --success-color: #30D158;
-            --success-hover-color: #28B84A;
-            --done-background-color: rgba(48, 209, 88, 0.15);
-            --nav-background-color: rgba(24, 24, 26, 0.85);
-            /* More opaque */
+            --background-color: #F7F7F9;
+            --text-color: #1F2937;
+            --secondary-text-color: #6B7280;
+            --accent-color: #3B82F6;
+            --accent-color-rgb: 59, 130, 246;
+            --accent-color-darker: #2563EB;
+            --card-background: #FFFFFF;
+            --border-color: #E5E7EB;
+            --input-background-color: #F3F4F6;
+            --input-focus-background-color: #FFFFFF;
+            --danger-color: #EF4444;
+            --danger-hover-color: #DC2626;
+            --success-color: #10B981;
+            --success-hover-color: #059669;
+            --done-background-color: rgba(16, 185, 129, 0.08);
+            --nav-background-color: rgba(252, 252, 252, 0.85);
 
             --border-radius: 10px;
-            --border-radius-small: 8px;
+            --border-radius-small: 6px;
             --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-            --transition-speed: 0.25s;
-            --long-transition-speed: 0.35s;
+            --transition-speed: 0.2s;
+            --long-transition-speed: 0.3s;
+
+            --card-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03), 0 1px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px 0 rgba(0, 0, 0, 0.03);
+            --card-shadow-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
         }
 
         * {
@@ -55,7 +55,6 @@
             margin: 0;
             padding: 0;
             -webkit-tap-highlight-color: transparent;
-            /* Remove tap highlight on mobile */
         }
 
         html,
@@ -70,39 +69,34 @@
             color: var(--text-color);
             font-size: 16px;
             line-height: 1.6;
-            /* Increased for readability */
             display: flex;
             flex-direction: column;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             overflow-x: hidden;
-            /* Prevent horizontal scroll */
         }
 
         main {
             flex-grow: 1;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
-            padding: 25px 20px 90px 20px;
-            /* Increased top/bottom padding */
+            padding: 24px 20px 100px 20px;
         }
 
-        /* Focus Visible Styling */
         *:focus-visible {
             outline: 2px solid var(--accent-color);
             outline-offset: 2px;
+            border-radius: var(--border-radius-small);
         }
 
         input:focus-visible,
         select:focus-visible,
         textarea:focus-visible {
             border-color: var(--accent-color) !important;
-            /* Ensure border changes */
-            box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.3);
+            box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.2);
         }
 
 
-        /* Screen Management */
         .screen {
             display: none;
         }
@@ -115,8 +109,7 @@
         @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(15px);
-                /* Slightly more pronounced */
+                transform: translateY(8px);
             }
 
             to {
@@ -137,17 +130,14 @@
 
             to {
                 opacity: 0;
-                transform: translateY(-15px);
-                /* Slightly more pronounced */
+                transform: translateY(-8px);
             }
         }
 
         h1.screen-header {
-            font-size: 30px;
-            /* Larger screen titles */
+            font-size: 28px;
             font-weight: 700;
-            /* Bolder */
-            margin-bottom: 30px;
+            margin-bottom: 24px;
             color: var(--text-color);
             text-align: center;
             letter-spacing: -0.5px;
@@ -155,21 +145,25 @@
 
         img.screen-logo {
             width: 100%;
-            max-width: 280px;
-            /* Slightly smaller max */
-            max-height: 80px;
-            /* Prevent overly tall logos */
+            max-width: 220px;
+            max-height: 70px;
             object-fit: contain;
             margin: 0 auto 30px auto;
-            /* Increased bottom margin */
             display: block;
+            filter: invert(1);
         }
 
-        /* Forms & Inputs */
+        nav .fa-solid {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 40px;
+        }
+
         .add-run-session-form {
             display: flex;
-            gap: 12px;
-            /* Slightly more gap */
+            gap: 10px;
             margin-bottom: 30px;
         }
 
@@ -184,10 +178,9 @@
         .profile-editor-form input[type="date"],
         .profile-editor-form input[type="time"] {
             flex-grow: 1;
-            padding: 9px;
-            /* Increased padding */
+            padding: 12px 14px;
             border: 1px solid var(--border-color);
-            border-radius: var(--border-radius-small);
+            border-radius: var(--border-radius);
             font-size: 16px;
             font-family: var(--font-family);
             background-color: var(--input-background-color);
@@ -198,15 +191,13 @@
         select#stats-period-filter {
             flex-grow: 0;
             min-width: 160px;
-            /* Slightly wider */
         }
 
         .add-run-session-form input[type="text"]::placeholder,
         .details-input-group input::placeholder,
         .profile-editor-form input::placeholder {
             color: var(--secondary-text-color);
-            opacity: 0.8;
-            /* More visible placeholder */
+            opacity: 0.7;
         }
 
         .add-run-session-form input[type="text"]:focus,
@@ -214,32 +205,28 @@
         select#stats-period-filter:focus,
         .profile-editor-form input:focus {
             outline: none;
-            /* Handled by focus-visible */
             border-color: var(--accent-color);
             background-color: var(--input-focus-background-color);
-            box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.3);
-            /* Softer focus glow */
+            box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.2);
         }
 
         .details-input-group input[type="date"]::-webkit-calendar-picker-indicator,
         .details-input-group input[type="time"]::-webkit-calendar-picker-indicator,
         .profile-editor-form input[type="date"]::-webkit-calendar-picker-indicator,
         .profile-editor-form input[type="time"]::-webkit-calendar-picker-indicator {
-            filter: invert(0.8) brightness(0.9);
-            /* Adjusted for better visibility */
+            filter: invert(0.5);
             cursor: pointer;
         }
 
 
         .add-run-session-form button,
         .minimal-button {
-            padding: 9px;
-            /* Consistent padding */
+            padding: 10px 16px;
             background-color: var(--accent-color);
+            background-image: linear-gradient(to bottom, var(--accent-color), var(--accent-color-darker));
             color: #FFFFFF;
-            /* Ensure white text on accent */
             border: none;
-            border-radius: var(--border-radius-small);
+            border-radius: var(--border-radius);
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
@@ -247,63 +234,66 @@
             align-items: center;
             justify-content: center;
             transition: background-color var(--transition-speed) ease, transform 0.15s ease, box-shadow var(--transition-speed) ease;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
             gap: 8px;
-            /* Slightly more gap for icon and text */
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
         .add-run-session-form button {
-            /* Specific style for the plus button if needed */
             padding: 12px 15px;
-            /* More square-ish for icon only */
             flex-shrink: 0;
         }
 
 
         .add-run-session-form button:hover,
         .minimal-button:hover {
-            background-color: color-mix(in srgb, var(--accent-color) 85%, black);
-            box-shadow: 0 3px 7px rgba(0, 0, 0, 0.2);
+            background-image: linear-gradient(to bottom, var(--accent-color-darker), var(--accent-color-darker));
+            transform: translateY(-2px);
+            box-shadow: var(--card-shadow-hover);
         }
 
         .add-run-session-form button:active,
         .minimal-button:active {
-            transform: scale(0.97) translateY(1px);
-            /* More pronounced active state */
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+            transform: scale(0.97) translateY(0);
         }
 
         .minimal-button.danger {
-            background-color: var(--danger-color);
-            color: #FFFFFF;
+            background-image: linear-gradient(to bottom, var(--danger-color), var(--danger-hover-color));
         }
 
         .minimal-button.danger:hover {
-            background-color: var(--danger-hover-color);
+            background-image: linear-gradient(to bottom, var(--danger-hover-color), var(--danger-hover-color));
         }
 
         .minimal-button.save-details-button,
         .minimal-button.profile-save-button {
-            background-color: var(--success-color);
-            color: #FFFFFF;
-            /* Ensure white text for contrast */
+            background-image: linear-gradient(to bottom, var(--success-color), var(--success-hover-color));
         }
 
         .minimal-button.save-details-button:hover,
         .minimal-button.profile-save-button:hover {
-            background-color: var(--success-hover-color);
+            background-image: linear-gradient(to bottom, var(--success-hover-color), var(--success-hover-color));
+        }
+
+        .minimal-button.profile-cancel-button {
+            background-image: none;
+            background-color: var(--input-background-color);
+            color: var(--secondary-text-color);
+            box-shadow: none;
+        }
+
+        .minimal-button.profile-cancel-button:hover {
+            background-color: var(--border-color);
+            color: var(--text-color);
         }
 
         .minimal-button i {
             font-size: 0.9em;
         }
 
-        /* Adjust icon size in buttons */
         .minimal-button.delete-run-session-button-panel i {
             margin: 0;
         }
 
-        /* Run Session List Items */
         .run-session-list {
             list-style: none;
             padding: 0;
@@ -312,29 +302,28 @@
         .run-session-item {
             background-color: var(--card-background);
             border: 1px solid var(--border-color);
-            /* Subtle border */
             border-radius: var(--border-radius);
-            margin-bottom: 18px;
-            /* More space */
-            padding: 18px;
-            /* More padding */
-            box-shadow: 0 3px 8px var(--shadow-color);
-            /* Refined shadow */
+            margin-bottom: 16px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
             overflow: hidden;
             transition: background-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease, opacity var(--transition-speed) ease, transform var(--transition-speed) ease;
             position: relative;
         }
 
         .run-session-item:hover:not(.done):not(.editing) {
-            background-color: color-mix(in srgb, var(--card-background) 95%, var(--text-color) 5%);
-            box-shadow: 0 5px 12px var(--shadow-color);
-            transform: translateY(-2px);
+            box-shadow: var(--card-shadow-hover);
+            transform: translateY(-3px);
+            border-color: #D1D5DB;
         }
 
+        .profile-run-session-item.editing .profile-item-chevron {
+            transform: rotate(90deg);
+        }
 
         .run-session-item.done {
             background-color: var(--done-background-color);
-            border-color: color-mix(in srgb, var(--success-color) 30%, transparent);
+            border-color: color-mix(in srgb, var(--success-color) 20%, transparent);
         }
 
         .run-session-item.deleting {
@@ -346,15 +335,15 @@
                 opacity: 1;
                 transform: translateY(0);
                 max-height: 250px;
-                padding: 18px;
-                margin-bottom: 18px;
+                padding: 20px;
+                margin-bottom: 16px;
             }
 
             to {
                 opacity: 0;
                 transform: translateY(-20px);
                 max-height: 0;
-                padding: 0 18px;
+                padding: 0 20px;
                 margin-bottom: 0;
                 border: none;
                 box-shadow: none;
@@ -365,16 +354,14 @@
             display: flex;
             align-items: center;
             gap: 15px;
-            /* More gap */
             cursor: default;
         }
 
         .run-session-item-main .checkbox {
             appearance: none;
-            width: 26px;
-            height: 26px;
-            /* Slightly larger */
-            border: 2px solid var(--secondary-text-color);
+            width: 24px;
+            height: 24px;
+            border: 2px solid #BDBDBD;
             border-radius: 50%;
             cursor: pointer;
             position: relative;
@@ -392,8 +379,7 @@
         }
 
         .run-session-item-main .checkbox:focus-visible {
-            /* Specific focus for checkbox */
-            box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.4);
+            box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.3);
             outline: none;
         }
 
@@ -401,10 +387,8 @@
             content: '\f00c';
             font-family: "Font Awesome 6 Free";
             font-weight: 900;
-            font-size: 13px;
-            /* Adjusted size */
+            font-size: 12px;
             color: #FFFFFF;
-            /* White checkmark */
             position: absolute;
             top: 50%;
             left: 50%;
@@ -413,11 +397,9 @@
 
         .run-session-name {
             flex-grow: 1;
-            font-size: 18px;
-            /* Larger name */
-            font-weight: 500;
+            font-size: 17px;
+            font-weight: 600;
             padding: 8px 0;
-            /* Vertical padding for better feel */
             border: none;
             background: transparent;
             font-family: var(--font-family);
@@ -426,7 +408,6 @@
             width: auto;
             min-width: 50px;
             border-radius: var(--border-radius-small);
-            /* Add radius for consistency on focus */
         }
 
         .run-session-item:not(.done) .run-session-name {
@@ -439,46 +420,28 @@
             padding-right: 10px;
             margin-left: -10px;
             margin-right: -10px;
-            /* Compensate for padding */
             box-shadow: inset 0 0 0 1px var(--border-color);
-            /* Subtle inset border */
         }
 
         .run-session-item.done .run-session-name {
             color: var(--secondary-text-color);
             text-decoration: line-through;
-            text-decoration-color: var(--secondary-text-color);
+            text-decoration-color: currentColor;
             text-decoration-thickness: 1.5px;
-            /* Slightly thicker */
+            opacity: 0.8;
         }
 
-        .delete-run-session-button {
-            /* This class seems to be used for main delete */
-            flex-shrink: 0;
-            margin-left: auto;
-            padding: 8px 12px;
-            /* Adjust padding */
-        }
-
-        .delete-run-session-button i {
-            margin: 0;
-            font-size: 1em;
-        }
-
-        /* Details Panel */
         .run-session-details-panel {
             max-height: 0;
             overflow: hidden;
             transition: max-height var(--long-transition-speed) ease-out, padding var(--long-transition-speed) ease-out, margin-top var(--long-transition-speed) ease-out, border-top-color var(--long-transition-speed) ease-out;
             padding: 0 5px;
-            /* Horizontal padding for content inside */
             margin-top: 0;
             border-top: 1px solid transparent;
         }
 
         .run-session-details-panel.open {
             max-height: 600px;
-            /* Generous height */
             padding-top: 20px;
             padding-bottom: 15px;
             margin-top: 20px;
@@ -487,17 +450,17 @@
 
         .details-input-group {
             margin-bottom: 18px;
-            /* More space */
             display: flex;
             flex-direction: column;
         }
 
         .details-input-group label {
-            font-size: 14px;
+            font-size: 12px;
             color: var(--secondary-text-color);
-            margin-bottom: 8px;
-            /* More space */
-            font-weight: 500;
+            margin-bottom: 6px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .details-input-group input[type="number"],
@@ -518,10 +481,8 @@
             justify-content: space-between;
             align-items: center;
             margin-top: 20px;
-            /* More space */
         }
 
-        /* Compact Display */
         .run-session-compact-display {
             opacity: 0;
             max-height: 0;
@@ -541,7 +502,6 @@
         .run-session-compact-display.visible {
             opacity: 1;
             max-height: 120px;
-            /* Increased for potential two lines */
             margin-top: 15px;
             padding-top: 15px;
             border-top: 1px solid var(--border-color);
@@ -563,36 +523,31 @@
             color: var(--accent-color);
             cursor: pointer;
             padding: 8px;
-            /* Better touch target */
-            font-size: 20px;
-            /* Larger icon */
+            font-size: 18px;
             flex-shrink: 0;
             border-radius: 50%;
             transition: background-color var(--transition-speed) ease, opacity var(--transition-speed) ease;
+            margin-left: auto;
         }
 
         .edit-details-button:hover {
             background-color: rgba(var(--accent-color-rgb), 0.1);
-            opacity: 0.8;
         }
 
         .edit-details-button:focus-visible {
             background-color: rgba(var(--accent-color-rgb), 0.15);
             outline: none;
-            /* Custom focus already applied globally */
         }
 
 
-        /* Profile Screen & Stats Screen common*/
         .week-block,
         .stats-block {
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             padding: 20px;
-            /* Add padding to make it card-like */
             background-color: var(--card-background);
             border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
-            box-shadow: 0 3px 8px var(--shadow-color);
+            box-shadow: var(--card-shadow);
         }
 
         .week-block:last-child,
@@ -601,21 +556,19 @@
         }
 
         .week-header {
-            font-size: 22px;
-            /* Larger */
+            font-size: 20px;
             font-weight: 600;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-bottom: 10px;
+            padding-bottom: 15px;
             border-bottom: 1px solid var(--border-color);
-            /* Separator for header */
         }
 
         .week-summary {
-            font-size: 15px;
-            font-weight: 400;
+            font-size: 14px;
+            font-weight: 500;
             color: var(--secondary-text-color);
         }
 
@@ -628,7 +581,6 @@
             display: flex;
             flex-direction: column;
             padding: 15px 0;
-            /* Vertical padding */
             border-bottom: 1px solid var(--border-color);
             font-size: 16px;
             cursor: pointer;
@@ -642,17 +594,14 @@
 
         .profile-run-session-item-content-wrapper {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
+            gap: 18px;
         }
 
         .profile-run-session-status {
-            margin-right: 18px;
-            font-size: 22px;
-            /* Larger emoji */
+            font-size: 20px;
             width: 28px;
             text-align: center;
-            padding-top: 0px;
-            /* Align with text */
             flex-shrink: 0;
         }
 
@@ -671,14 +620,14 @@
         }
 
         .profile-run-session-name {
-            font-weight: 500;
+            font-weight: 600;
             color: var(--text-color);
             font-size: 17px;
         }
 
         .profile-run-session-details-info {
             color: var(--secondary-text-color);
-            font-size: 14px;
+            font-size: 13px;
             text-align: right;
             flex-shrink: 0;
             opacity: 0.9;
@@ -691,13 +640,22 @@
             opacity: 0.8;
         }
 
-        /* Profile Item Editor */
+        .profile-item-chevron {
+            color: var(--border-color);
+            font-size: 14px;
+            transition: color var(--transition-speed) ease;
+            margin-right: 3px;
+        }
+
+        .profile-run-session-item:hover .profile-item-chevron {
+            color: var(--secondary-text-color);
+        }
+
         .profile-editor-form {
-            background-color: color-mix(in srgb, var(--card-background) 85%, black);
-            /* Slightly darker editor */
+            background-color: var(--background-color);
             padding-left: 15px;
             padding-right: 15px;
-            border-radius: var(--border-radius-small);
+            border-radius: var(--border-radius);
             border: 1px solid var(--border-color);
             max-height: 0;
             opacity: 0;
@@ -709,15 +667,13 @@
                 margin-top var(--long-transition-speed) ease-out;
         }
 
-        /* .profile-editor-form will have padding-top, padding-bottom, margin-top animated by JS */
-
         .profile-editor-form .details-input-group {
             margin-bottom: 15px;
         }
 
         .profile-editor-form .details-input-group label {
-            font-size: 13px;
-            font-weight: 500;
+            font-size: 12px;
+            font-weight: 600;
         }
 
         .profile-editor-form .details-buttons-container {
@@ -729,21 +685,20 @@
 
         .profile-editor-form .details-buttons-container>div {
             display: flex;
-            gap: 6px;
+            gap: 8px;
         }
 
         .profile-editor-checkbox-group {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 10px;
             margin-bottom: 15px;
             padding: 10px 0;
-            /* Add some padding */
         }
 
         .profile-editor-checkbox-group input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             accent-color: var(--accent-color);
             cursor: pointer;
         }
@@ -754,7 +709,6 @@
         }
 
 
-        /* Stats Screen Specifics */
         .stats-controls {
             display: flex;
             align-items: center;
@@ -762,11 +716,10 @@
             margin-bottom: 35px;
             flex-wrap: wrap;
             padding: 15px;
-            /* Add padding */
             background-color: var(--card-background);
             border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
-            box-shadow: 0 2px 5px var(--shadow-color);
+            box-shadow: var(--card-shadow);
         }
 
         .stats-controls label {
@@ -777,9 +730,7 @@
 
         #stats-metrics-wrapper {
             display: grid;
-            /* Use grid for better responsiveness */
             grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
-            /* Responsive columns */
             gap: 25px;
             margin-bottom: 25px;
         }
@@ -789,8 +740,7 @@
             border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
             padding: 25px;
-            /* More padding */
-            box-shadow: 0 3px 8px var(--shadow-color);
+            box-shadow: var(--card-shadow);
             display: flex;
             flex-direction: column;
         }
@@ -798,38 +748,33 @@
         .stats-chart-canvas-container {
             width: 100%;
             height: 280px;
-            /* Slightly smaller height */
             margin-bottom: 20px;
             position: relative;
         }
 
         .stats-summary-text {
             text-align: center;
-            font-size: 16px;
+            font-size: 15px;
             color: var(--secondary-text-color);
             margin-top: 5px;
             font-weight: 500;
         }
 
-        /* Reset Button */
         .reset-all-button {
             display: block;
             width: 100%;
             margin: 40px 0 20px 0;
-            /* More top margin */
             padding: 16px;
-            /* More padding */
-            background-color: var(--danger-color);
-            color: white;
-            border: none;
+            background-color: transparent;
+            color: var(--danger-color);
+            border: 2px solid var(--danger-color);
             border-radius: var(--border-radius);
             cursor: pointer;
             font-size: 17px;
-            /* Larger font */
             font-weight: 600;
             text-align: center;
-            transition: background-color var(--transition-speed) ease, transform 0.15s ease, box-shadow var(--transition-speed) ease;
-            box-shadow: 0 3px 8px var(--shadow-color);
+            transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease, transform 0.15s ease, box-shadow var(--transition-speed) ease;
+            box-shadow: none;
         }
 
         .reset-all-button i {
@@ -837,13 +782,15 @@
         }
 
         .reset-all-button:hover {
-            background-color: var(--danger-hover-color);
-            box-shadow: 0 4px 10px var(--shadow-color);
+            background-color: var(--danger-color);
+            color: white;
+            border-color: var(--danger-color);
+            transform: translateY(-2px);
+            box-shadow: var(--card-shadow-hover);
         }
 
         .reset-all-button:active {
-            transform: scale(0.98) translateY(1px);
-            box-shadow: 0 2px 5px var(--shadow-color);
+            transform: scale(0.98) translateY(0);
         }
 
         nav {
@@ -851,20 +798,16 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: calc(70px + env(safe-area-inset-bottom));
-            /* Increased height */
+            height: calc(80px + env(safe-area-inset-bottom));
             padding-bottom: env(safe-area-inset-bottom);
             background-color: var(--nav-background-color);
             backdrop-filter: blur(20px);
-            /* Stronger blur */
             -webkit-backdrop-filter: blur(20px);
             border-top: 1px solid var(--border-color);
             display: flex;
             justify-content: space-around;
             align-items: stretch;
-            /* Stretch items */
             padding-top: 0;
-            /* Remove top padding, handled by button flex */
         }
 
         nav button {
@@ -877,13 +820,10 @@
             align-items: center;
             justify-content: center;
             height: 100%;
-            /* Full height of nav item */
             color: var(--secondary-text-color);
             transition: color var(--transition-speed) ease, transform 0.1s ease;
             padding: 8px 5px calc(8px + env(safe-area-inset-bottom)) 5px;
-            /* Adjust padding for text */
             position: relative;
-            /* For pseudo-elements if needed */
         }
 
         nav button:active {
@@ -891,13 +831,15 @@
         }
 
         nav button i {
-            font-size: 23px;
-            /* Slightly larger icons */
-            margin-bottom: 5px;
-            /* More space */
-            height: 25px;
+            font-size: 22px;
+            margin-bottom: 6px;
+            height: 28px;
+            width: 56px;
             display: flex;
             align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            transition: background-color 0.2s ease, transform 0.2s ease;
         }
 
         nav button span {
@@ -912,16 +854,13 @@
 
         nav button.active span {
             font-weight: 600;
-            /* Bolder text for active tab */
         }
 
         nav button.active i {
-            transform: scale(1.05);
-            /* Slight scale for active icon */
+            background-color: rgba(var(--accent-color-rgb), 0.1);
         }
 
 
-        /* Empty State Messages */
         #no-run-sessions-message,
         #no-history-message {
             text-align: center;
@@ -932,27 +871,24 @@
             flex-direction: column;
             align-items: center;
             gap: 15px;
-            opacity: 0.7;
+            opacity: 0.8;
         }
 
         #no-run-sessions-message::before,
         #no-history-message::before {
             font-family: "Font Awesome 6 Free";
             font-weight: 900;
-            font-size: 2.5em;
-            /* Larger icon */
+            font-size: 3em;
             margin-bottom: 10px;
-            opacity: 0.5;
+            opacity: 0.3;
         }
 
         #no-run-sessions-message::before {
             content: '\f52c';
-            /* fa-running */
         }
 
         #no-history-message::before {
             content: '\f1da';
-            /* fa-history */
         }
 
 
@@ -1053,10 +989,8 @@
             const noRunSessionsMessage = document.getElementById('no-run-sessions-message');
             const noHistoryMessage = document.getElementById('no-history-message');
 
-            // Add this line to define main:
             const main = document.querySelector('main');
 
-            // Stats Screen Elements
             const statsPeriodFilter = document.getElementById('stats-period-filter');
             const statsChartCanvas = document.getElementById('totalKilometersChart');
             const statsSummaryElement = document.getElementById('stats-summary');
@@ -1073,17 +1007,15 @@
 
             let currentScreenId;
 
-            // Check if the app is reloaded or loaded
             if (performance.getEntriesByType("navigation")[0]?.type === "reload") {
                 currentScreenId = localStorage.getItem(LAST_ACTIVE_SCREEN_KEY) || 'home-screen';
             } else {
                 currentScreenId = 'home-screen';
             }
-            
+
             let currentIsoWeekInfo = null;
             let openProfileEditor = null;
 
-            // --- Data Management ---
             function loadData(key, defaultValue = []) {
                 const data = localStorage.getItem(key);
                 try {
@@ -1123,7 +1055,6 @@
             function getWeekData(isoWeek) { return loadData(WEEK_DATA_PREFIX + isoWeek); }
             function saveWeekData(isoWeek, data) { saveData(WEEK_DATA_PREFIX + isoWeek, data); }
 
-            // --- Week Calculation ---
             function getIsoWeekAndYear(dateInput) {
                 const date = new Date(Date.UTC(dateInput.getFullYear(), dateInput.getMonth(), dateInput.getDate()));
                 date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
@@ -1155,7 +1086,6 @@
             }
 
 
-            // --- Initialization ---
             function initializeApp() {
                 currentIsoWeekInfo = getCurrentIsoWeek();
                 const { isoWeekString } = currentIsoWeekInfo;
@@ -1234,7 +1164,6 @@
                 checkEmptyListState();
             }
 
-            // --- Navigation ---
             function switchScreen(targetId, instant = false) {
                 const currentActiveScreen = document.querySelector('.screen.active');
                 const targetScreen = document.getElementById(targetId);
@@ -1253,12 +1182,12 @@
                     setTimeout(() => {
                         if (currentActiveScreen) currentActiveScreen.classList.remove('active', 'fade-out');
                         targetScreen.classList.add('active');
-                        main.scrollTop = 0; // Scroll to top of new screen
+                        main.scrollTop = 0;
                     }, parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--transition-speed') || '0.25') * 1000);
                 } else {
                     if (currentActiveScreen) currentActiveScreen.classList.remove('active', 'fade-out');
                     targetScreen.classList.add('active');
-                    main.scrollTop = 0; // Scroll to top of new screen
+                    main.scrollTop = 0;
                 }
 
                 if (currentActiveButton) currentActiveButton.classList.remove('active');
@@ -1269,7 +1198,6 @@
 
                 if (targetId === 'profile-screen') renderProfileScreen();
                 else if (targetId === 'stats-screen') {
-                    // Delay chart rendering until after the transition completes so the same bar animation is used as on reload.
                     setTimeout(() => {
                         renderStatsScreen();
                     }, parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--transition-speed') || '0.25') * 1000);
@@ -1286,7 +1214,6 @@
                 switchScreen(targetId);
             }
 
-            // --- Event Delegation for Run Session List (Home Screen) ---
             function handleListClick(event) {
                 const target = event.target;
                 const listItem = target.closest('.run-session-item');
@@ -1305,11 +1232,11 @@
                         }
                     }
                 }
-                else if (target.classList.contains('delete-run-session-button-main') || target.closest('.delete-run-session-button-main') || target.classList.contains('delete-run-session-button-panel') || target.closest('.delete-run-session-button-panel')) {
+                else if (target.classList.contains('delete-run-session-button-panel') || target.closest('.delete-run-session-button-panel')) {
                     handleDeleteRunSession(runSessionId, listItem);
                 }
             }
-            function handleListInput(event) { /* Currently saving name on focusout */ }
+            function handleListInput(event) { }
             function handleListFocusOut(event) {
                 const target = event.target;
                 const listItem = target.closest('.run-session-item');
@@ -1320,7 +1247,6 @@
                 }
             }
 
-            // --- Home Screen Logic ---
             function renderHomeRunSessions() {
                 const { isoWeekString } = currentIsoWeekInfo;
                 const weekData = getWeekData(isoWeekString);
@@ -1349,8 +1275,8 @@
                      <div class="run-session-item-main">
                          <input type="checkbox" class="checkbox" aria-label="Mark ${safeName} as done" ${runSession.done ? 'checked' : ''}>
                          <input type="text" class="run-session-name" value="${safeName}" ${runSession.done ? 'readonly' : ''} aria-label="Run session name for ${safeName}">
-                         <button class="delete-run-session-button-main minimal-button danger ${runSession.done ? 'hidden' : ''}" aria-label="Delete ${safeName}">
-                             <i class="fa-solid fa-trash-can"></i>
+                         <button class="edit-details-button" aria-label="Edit details for ${safeName}">
+                            <i class="fa-solid fa-pencil"></i>
                          </button>
                      </div>
                      <div class="run-session-details-panel">
@@ -1381,8 +1307,7 @@
                      </div>
                      <div class="run-session-compact-display ${runSession.done && hasDetails ? 'visible' : ''}">
                          <span class="compact-info">
-                             </span>
-                         ${runSession.done ? `<button class="edit-details-button" aria-label="Edit Details"><i class="fa-solid fa-pencil"></i></button>` : ''}
+                         </span>
                      </div>
                  `;
                 updateCompactDisplay(runSession, li);
@@ -1422,7 +1347,7 @@
                 newRunSessionInput.value = '';
                 const newItem = createRunSessionListItem(newRunSession);
                 runSessionListContainer.appendChild(newItem);
-                newItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); // Scroll to new item
+                newItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 checkEmptyListState();
             }
 
@@ -1436,14 +1361,12 @@
                 const isChecking = checkboxElement.checked;
                 const nameInput = listItemElement.querySelector('.run-session-name');
                 const detailsPanel = listItemElement.querySelector('.run-session-details-panel');
-                const deleteButtonMain = listItemElement.querySelector('.delete-run-session-button-main');
                 const dateInput = detailsPanel.querySelector(`#run-date-${runSessionId}`);
                 const timeInput = detailsPanel.querySelector(`#run-time-${runSessionId}`);
 
                 if (isChecking) {
                     listItemElement.classList.add('done');
                     nameInput.setAttribute('readonly', true);
-                    deleteButtonMain?.classList.add('hidden');
                     detailsPanel.classList.add('open');
 
                     dateInput.value = new Date().toISOString().split('T')[0];
@@ -1457,7 +1380,6 @@
                 } else {
                     listItemElement.classList.remove('done');
                     nameInput.removeAttribute('readonly');
-                    deleteButtonMain?.classList.remove('hidden');
                     detailsPanel.classList.remove('open');
 
                     if (listItemElement.dataset.temporarilyChecked === "true") {
@@ -1487,8 +1409,7 @@
                 const listItemElement = document.querySelector(`.run-session-item[data-id="${runSessionId}"]`);
                 if (listItemElement && listItemElement.dataset.temporarilyChecked === "true") {
                     const nameInput = listItemElement.querySelector('.run-session-name');
-                    if (nameInput) nameInput.value = runSession.name; // Revert to original if edit attempted during temp check
-                    // Optionally alert user or just prevent edit
+                    if (nameInput) nameInput.value = runSession.name;
                     return;
                 }
 
@@ -1516,7 +1437,7 @@
                         const safeNewName = escapeHtml(newName);
                         listItem.querySelector('.checkbox')?.setAttribute('aria-label', `Mark ${safeNewName} as done`);
                         if (nameInput) nameInput.setAttribute('aria-label', `Run session name for ${safeNewName}`);
-                        listItem.querySelector('.delete-run-session-button-main')?.setAttribute('aria-label', `Delete ${safeNewName}`);
+                        listItem.querySelector('.edit-details-button')?.setAttribute('aria-label', `Edit details for ${safeNewName}`);
                     }
                 }
             }
@@ -1592,7 +1513,6 @@
                     listItemElement.removeAttribute("temporarilyChecked");
                     listItemElement.classList.add('done');
                     listItemElement.querySelector('.run-session-name').setAttribute('readonly', true);
-                    listItemElement.querySelector('.delete-run-session-button-main')?.classList.add('hidden');
                     detailsPanel.classList.remove('open');
                     updateCompactDisplay(runSessionToUpdate, listItemElement);
 
@@ -1619,7 +1539,7 @@
                 const compactDisplay = listItemElement.querySelector('.run-session-compact-display');
                 if (!compactDisplay) return;
                 const compactInfoSpan = compactDisplay.querySelector('.compact-info');
-                const editButton = compactDisplay.querySelector('.edit-details-button');
+                const editButton = listItemElement.querySelector('.edit-details-button');
 
                 if (runSession.done) {
                     let infoParts = [];
@@ -1655,17 +1575,12 @@
                         ${runDateTimeInfo}
                     `;
                     compactDisplay.classList.add('visible');
-                    if (!editButton && compactDisplay.querySelector('.edit-details-button') === null) {
-                        const newEditButton = document.createElement('button');
-                        newEditButton.className = 'edit-details-button';
-                        newEditButton.setAttribute('aria-label', 'Edit Details');
-                        newEditButton.innerHTML = '<i class="fa-solid fa-pencil"></i>';
-                        compactDisplay.appendChild(newEditButton);
-                    }
+                    if (editButton) editButton.classList.remove('hidden');
+
                 } else {
                     compactDisplay.classList.remove('visible');
                     compactInfoSpan.innerHTML = '';
-                    if (editButton) editButton.remove();
+                    if (editButton) editButton.classList.remove('hidden');
                 }
             }
 
@@ -1703,7 +1618,6 @@
             }
 
 
-            // --- Profile Screen Logic ---
             function handleProfileListClick(event) {
                 const editorForm = event.target.closest('.profile-editor-form');
 
@@ -1743,7 +1657,6 @@
                     }
                 };
                 editorForm.addEventListener('transitionend', handleTransitionEnd);
-                // Fallback timeout to remove element if transitionend doesn't fire
                 setTimeout(() => {
                     if (editorForm.parentNode && editorForm.style.opacity === '0') editorForm.remove();
                 }, parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--long-transition-speed') || '0.35') * 1000 + 100);
@@ -1758,7 +1671,6 @@
 
             function openProfileEditorWithoutTransition(newItemElement, updatedRunSession, runSessionId, newTargetIsoWeek) {
                 if (newItemElement) {
-                    // Open the editor immediately without transition
                     if (openProfileEditor && openProfileEditor.form) {
                         openProfileEditor.form.remove();
                         openProfileEditor = null;
@@ -1789,7 +1701,6 @@
                     return;
                 }
 
-                // Close any other open editor
                 if (openProfileEditor && openProfileEditor.id !== runSessionId) {
                     closeOpenProfileEditor();
                 }
@@ -1802,13 +1713,12 @@
                 const editorForm = createProfileEditorForm(runSession, runSessionId, isoWeek);
                 itemElement.appendChild(editorForm);
 
-                // Animate open
-                requestAnimationFrame(() => { // First frame to ensure element is in DOM
-                    requestAnimationFrame(() => { // Second frame to trigger transition
-                        editorForm.style.paddingTop = '20px'; // Target padding
-                        editorForm.style.paddingBottom = '20px'; // Target padding
-                        editorForm.style.marginTop = '15px'; // Target margin
-                        editorForm.style.maxHeight = (editorForm.scrollHeight + 40) + 'px'; // scrollHeight + vertical paddings
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        editorForm.style.paddingTop = '20px';
+                        editorForm.style.paddingBottom = '20px';
+                        editorForm.style.marginTop = '15px';
+                        editorForm.style.maxHeight = (editorForm.scrollHeight + 40) + 'px';
                         editorForm.style.opacity = '1';
                     });
                 });
@@ -1822,7 +1732,7 @@
                 form.className = 'profile-editor-form';
                 form.dataset.id = runSessionId;
                 form.dataset.week = isoWeek;
-                form.addEventListener('submit', e => e.preventDefault()); // Prevent actual form submission
+                form.addEventListener('submit', e => e.preventDefault());
 
                 const today = new Date().toISOString().split('T')[0];
                 const currentTime = new Date().toTimeString().split(' ')[0].substring(0, 5);
@@ -1897,7 +1807,7 @@
                 if (rsIndexInOriginal === -1) {
                     console.error("Run session not found in original week data for profile edit.");
                     closeOpenProfileEditor();
-                    renderProfileScreen(); // Re-render to reflect state
+                    renderProfileScreen();
                     return;
                 }
 
@@ -1928,14 +1838,13 @@
                             if (!isNaN(hours) && !isNaN(minutes)) completedDate.setHours(hours, minutes);
                         }
                     } else {
-                        completedDate = new Date(); // Fallback if date somehow cleared
+                        completedDate = new Date();
                     }
                     updatedRunSession.completionTimestamp = completedDate.toISOString();
                 } else {
                     updatedRunSession.completionTimestamp = null;
                 }
 
-                // Update template if name changed
                 const template = getRunSessionTemplate();
                 const templateIndex = template.findIndex(t => t.id === runSessionId);
                 if (templateIndex !== -1 && template[templateIndex].name !== updatedRunSession.name) {
@@ -1943,16 +1852,13 @@
                     saveRunSessionTemplate(template);
                 }
 
-                // Save to correct week
                 if (newTargetIsoWeek === originalIsoWeek) {
                     originalWeekData[rsIndexInOriginal] = updatedRunSession;
                     saveWeekData(originalIsoWeek, originalWeekData);
                 } else {
-                    // Remove from original week
                     originalWeekData.splice(rsIndexInOriginal, 1);
                     saveWeekData(originalIsoWeek, originalWeekData);
 
-                    // Add/Update in new target week
                     let newTargetWeekData = getWeekData(newTargetIsoWeek);
                     const existingIndexInNewTarget = newTargetWeekData.findIndex(rs => rs.id === runSessionId);
                     if (existingIndexInNewTarget !== -1) {
@@ -1967,12 +1873,11 @@
                 const newItemElement = document.querySelector(`.profile-run-session-item[data-id="${runSessionId}"][data-week="${newTargetIsoWeek}"]`);
                 openProfileEditorWithoutTransition(newItemElement, updatedRunSession, runSessionId, newTargetIsoWeek);
                 closeOpenProfileEditor();
-                // If home screen is active and relevant week changed, re-render home
                 if (currentScreenId === 'home-screen' &&
                     (currentIsoWeekInfo.isoWeekString === originalIsoWeek || currentIsoWeekInfo.isoWeekString === newTargetIsoWeek)) {
                     renderHomeRunSessions();
                 }
-                if (currentScreenId === 'stats-screen') renderStatsScreen(); // Stats might change
+                if (currentScreenId === 'stats-screen') renderStatsScreen();
             }
 
             function handleDeleteProfileItem(editorForm) {
@@ -1983,9 +1888,8 @@
                 const weekInfo = getWeekRangeFromIsoString(isoWeek);
 
                 if (confirm(`Are you sure you want to delete "${escapeHtml(runSessionName)}" from Week ${weekInfo.weekNumber} (${weekInfo.weekRange})? This action cannot be undone.`)) {
-                    closeOpenProfileEditor(); // Close editor before deleting
+                    closeOpenProfileEditor();
 
-                    // Animate item removal
                     itemElement.style.opacity = '0';
                     itemElement.style.maxHeight = '0px';
                     itemElement.style.paddingTop = '0px';
@@ -2001,7 +1905,6 @@
                                 const weekBlockElement = listInWeekBlock.closest('.week-block');
                                 if (weekBlockElement) weekBlockElement.remove();
                             }
-                            // Check if any week blocks are left
                             if (weeklyProgressContainer.querySelectorAll('.week-block').length === 0) {
                                 noHistoryMessage.classList.remove('hidden');
                                 resetAllButton.classList.add('hidden');
@@ -2009,7 +1912,6 @@
                             itemElement.removeEventListener('transitionend', handleRemovalTransition);
                         }
                     });
-                    // Fallback for removal
                     setTimeout(() => {
                         if (itemElement.parentNode && itemElement.style.opacity === '0') {
                             const listInWeekBlock = itemElement.parentElement;
@@ -2026,16 +1928,13 @@
                     }, parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--transition-speed') || '0.3') * 1000 + 100);
 
 
-                    // Update data
                     let weekData = getWeekData(isoWeek);
                     weekData = weekData.filter(rs => rs.id !== runSessionId);
                     saveWeekData(isoWeek, weekData);
 
-                    // If current week on home screen was affected, re-render home
                     if (isoWeek === currentIsoWeekInfo.isoWeekString) {
                         renderHomeRunSessions();
                     }
-                    // Re-render stats as data changed
                     renderStatsScreen();
                 }
             }
@@ -2043,7 +1942,7 @@
 
             function renderProfileScreen() {
                 weeklyProgressContainer.innerHTML = '';
-                if (openProfileEditor && openProfileEditor.form) { // Ensure any orphaned editor is removed
+                if (openProfileEditor && openProfileEditor.form) {
                     openProfileEditor.form.remove();
                     openProfileEditor = null;
                 }
@@ -2052,16 +1951,16 @@
 
                 if (allKeys.length === 0) {
                     noHistoryMessage.classList.remove('hidden');
-                    resetAllButton.classList.add('hidden'); // Hide reset button if no data
+                    resetAllButton.classList.add('hidden');
                     return;
                 }
                 noHistoryMessage.classList.add('hidden');
-                resetAllButton.classList.remove('hidden'); // Show reset button
+                resetAllButton.classList.remove('hidden');
 
                 allKeys.forEach(key => {
                     const isoWeek = key.substring(WEEK_DATA_PREFIX.length);
                     const weekData = loadData(key);
-                    if (!weekData || weekData.length === 0) return; // Skip empty weeks
+                    if (!weekData || weekData.length === 0) return;
 
                     const weekBlock = document.createElement('div');
                     weekBlock.classList.add('week-block');
@@ -2112,6 +2011,7 @@
                                      </div>
                                      ${rs.done ? `<span class="profile-run-session-timestamp">${completionInfo}</span>` : ''}
                                  </div>
+                                 <span class="profile-item-chevron"><i class="fa-solid fa-chevron-right"></i></span>
                             </div>
                          `;
                         ul.appendChild(li);
@@ -2137,27 +2037,18 @@
                         console.warn("Invalid isoWeek format for getWeekRangeFromIsoString:", isoWeek);
                         return { weekRange: `Invalid Week: ${isoWeek}`, weekNumber: weekNumStr || '', year: year || new Date().getFullYear(), startDate: null, endDate: null };
                     }
-                    // Get the 4th of January of that year (always in week 1)
                     const jan4UTC = new Date(Date.UTC(year, 0, 4));
-                    // Get the day of the week for Jan 4th (0=Sun, 1=Mon, ..., 6=Sat)
-                    const dayOfWeekJan4 = jan4UTC.getUTCDay(); // Sunday is 0, Monday is 1...
-                    // Calculate offset to the first Thursday of week 1
-                    // ISO 8601 weeks start on Monday. Thursday of week 1 is used as a reference.
-                    // (dayOfWeekJan4 || 7) handles Sunday (0) as 7.
+                    const dayOfWeekJan4 = jan4UTC.getUTCDay();
                     const offsetToWeek1Thursday = 4 - (dayOfWeekJan4 || 7);
 
-                    // Get the date of the Thursday of the first week
                     const firstThursdayUTC = new Date(Date.UTC(year, 0, 4 + offsetToWeek1Thursday));
 
-                    // Get the Thursday of the target week
                     const thursdayOfGivenWeekUTC = new Date(firstThursdayUTC.getTime());
                     thursdayOfGivenWeekUTC.setUTCDate(firstThursdayUTC.getUTCDate() + (weekNum - 1) * 7);
 
-                    // Monday of that week is Thursday - 3 days
                     const mondayOfWeekUTC = new Date(thursdayOfGivenWeekUTC.getTime());
                     mondayOfWeekUTC.setUTCDate(thursdayOfGivenWeekUTC.getUTCDate() - 3);
 
-                    // Sunday of that week is Thursday + 3 days
                     const sundayOfWeekUTC = new Date(thursdayOfGivenWeekUTC.getTime());
                     sundayOfWeekUTC.setUTCDate(thursdayOfGivenWeekUTC.getUTCDate() + 3);
 
@@ -2186,8 +2077,8 @@
                         weekRange: rangeString,
                         weekNumber: String(weekNum).padStart(2, '0'),
                         year: year,
-                        startDate: mondayOfWeekUTC, // This is UTC date, careful if using for local comparisons directly
-                        endDate: sundayOfWeekUTC   // This is UTC date
+                        startDate: mondayOfWeekUTC,
+                        endDate: sundayOfWeekUTC
                     };
                 } catch (e) {
                     console.error("Error calculating week range for", isoWeek, ":", e);
@@ -2202,7 +2093,6 @@
                 }
             }
 
-            // --- Stats Screen Logic ---
             function renderStatsScreen() {
                 const period = statsPeriodFilter.value;
                 const allRunSessions = getAllHistoricalRunSessions();
@@ -2210,10 +2100,10 @@
 
                 const today = new Date();
                 const currentYear = today.getFullYear();
-                const currentMonth = today.getMonth(); // 0-indexed
+                const currentMonth = today.getMonth();
                 const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim();
                 const gridBorderColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim();
-                const tooltipBgColor = getComputedStyle(document.documentElement).getPropertyValue('--nav-background-color').trim(); // Use nav for consistency
+                const tooltipBgColor = getComputedStyle(document.documentElement).getPropertyValue('--nav-background-color').trim();
 
                 let distChartData, distChartLabels, distChartLabel = "Kilometers";
                 let totalKmForPeriod = 0;
@@ -2233,9 +2123,9 @@
 
                     filteredSessions.forEach(rs => {
                         if (rs.runDate) {
-                            const runDate = new Date(rs.runDate + "T00:00:00"); // Ensure interpretation as local date for getDay()
-                            const dayOfWeek = runDate.getDay(); // 0 (Sun) to 6 (Sat)
-                            const isoDayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Convert to Mon (0) to Sun (6)
+                            const runDate = new Date(rs.runDate + "T00:00:00");
+                            const dayOfWeek = runDate.getDay();
+                            const isoDayIndex = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
 
                             if (rs.distance && rs.distance > 0) {
                                 dailyKm[isoDayIndex] += rs.distance;
@@ -2260,7 +2150,7 @@
                             totalPeriodRunSeconds += dailyTotalRunSeconds[i];
                             totalPeriodDistanceForPace += dailyTotalDistance[i];
                         } else {
-                            dailyAvgPaceData[i] = 0; // Use 0 for no pace, chart will show 00:00
+                            dailyAvgPaceData[i] = 0;
                         }
                     }
                     paceChartData = dailyAvgPaceData;
@@ -2278,7 +2168,7 @@
                         if (rs.runDate) {
                             const runDateObj = new Date(rs.runDate + "T00:00:00");
                             if (runDateObj.getFullYear() === currentYear && runDateObj.getMonth() === currentMonth) {
-                                const dayOfMonthIndex = runDateObj.getDate() - 1; // 0-indexed
+                                const dayOfMonthIndex = runDateObj.getDate() - 1;
 
                                 if (rs.distance && rs.distance > 0) {
                                     dailyKm[dayOfMonthIndex] += rs.distance;
@@ -2352,14 +2242,15 @@
                     paceChartData = monthlyAvgPaceData;
                 }
 
-                const chartBarThickness = (period === 'year') ? 20 : (period === 'month' ? 10 : 'flex'); // Adjust thickness
-                const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
-                const successColor = getComputedStyle(document.documentElement).getPropertyValue('--success-color').trim();
-
+                const chartBarThickness = (period === 'year') ? 20 : (period === 'month' ? 10 : 'flex');
 
                 if (totalKilometersChart) totalKilometersChart.destroy();
                 if (statsChartCanvas) {
                     const ctx = statsChartCanvas.getContext('2d');
+                    const accentGradient = ctx.createLinearGradient(0, 0, 0, 280);
+                    accentGradient.addColorStop(0, 'rgba(59, 130, 246, 0.7)');
+                    accentGradient.addColorStop(1, 'rgba(59, 130, 246, 0.3)');
+
                     totalKilometersChart = new Chart(ctx, {
                         type: 'bar',
                         data: {
@@ -2367,10 +2258,10 @@
                             datasets: [{
                                 label: 'Kilometers',
                                 data: distChartData,
-                                backgroundColor: `rgba(${getComputedStyle(document.documentElement).getPropertyValue('--accent-color-rgb')}, 0.65)`,
-                                borderColor: accentColor,
+                                backgroundColor: accentGradient,
+                                borderColor: 'rgba(59, 130, 246, 0.8)',
                                 borderWidth: 1,
-                                borderRadius: 5, // Rounded bars
+                                borderRadius: 5,
                                 barThickness: chartBarThickness,
                             }]
                         },
@@ -2407,6 +2298,10 @@
                 if (averagePaceChartInstance) averagePaceChartInstance.destroy();
                 if (statsPaceChartCanvas) {
                     const paceCtx = statsPaceChartCanvas.getContext('2d');
+                    const successGradient = paceCtx.createLinearGradient(0, 0, 0, 280);
+                    successGradient.addColorStop(0, 'rgba(16, 185, 129, 0.7)');
+                    successGradient.addColorStop(1, 'rgba(16, 185, 129, 0.3)');
+
                     averagePaceChartInstance = new Chart(paceCtx, {
                         type: 'bar',
                         data: {
@@ -2414,8 +2309,8 @@
                             datasets: [{
                                 label: 'Average Pace /km',
                                 data: paceChartData,
-                                backgroundColor: `rgba(${getComputedStyle(document.documentElement).getPropertyValue('--success-color').match(/\d+/g).slice(0, 3).join(',')}, 0.65)`, // Dynamic success color
-                                borderColor: successColor,
+                                backgroundColor: successGradient,
+                                borderColor: 'rgba(16, 185, 129, 0.8)',
                                 borderWidth: 1,
                                 borderRadius: 5,
                                 barThickness: chartBarThickness,
@@ -2493,32 +2388,28 @@
 
             function filterSessionsByPeriod(sessions, period) {
                 const today = new Date();
-                today.setHours(0, 0, 0, 0); // Normalize today to start of day for comparisons
+                today.setHours(0, 0, 0, 0);
 
-                const currentWeekInfo = getCurrentIsoWeek(today); // currentWeekInfo.startDate and .endDate are already Date objects at midnight
+                const currentWeekInfo = getCurrentIsoWeek(today);
 
                 const currentYearStart = new Date(today.getFullYear(), 0, 1);
-                const currentYearEnd = new Date(today.getFullYear(), 11, 31, 23, 59, 59, 999); // End of year
+                const currentYearEnd = new Date(today.getFullYear(), 11, 31, 23, 59, 59, 999);
 
                 return sessions.filter(rs => {
                     if (!rs.runDate) return false;
                     if (rs.distance == null || rs.distance <= 0 || !rs.time) return false;
 
-                    // Parse rs.runDate as local date by splitting and creating new Date
-                    // Assumes rs.runDate is YYYY-MM-DD
                     const parts = rs.runDate.split('-');
                     const runDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-                    runDate.setHours(0, 0, 0, 0); // Normalize runDate to start of day
+                    runDate.setHours(0, 0, 0, 0);
 
                     if (isNaN(runDate.getTime())) return false;
 
                     switch (period) {
                         case 'week':
-                            // currentWeekInfo.startDate and .endDate are already Date objects
                             return runDate >= currentWeekInfo.startDate && runDate <= currentWeekInfo.endDate;
                         case 'month':
                             const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-                            // Filter for runs up to and including the current day of the month
                             const endOfPeriodForMonth = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
                             return runDate >= firstDayOfMonth && runDate <= endOfPeriodForMonth;
                         case 'year':
@@ -2529,22 +2420,20 @@
             }
 
 
-            // --- Reset Logic ---
             function handleResetAll() {
                 if (confirm("⚠️ Are you sure you want to permanently delete ALL your Stay Fit! run session data? This cannot be undone.")) {
                     if (confirm("⚠️ FINAL WARNING: Delete all data?")) {
                         Object.keys(localStorage).forEach(key => { if (key.startsWith('stayfit_')) localStorage.removeItem(key); });
-                        currentIsoWeekInfo = getCurrentIsoWeek(); // Recalculate current week
-                        saveRunSessionTemplate([]); // Clear template
-                        saveWeekData(currentIsoWeekInfo.isoWeekString, []); // Clear current week data
-                        initializeApp(); // Re-initialize the app to reflect cleared state
+                        currentIsoWeekInfo = getCurrentIsoWeek();
+                        saveRunSessionTemplate([]);
+                        saveWeekData(currentIsoWeekInfo.isoWeekString, []);
+                        initializeApp();
                         alert(`All Stay Fit! data entries have been cleared.`);
-                        switchScreen('home-screen', true); // Go to home screen
+                        switchScreen('home-screen', true);
                     }
                 }
             }
 
-            // --- Utilities ---
             function escapeHtml(unsafe) {
                 if (typeof unsafe !== 'string') return String(unsafe);
                 return unsafe
@@ -2554,57 +2443,44 @@
                     .replace(/"/g, "&quot;")
                     .replace(/'/g, "&#39;");
             }
-            function parseTimeInput(timeString) { // HH:MM:SS or MM:SS
-                timeString = String(timeString).trim().replace(/[.,]/g, ":"); // Normalize separators
+            function parseTimeInput(timeString) {
+                timeString = String(timeString).trim().replace(/[.,]/g, ":");
                 const parts = timeString.split(':').map(part => part.trim()).filter(part => part !== '');
                 let hours = 0, minutes = 0, seconds = 0;
 
-                if (parts.length === 2) { // MM:SS
+                if (parts.length === 2) {
                     minutes = parseInt(parts[0], 10);
                     seconds = parseInt(parts[1], 10);
-                } else if (parts.length === 3) { // HH:MM:SS
+                } else if (parts.length === 3) {
                     hours = parseInt(parts[0], 10);
                     minutes = parseInt(parts[1], 10);
                     seconds = parseInt(parts[2], 10);
-                } else if (parts.length === 1 && !isNaN(parseInt(parts[0], 10))) { // Treat single number as minutes
+                } else if (parts.length === 1 && !isNaN(parseInt(parts[0], 10))) {
                     minutes = parseInt(parts[0], 10);
                 }
-                else { return null; } // Invalid format
+                else { return null; }
 
-                // Validate parts
                 if (isNaN(hours) || isNaN(minutes) || isNaN(seconds) ||
                     hours < 0 || minutes < 0 || seconds < 0 ||
                     minutes > 59 || seconds > 59) {
-
-                    // Allow MM:SS where MM >= 60 (e.g., 70:30 for 1 hour 10 mins 30 secs)
-                    if (parts.length === 2 && minutes >= 60 && !isNaN(minutes) && !isNaN(seconds) && seconds <= 59) {
-                        // Valid, will be converted below
-                    }
-                    // Allow single number as minutes
-                    else if (parts.length === 1 && minutes >= 0 && !isNaN(minutes)) {
-                        // Valid, will be converted below
-                    }
-                    else {
-                        return null;
-                    }
+                    return null;
                 }
 
-                // Convert MM:SS with MM >= 60 or single number M to HH:MM:SS
                 if (parts.length === 2 && minutes >= 60) {
                     hours = Math.floor(minutes / 60);
                     minutes %= 60;
-                } else if (parts.length === 1) { // Single number was treated as minutes
+                } else if (parts.length === 1) {
                     hours = Math.floor(minutes / 60);
                     minutes %= 60;
                 }
 
                 return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
             }
-            function formatTimeForDisplay(timeString) { // Input HH:MM:SS, output MM:SS if hours is 00
+            function formatTimeForDisplay(timeString) {
                 if (!timeString || !/^\d{2}:\d{2}:\d{2}$/.test(timeString)) return timeString || '';
                 return timeString.startsWith('00:') ? timeString.substring(3) : timeString;
             }
-            function formatTimeForDisplaySimple(timeString) { // Input HH:MM or HH:MM:SS, output h:MM AM/PM
+            function formatTimeForDisplaySimple(timeString) {
                 if (!timeString || !/^\d{2}:\d{2}(:\d{2})?$/.test(timeString)) return timeString || '';
                 const [h, m] = timeString.split(':');
                 const hour = parseInt(h, 10);
@@ -2614,11 +2490,9 @@
                 const displayHour = hour % 12 === 0 ? 12 : hour % 12;
                 return `${displayHour}:${m} ${period}`;
             }
-            function formatDateForDisplay(isoDateString) { // YYYY-MM-DD
+            function formatDateForDisplay(isoDateString) {
                 if (!isoDateString) return '';
                 try {
-                    // Create date as UTC to avoid timezone shifts when only date is known, then format locally.
-                    // Or, better: interpret YYYY-MM-DD as local date.
                     const parts = isoDateString.split('-');
                     const date = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
                     return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
@@ -2632,24 +2506,23 @@
                 } catch (e) { return 'Completed: (invalid date)'; }
             }
 
-            // --- Pace Utilities ---
-            function timeStringToSeconds(timeString) { // Expects HH:MM:SS
+            function timeStringToSeconds(timeString) {
                 if (!timeString) return null;
                 const parts = String(timeString).split(':').map(Number);
                 let hours = 0, minutes = 0, seconds = 0;
 
                 if (parts.length === 3) { [hours, minutes, seconds] = parts; }
-                else if (parts.length === 2) { [minutes, seconds] = parts; } // Should ideally be HH:MM:SS but handle MM:SS
+                else if (parts.length === 2) { [minutes, seconds] = parts; }
                 else { return null; }
 
                 if (isNaN(hours) || isNaN(minutes) || isNaN(seconds)) return null;
-                if (minutes > 59 || seconds > 59 || minutes < 0 || seconds < 0 || hours < 0) return null; // Basic validation
+                if (minutes > 59 || seconds > 59 || minutes < 0 || seconds < 0 || hours < 0) return null;
                 return (hours * 3600) + (minutes * 60) + seconds;
             }
 
-            function formatPace(secondsPerKm) { // Output MM:SS/km
+            function formatPace(secondsPerKm) {
                 if (secondsPerKm === null || isNaN(secondsPerKm) || !isFinite(secondsPerKm) || secondsPerKm <= 0) {
-                    return ''; // Return empty for invalid or zero pace
+                    return '';
                 }
                 const totalSeconds = Math.round(secondsPerKm);
                 const minutes = Math.floor(totalSeconds / 60);
@@ -2657,22 +2530,32 @@
                 return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}/km`;
             }
 
-            function formatPaceForChart(valueInSeconds) { // Output MM:SS for chart ticks/tooltips
+            function formatPaceForChart(valueInSeconds) {
                 if (valueInSeconds === 0) {
-                    return "00:00"; // Explicitly handle 0 for baseline
+                    return "00:00";
                 }
                 if (valueInSeconds === null || isNaN(valueInSeconds) || !isFinite(valueInSeconds) || valueInSeconds < 0) {
-                    return "N/A"; // Not Applicable for invalid data points
+                    return "N/A";
                 }
-                // This part now only runs for valueInSeconds > 0
                 const totalSeconds = Math.round(valueInSeconds);
                 const minutes = Math.floor(totalSeconds / 60);
                 const remainingSeconds = totalSeconds % 60;
                 return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
             }
 
-            // --- Start the app ---
             initializeApp();
+
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('./sw.js')
+                        .then(registration => {
+                            console.log('Service Worker registered successfully:', registration.scope);
+                        })
+                        .catch(error => {
+                            console.error('Service Worker registration failed:', error);
+                        });
+                });
+            }
         });
     </script>
 
