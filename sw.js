@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stayfit-pwa-cache-v1.2';
+const CACHE_NAME = 'stayfit-pwa-cache-v1.3';
 const urlsToCache = [
     './',
     './index.html',
@@ -42,10 +42,18 @@ self.addEventListener('activate', event => {
             return Promise.all(
                 cacheNames.map(cacheName => {
                     if (cacheWhitelist.indexOf(cacheName) === -1) {
+                        console.log('Deleting old cache:', cacheName);
                         return caches.delete(cacheName);
                     }
                 })
             );
         })
     );
+    event.waitUntil(clients.claim());
+});
+
+self.addEventListener('message', event => {
+    if (event.data.action === 'skipWaiting') {
+        self.skipWaiting();
+    }
 });
