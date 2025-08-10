@@ -861,7 +861,8 @@
 
 
         #no-run-sessions-message,
-        #no-history-message {
+        #no-history-message,
+        #no-supplements-message {
             text-align: center;
             color: var(--secondary-text-color);
             padding: 40px 20px;
@@ -874,7 +875,8 @@
         }
 
         #no-run-sessions-message::before,
-        #no-history-message::before {
+        #no-history-message::before,
+        #no-supplements-message::before {
             font-family: "Font Awesome 6 Free";
             font-weight: 900;
             font-size: 3em;
@@ -889,11 +891,157 @@
         #no-history-message::before {
             content: '\f1da';
         }
-
+        
+        #no-supplements-message::before {
+            content: '\f481'; /* fa-pills */
+        }
 
         .hidden {
             display: none !important;
         }
+
+        /* --- NEW SUPPLEMENTS STYLES --- */
+        .supplement-card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+        }
+
+        .supplement-header {
+            font-size: 20px;
+            font-weight: 600;
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .supplement-settings {
+            padding: 20px;
+            background-color: var(--background-color);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .supplement-settings .details-input-group {
+            margin-bottom: 15px;
+        }
+        .supplement-settings .details-input-group:last-child {
+            margin-bottom: 0;
+        }
+        .supplement-settings-checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+        }
+        .supplement-settings-checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--accent-color);
+            cursor: pointer;
+        }
+        .supplement-settings-checkbox-group label {
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .supplement-settings .details-buttons-container {
+            justify-content: flex-end;
+            margin-top: 15px;
+        }
+
+        .supplement-log-list {
+            list-style: none;
+            padding: 0;
+            max-height: 50vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .supplement-log-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            gap: 15px;
+        }
+        .supplement-log-item:last-child {
+            border-bottom: none;
+        }
+        .supplement-log-item.is-today {
+            background-color: color-mix(in srgb, var(--accent-color) 5%, transparent);
+        }
+
+        .log-item-info {
+            flex-grow: 1;
+        }
+        .log-item-info .date {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .log-item-info .phase {
+            font-size: 13px;
+            color: var(--secondary-text-color);
+            font-weight: 500;
+        }
+        .log-item-info .phase.loading {
+            color: var(--accent-color);
+        }
+        .log-item-info .phase.maintenance {
+            color: var(--success-color);
+        }
+
+        .log-item-doses {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .dose-checkbox-label {
+            display: block;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+        }
+
+        .dose-checkbox-label input {
+            display: none;
+        }
+        .dose-checkbox-label .visual-checkbox {
+            width: 100%;
+            height: 100%;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius-small);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-speed) ease;
+        }
+        .dose-checkbox-label input:checked + .visual-checkbox {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+            color: white;
+            transform: scale(1.1);
+        }
+        .dose-checkbox-label input:checked + .visual-checkbox i {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .dose-checkbox-label .visual-checkbox i {
+            font-size: 14px;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: all var(--transition-speed) ease;
+        }
+        .dose-checkbox-label:hover .visual-checkbox {
+            border-color: var(--success-hover-color);
+        }
+
+        #supplements-container:has(.minimal-button) {
+            text-align: center;
+        }
+
     </style>
 </head>
 
@@ -947,6 +1095,15 @@
                 </div>
             </div>
         </section>
+        
+        <section id="supplements-screen" class="screen">
+            <h1 class="screen-header">Supplements</h1>
+            <div id="supplements-container">
+                <div id="no-supplements-message" class="hidden">
+                    No supplements being tracked.
+                </div>
+            </div>
+        </section>
 
         <section id="profile-screen" class="screen">
             <h1 class="screen-header">Weekly Progress</h1>
@@ -970,6 +1127,10 @@
             <i class="fa-solid fa-chart-line"></i>
             <span>Stats</span>
         </button>
+        <button data-target="supplements-screen" aria-label="Supplements">
+            <i class="fa-solid fa-pills"></i>
+            <span>Supplements</span>
+        </button>
         <button data-target="profile-screen" aria-label="Profile">
             <i class="fa-solid fa-user"></i>
             <span>Profile</span>
@@ -987,6 +1148,8 @@
             const resetAllButton = document.getElementById('reset-all-button');
             const noRunSessionsMessage = document.getElementById('no-run-sessions-message');
             const noHistoryMessage = document.getElementById('no-history-message');
+            const supplementsContainer = document.getElementById('supplements-container');
+            const noSupplementsMessage = document.getElementById('no-supplements-message');
 
             const main = document.querySelector('main');
 
@@ -1002,6 +1165,7 @@
 
             const TEMPLATE_KEY = 'stayfit_template';
             const WEEK_DATA_PREFIX = 'stayfit_week';
+            const SUPPLEMENTS_KEY = 'stayfit_supplements';
             const LAST_ACTIVE_SCREEN_KEY = 'stayfit_last_screen';
 
             let currentScreenId;
@@ -1053,6 +1217,8 @@
             function saveRunSessionTemplate(template) { saveData(TEMPLATE_KEY, template); }
             function getWeekData(isoWeek) { return loadData(WEEK_DATA_PREFIX + isoWeek); }
             function saveWeekData(isoWeek, data) { saveData(WEEK_DATA_PREFIX + isoWeek, data); }
+            function getSupplementsData() { return loadData(SUPPLEMENTS_KEY, {}); }
+            function saveSupplementsData(data) { saveData(SUPPLEMENTS_KEY, data); }
 
             function getIsoWeekAndYear(dateInput) {
                 const date = new Date(Date.UTC(dateInput.getFullYear(), dateInput.getMonth(), dateInput.getDate()));
@@ -1082,6 +1248,18 @@
 
             function getDaysInMonth(year, monthZeroIndexed) {
                 return new Date(year, monthZeroIndexed + 1, 0).getDate();
+            }
+
+            function getYYYYMMDD(date) {
+                return date.toISOString().split('T')[0];
+            }
+            
+            function daysBetween(date1Str, date2Str) {
+                const d1 = new Date(date1Str);
+                const d2 = new Date(date2Str);
+                d1.setUTCHours(0,0,0,0);
+                d2.setUTCHours(0,0,0,0);
+                return Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
             }
 
 
@@ -1159,6 +1337,7 @@
                 runSessionListContainer.addEventListener('focusout', handleListFocusOut);
                 statsPeriodFilter.addEventListener('change', renderStatsScreen);
                 weeklyProgressContainer.addEventListener('click', handleProfileListClick);
+                supplementsContainer.addEventListener('click', handleSupplementsClick);
 
                 checkEmptyListState();
             }
@@ -1201,6 +1380,7 @@
                         renderStatsScreen();
                     }, parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--transition-speed') || '0.25') * 1000);
                 }
+                else if (targetId === 'supplements-screen') renderSupplementsScreen();
                 else if (targetId === 'home-screen') {
                     renderHomeRunSessions();
                     checkEmptyListState();
@@ -2418,6 +2598,156 @@
                 });
             }
 
+            function renderSupplementsScreen() {
+                const supplementsData = getSupplementsData();
+                supplementsContainer.innerHTML = '';
+
+                if (Object.keys(supplementsData).length === 0) {
+                    noSupplementsMessage.classList.remove('hidden');
+                    const addCreatineButton = document.createElement('button');
+                    addCreatineButton.textContent = 'Track Creatine';
+                    addCreatineButton.className = 'minimal-button';
+                    addCreatineButton.dataset.action = 'add-creatine';
+                    supplementsContainer.appendChild(addCreatineButton);
+                    return;
+                }
+                noSupplementsMessage.classList.add('hidden');
+
+                if (supplementsData.creatine) {
+                    supplementsContainer.appendChild(createCreatineTrackerUI(supplementsData.creatine));
+                }
+            }
+
+            function createCreatineTrackerUI(creatineData) {
+                const card = document.createElement('div');
+                card.className = 'supplement-card';
+                card.dataset.supplement = 'creatine';
+
+                const settingsHTML = `
+                    <div class="supplement-settings">
+                        <div class="details-input-group">
+                            <label for="creatine-start-date">Tracking Start Date</label>
+                            <input type="date" id="creatine-start-date" value="${creatineData.config.trackingStartDate}">
+                        </div>
+                        <div class="supplement-settings-checkbox-group">
+                            <input type="checkbox" id="creatine-loading-phase" ${creatineData.config.hasLoadingPhase ? 'checked' : ''}>
+                            <label for="creatine-loading-phase">Enable 7-Day Loading Phase</label>
+                        </div>
+                        <div class="details-buttons-container">
+                             <button class="minimal-button save-details-button" data-action="save-creatine-config">
+                                <i class="fa-solid fa-save"></i>Save Settings
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                const today = new Date();
+                const todayStr = getYYYYMMDD(today);
+                let logItemsHTML = '';
+
+                for (let i = 0; i < 30; i++) {
+                    const date = new Date();
+                    date.setDate(today.getDate() - i);
+                    const dateStr = getYYYYMMDD(date);
+
+                    const status = getCreatineStatusForDate(dateStr, creatineData.config);
+                    if (status.phase === 'pre-tracking') continue;
+
+                    const dayLog = creatineData.intakeLog[dateStr] || [];
+                    let doseCheckboxesHTML = '';
+                    for (let d = 0; d < status.doses; d++) {
+                        const isChecked = dayLog[d] === true;
+                        doseCheckboxesHTML += `
+                            <label class="dose-checkbox-label">
+                                <input type="checkbox" class="dose-checkbox" data-date="${dateStr}" data-dose-index="${d}" ${isChecked ? 'checked' : ''}>
+                                <span class="visual-checkbox"><i class="fa-solid fa-check"></i></span>
+                            </label>
+                        `;
+                    }
+                    
+                    const dateDisplay = date.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+
+                    logItemsHTML += `
+                        <li class="supplement-log-item ${dateStr === todayStr ? 'is-today' : ''}">
+                            <div class="log-item-info">
+                                <div class="date">${dateDisplay}</div>
+                                <div class="phase ${status.phase}">${status.phaseName}</div>
+                            </div>
+                            <div class="log-item-doses">${doseCheckboxesHTML}</div>
+                        </li>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="supplement-header">Creatine Tracker</div>
+                    ${settingsHTML}
+                    <ul class="supplement-log-list">${logItemsHTML}</ul>
+                `;
+
+                return card;
+            }
+
+            function getCreatineStatusForDate(dateStr, config) {
+                const daysSinceStart = daysBetween(config.trackingStartDate, dateStr);
+                if (daysSinceStart < 0) {
+                    return { phase: 'pre-tracking', phaseName: 'Not Started', doses: 0 };
+                }
+
+                if (config.hasLoadingPhase && daysSinceStart < 7) {
+                    return { phase: 'loading', phaseName: `Loading Day ${daysSinceStart + 1}`, doses: 4 };
+                } else {
+                    return { phase: 'maintenance', phaseName: 'Maintenance', doses: 1 };
+                }
+            }
+            
+            function handleSupplementsClick(event) {
+                const action = event.target.dataset.action;
+                
+                if (action === 'add-creatine') {
+                    const supplementsData = getSupplementsData();
+                    supplementsData.creatine = {
+                        config: {
+                            trackingStartDate: getYYYYMMDD(new Date()),
+                            hasLoadingPhase: true,
+                        },
+                        intakeLog: {}
+                    };
+                    saveSupplementsData(supplementsData);
+                    renderSupplementsScreen();
+                } else if (action === 'save-creatine-config') {
+                    const supplementsData = getSupplementsData();
+                    const card = event.target.closest('.supplement-card');
+                    const startDate = card.querySelector('#creatine-start-date').value;
+                    const hasLoading = card.querySelector('#creatine-loading-phase').checked;
+                    
+                    supplementsData.creatine.config.trackingStartDate = startDate;
+                    supplementsData.creatine.config.hasLoadingPhase = hasLoading;
+                    
+                    saveSupplementsData(supplementsData);
+                    renderSupplementsScreen();
+                    alert('Creatine settings saved!');
+                } else if (event.target.classList.contains('dose-checkbox')) {
+                    handleDoseCheck(event.target);
+                }
+            }
+
+            function handleDoseCheck(checkbox) {
+                const date = checkbox.dataset.date;
+                const doseIndex = parseInt(checkbox.dataset.doseIndex);
+                const isChecked = checkbox.checked;
+
+                const supplementsData = getSupplementsData();
+                const creatineData = supplementsData.creatine;
+
+                if (!creatineData.intakeLog[date]) {
+                    const status = getCreatineStatusForDate(date, creatineData.config);
+                    creatineData.intakeLog[date] = new Array(status.doses).fill(false);
+                }
+                
+                creatineData.intakeLog[date][doseIndex] = isChecked;
+                saveSupplementsData(supplementsData);
+                if ('vibrate' in navigator) navigator.vibrate(50);
+            }
 
             function handleResetAll() {
                 if (confirm("⚠️ Are you sure you want to permanently delete ALL your Stay Fit! run session data? This cannot be undone.")) {
